@@ -1,193 +1,257 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { LIVE_BROADCASTS, DESTINATIONS, RECOMMENDATIONS, SAMPLE_USERS, getUserById } from '../data/seed';
-import { Sparkles, MapPin, ArrowRight, Radio, ThumbsUp } from 'lucide-react';
+import { Sparkles, MapPin, ArrowRight, Radio, ThumbsUp, Compass, Plus, MessageCircle } from 'lucide-react';
 
 export default function Home() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
 
   const firstName = currentUser?.name?.split(' ')[0] || 'Traveler';
-  const featuredDests = DESTINATIONS.slice(0, 4);
+  const featuredDests = DESTINATIONS.slice(0, 6);
   const topRecs = RECOMMENDATIONS.filter(r => r.isHiddenGem).slice(0, 3);
 
   return (
     <div className="pb-24 overflow-y-auto">
-      {/* Header */}
-      <div className="gradient-navy px-6 md:px-10 lg:px-16 pt-12 pb-8 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-6 ">
-          <div>
-            <p className="text-white/60 text-sm">Welcome back</p>
-            <h1 className="text-white text-2xl md:text-3xl font-display font-semibold">{firstName}</h1>
+      {/* Hero Header — big, visual, inviting */}
+      <div className="relative">
+        <div className="gradient-navy px-6 md:px-10 lg:px-16 pt-12 pb-6">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-white/50 text-sm font-medium">Good to see you</p>
+              <h1 className="text-white text-3xl md:text-4xl font-display font-bold mt-0.5">{firstName}</h1>
+            </div>
+            <button onClick={() => navigate('/passport')} className="relative group">
+              <img
+                src={currentUser?.avatar || SAMPLE_USERS[0].avatar}
+                alt=""
+                className="w-12 h-12 rounded-2xl border-2 border-gold object-cover group-hover:scale-105 transition-transform"
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-gold rounded-full border-2 border-navy" />
+            </button>
           </div>
-          <button onClick={() => navigate('/passport')} className="relative">
-            <img
-              src={currentUser?.avatar || SAMPLE_USERS[0].avatar}
-              alt=""
-              className="w-11 h-11 rounded-full border-2 border-gold object-cover"
-            />
-            <span className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-gold rounded-full border-2 border-navy" />
+
+          {/* Quick Action Bubbles */}
+          <div className="flex gap-3 overflow-x-auto pb-2 -mx-2 px-2">
+            <button
+              onClick={() => navigate('/companion')}
+              className="flex items-center gap-2.5 px-5 py-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/20 transition-all active:scale-95 whitespace-nowrap"
+            >
+              <div className="w-8 h-8 rounded-xl gradient-gold flex items-center justify-center">
+                <Sparkles size={14} className="text-white" />
+              </div>
+              <div className="text-left">
+                <p className="text-white text-sm font-semibold">Ask Companion</p>
+                <p className="text-white/40 text-[11px]">AI travel intelligence</p>
+              </div>
+            </button>
+            <button
+              onClick={() => navigate('/discover')}
+              className="flex items-center gap-2.5 px-5 py-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/20 transition-all active:scale-95 whitespace-nowrap"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center">
+                <Compass size={14} className="text-white" />
+              </div>
+              <div className="text-left">
+                <p className="text-white text-sm font-semibold">Explore</p>
+                <p className="text-white/40 text-[11px]">Discover destinations</p>
+              </div>
+            </button>
+            <button
+              onClick={() => navigate('/add-rec')}
+              className="flex items-center gap-2.5 px-5 py-3 bg-white/10 backdrop-blur-sm rounded-2xl border border-white/10 hover:bg-white/20 transition-all active:scale-95 whitespace-nowrap"
+            >
+              <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center">
+                <Plus size={14} className="text-white" />
+              </div>
+              <div className="text-left">
+                <p className="text-white text-sm font-semibold">Share Rec</p>
+                <p className="text-white/40 text-[11px]">Help travelers</p>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="content-px">
+        {/* Context-Aware Intelligence Cards */}
+        <div className="mt-5 space-y-3">
+          {/* For You Right Now */}
+          <button
+            onClick={() => navigate('/companion')}
+            className="w-full p-5 rounded-3xl gradient-navy relative overflow-hidden text-left group active:scale-[0.99] transition-transform"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-12 translate-x-12" />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 rounded-full gradient-gold flex items-center justify-center">
+                  <Sparkles size={10} className="text-white" />
+                </div>
+                <span className="text-[11px] font-bold text-gold uppercase tracking-wider">For You Right Now</span>
+              </div>
+              <p className="text-white text-base font-medium leading-snug">
+                You just finished a week of hiking — Senderos Hostería has one room left tonight. $120/night, mountain views from bed.
+              </p>
+              <p className="text-white/30 text-[11px] mt-2 flex items-center gap-1">
+                <MapPin size={10} /> Based on your trip to {currentUser?.recentTrip?.destination || 'El Chaltén'} · 28 members recommend
+              </p>
+            </div>
+          </button>
+
+          {/* Debrief nudge */}
+          <button
+            onClick={() => navigate('/debrief')}
+            className="w-full p-4 rounded-2xl bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 text-left group active:scale-[0.99] transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl gradient-gold flex items-center justify-center flex-shrink-0">
+                <MessageCircle size={18} className="text-white" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-charcoal">Share your {currentUser?.recentTrip?.destination || 'Patagonia'} knowledge</p>
+                <p className="text-xs text-charcoal-light mt-0.5">2 members are planning the same trip</p>
+              </div>
+              <ArrowRight size={16} className="text-gold group-hover:translate-x-1 transition-transform" />
+            </div>
           </button>
         </div>
 
-        {/* AI Prompt Card */}
-        <button
-            onClick={() => navigate('/companion')}
-            className="w-full p-4 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 text-left hover:bg-white/15 transition-all group"
+        {/* Live Now — horizontal scroll */}
+        <div className="mt-7">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <h2 className="text-lg font-bold text-navy">Live Now</h2>
+            </div>
+            <button onClick={() => navigate('/live')} className="text-sm text-gold font-semibold active:opacity-70">View All</button>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            {LIVE_BROADCASTS.slice(0, 3).map((broadcast, idx) => {
+              const user = getUserById(broadcast.userId);
+              return (
+                <div key={broadcast.id} className="min-w-[280px] md:flex-1 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow animate-fade-up"
+                  style={{ animationDelay: `${idx * 0.1}s` }}
+                >
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <div className="relative">
+                      <img src={user.avatar} alt="" className="w-8 h-8 rounded-xl object-cover" />
+                      <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-white" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-xs font-bold text-charcoal">{user.name}</span>
+                      <span className="text-[10px] text-charcoal-light block">{user.badges?.[0]}</span>
+                    </div>
+                    <span className="text-[10px] text-charcoal-light bg-cream px-2 py-0.5 rounded-full">{broadcast.time}</span>
+                  </div>
+                  <p className="text-sm text-charcoal leading-relaxed">{broadcast.text}</p>
+                  <div className="flex items-center gap-1.5 mt-2.5 pt-2.5 border-t border-gray-50">
+                    <MapPin size={11} className="text-gold" />
+                    <span className="text-[11px] text-charcoal-light">{broadcast.location}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Trending Destinations — big photo cards */}
+        <div className="mt-7">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-navy">Trending Destinations</h2>
+            <button onClick={() => navigate('/discover')} className="text-sm text-gold font-semibold active:opacity-70">See All</button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {featuredDests.map((dest, idx) => (
+              <button
+                key={dest.id}
+                onClick={() => navigate(`/discover/${dest.id}`)}
+                className={`relative rounded-3xl overflow-hidden group active:scale-[0.97] transition-transform animate-fade-up ${
+                  idx === 0 ? 'col-span-2 h-48 md:h-56' : 'h-40 md:h-48'
+                }`}
+                style={{ animationDelay: `${idx * 0.05}s` }}
+              >
+                <img src={dest.image} alt={dest.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <p className="text-white font-bold text-base drop-shadow-lg">{dest.name}</p>
+                  <p className="text-white/70 text-xs mt-0.5">{dest.country}</p>
+                </div>
+                <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm rounded-full px-2.5 py-1">
+                  <span className="text-white text-[10px] font-semibold">{dest.memberCheckIns} check-ins</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Hidden Gems — editorial cards */}
+        <div className="mt-7">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-lg font-bold text-navy">Hidden Gems</h2>
+            <span className="text-[10px] bg-gold/10 text-gold font-bold px-3 py-1 rounded-full uppercase tracking-wider">Members Only</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {topRecs.map((rec, idx) => {
+              const user = getUserById(rec.userId);
+              const dest = DESTINATIONS.find(d => d.id === rec.destId);
+              return (
+                <button
+                  key={rec.id}
+                  onClick={() => navigate(`/discover/${rec.destId}`)}
+                  className="p-4 bg-white rounded-2xl border border-gray-100 hover:shadow-md transition-all text-left group active:scale-[0.99] animate-fade-up"
+                  style={{ animationDelay: `${idx * 0.08}s` }}
+                >
+                  {dest && (
+                    <div className="relative h-28 rounded-xl overflow-hidden mb-3">
+                      <img src={dest.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <div className="absolute top-2 left-2 bg-gold/90 text-white text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">
+                        Hidden Gem
+                      </div>
+                    </div>
+                  )}
+                  <p className="text-sm font-bold text-charcoal leading-snug">{rec.title}</p>
+                  <p className="text-xs text-charcoal-light mt-1.5 line-clamp-2 leading-relaxed">{rec.text}</p>
+                  <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-50">
+                    <div className="flex items-center gap-2">
+                      <img src={user.avatar} alt="" className="w-5 h-5 rounded-lg object-cover" />
+                      <span className="text-[11px] font-medium text-charcoal">{user.name}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <ThumbsUp size={11} className="text-gold" />
+                      <span className="text-[11px] text-charcoal-light font-medium">{rec.upvotes}</span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Perk card */}
+        <div className="mt-7 mb-4">
+          <button
+            onClick={() => navigate('/perks')}
+            className="w-full p-5 bg-charcoal rounded-3xl text-left relative overflow-hidden group active:scale-[0.99] transition-transform"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
-                <Sparkles size={18} className="text-white" />
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gold/10 rounded-full -translate-y-16 translate-x-16" />
+            <div className="relative flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl gradient-gold flex items-center justify-center flex-shrink-0">
+                <Sparkles size={22} className="text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-white text-sm font-medium">Ask your Companion</p>
-                <p className="text-white/50 text-xs mt-0.5">Planning {currentUser?.upcomingTrip?.destination || 'Torres del Paine'}?</p>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[9px] font-bold bg-gold text-charcoal px-2 py-0.5 rounded-full uppercase">Black Perk</span>
+                </div>
+                <p className="text-white font-semibold text-sm">Aman Tokyo — 72% off this week</p>
+                <p className="text-white/40 text-xs mt-0.5">3 nights from $672</p>
               </div>
               <ArrowRight size={18} className="text-white/30 group-hover:text-gold transition-colors" />
             </div>
           </button>
-      </div>
-
-      <div className="content-px">
-          {/* Context-Aware Intelligence */}
-          <div className="mt-5 space-y-3">
-            {/* Jetzy Moment — contextual rec */}
-            <div className="p-4 rounded-2xl gradient-navy relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gold/10 rounded-full -translate-y-8 translate-x-8" />
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles size={14} className="text-gold" />
-                  <span className="text-[10px] font-bold text-gold uppercase tracking-wider">For You Right Now</span>
-                </div>
-                <p className="text-white text-sm font-medium">
-                  You just finished a week of hiking — Senderos Hostería has one room left tonight with mountain views from bed. $120/night.
-                </p>
-                <p className="text-white/40 text-[10px] mt-1.5 flex items-center gap-1">
-                  <MapPin size={10} /> Based on your trip to {currentUser?.recentTrip?.destination || 'El Chaltén'} · Recommended by 28 members
-                </p>
-              </div>
-            </div>
-
-            {/* Post-trip debrief nudge */}
-            <button
-              onClick={() => navigate('/debrief')}
-              className="w-full p-4 rounded-2xl bg-gradient-to-r from-gold/10 to-gold/5 border border-gold/20 text-left group"
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Sparkles size={14} className="text-gold" />
-                <span className="text-[10px] font-bold text-gold uppercase tracking-wider">Welcome Back</span>
-              </div>
-              <p className="text-sm text-charcoal font-medium">
-                Share what you learned in {currentUser?.recentTrip?.destination || 'Patagonia'} — 2 members are planning the same trip
-              </p>
-              <span className="text-xs text-gold font-semibold mt-2 flex items-center gap-1 group-hover:gap-2 transition-all">
-                Start Debrief <ArrowRight size={12} />
-              </span>
-            </button>
-
-            {/* Perk moment */}
-            <div className="p-4 rounded-2xl bg-white border border-gray-100 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] font-bold bg-charcoal text-white px-2 py-0.5 rounded-full">BLACK</span>
-                <span className="text-[10px] font-semibold text-gold uppercase tracking-wider">Select Perk</span>
-              </div>
-              <p className="text-sm text-charcoal font-medium">Aman Tokyo — 72% off this week only</p>
-              <button
-                onClick={() => navigate('/perks')}
-                className="text-xs text-gold font-semibold mt-2 flex items-center gap-1"
-              >
-                Claim Perk <ArrowRight size={12} />
-              </button>
-            </div>
-          </div>
-
-          {/* Live Now */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Radio size={14} className="text-red-500" />
-                <h2 className="text-base font-semibold text-navy">Live Now</h2>
-              </div>
-              <button onClick={() => navigate('/live')} className="text-xs text-gold font-semibold">View All</button>
-            </div>
-
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {LIVE_BROADCASTS.slice(0, 3).map(broadcast => {
-                const user = getUserById(broadcast.userId);
-                return (
-                  <div key={broadcast.id} className="min-w-[260px] md:min-w-[300px] md:flex-1 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <img src={user.avatar} alt="" className="w-7 h-7 rounded-full object-cover" />
-                      <span className="text-xs font-semibold text-charcoal">{user.name}</span>
-                      <span className="text-[10px] text-charcoal-light ml-auto">{broadcast.time}</span>
-                    </div>
-                    <p className="text-sm text-charcoal leading-relaxed">{broadcast.text}</p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <MapPin size={12} className="text-gold" />
-                      <span className="text-[11px] text-charcoal-light">{broadcast.location}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Trending Destinations */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-navy">Trending Destinations</h2>
-              <button onClick={() => navigate('/discover')} className="text-xs text-gold font-semibold">See All</button>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {featuredDests.map(dest => (
-                <button
-                  key={dest.id}
-                  onClick={() => navigate(`/discover/${dest.id}`)}
-                  className="relative rounded-2xl overflow-hidden h-36 md:h-44 group"
-                >
-                  <img src={dest.image} alt={dest.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <p className="text-white font-semibold text-sm">{dest.name}</p>
-                    <p className="text-white/70 text-[11px]">{dest.country}</p>
-                  </div>
-                  <div className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm rounded-full px-2 py-0.5">
-                    <span className="text-white text-[10px] font-medium">{dest.memberCheckIns} check-ins</span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Hidden Gems */}
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-semibold text-navy">Hidden Gems</h2>
-              <span className="text-[10px] bg-gold/10 text-gold font-semibold px-2 py-0.5 rounded-full">Member Only</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {topRecs.map(rec => {
-                const user = getUserById(rec.userId);
-                return (
-                  <div key={rec.id} className="p-4 bg-white rounded-2xl border border-gray-100">
-                    <div className="flex items-center gap-2 mb-2">
-                      <img src={user.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
-                      <span className="text-xs font-medium text-charcoal">{user.name}</span>
-                      <span className="text-[10px] bg-navy/5 text-navy px-1.5 py-0.5 rounded-full">{rec.category}</span>
-                    </div>
-                    <p className="text-sm font-semibold text-charcoal">{rec.title}</p>
-                    <p className="text-xs text-charcoal-light mt-1 line-clamp-2">{rec.text}</p>
-                    <div className="flex items-center gap-1 mt-2">
-                      <ThumbsUp size={12} className="text-gold" />
-                      <span className="text-[11px] text-charcoal-light">{rec.upvotes} travelers agree</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+        </div>
       </div>
     </div>
   );
