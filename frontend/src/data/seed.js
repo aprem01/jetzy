@@ -225,7 +225,7 @@ export const CIRCLES = [
 ];
 
 export const PERKS = [
-  { id: 'p1', title: 'Aman Tokyo — 3 nights', subtitle: '72% off rack rate', tier: 'black', category: 'Hotel', originalPrice: '$2,400', price: '$672', image: 'https://images.unsplash.com/photo-1590490360182-c33d955e9d6c?w=400&h=300&fit=crop' },
+  { id: 'p1', title: 'Aman Tokyo — 3 nights', subtitle: '72% off rack rate', tier: 'black', category: 'Hotel', originalPrice: '$2,400', price: '$672', image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=400&h=300&fit=crop' },
   { id: 'p2', title: 'Don Julio VIP Table', subtitle: 'Skip the line, chef\'s table', tier: 'select', category: 'Restaurant', originalPrice: '$180', price: '$95', image: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&h=300&fit=crop' },
   { id: 'p3', title: 'Aesop Travel Kit', subtitle: 'Member exclusive set', tier: 'select', category: 'Lifestyle', originalPrice: '$120', price: '$72', image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=300&fit=crop' },
   { id: 'p4', title: 'Safari Mobile Camp Upgrade', subtitle: 'Wayo Africa premium tent', tier: 'black', category: 'Experience', originalPrice: '$800', price: '$320', image: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=400&h=300&fit=crop' },

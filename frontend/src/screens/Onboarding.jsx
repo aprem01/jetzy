@@ -31,7 +31,7 @@ export default function Onboarding() {
   const [selectedCountries, setSelectedCountries] = useState([]);
   const [countrySearch, setCountrySearch] = useState('');
   const [upcomingTrip, setUpcomingTrip] = useState('');
-  const [selectedTier, setSelectedTier] = useState('explorer');
+  const [selectedTier, setSelectedTier] = useState('black');
 
   const toggleStyle = (id) => setSelectedStyles(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
   const toggleInterest = (i) => setSelectedInterests(prev => prev.includes(i) ? prev.filter(x => x !== i) : [...prev, i]);
