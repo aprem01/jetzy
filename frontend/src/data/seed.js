@@ -130,7 +130,7 @@ export const DESTINATIONS = [
   },
   {
     id: 'd7', name: 'Medellín', country: 'Colombia', region: 'South America',
-    image: 'https://images.unsplash.com/photo-1599839619722-35aa16f37f4d?w=800&h=600&fit=crop',
+    image: 'https://images.unsplash.com/photo-1583997052301-0042b33fc598?w=800&h=600&fit=crop',
     vibe: 'Spring weather, mountain views, and the best coffee on earth',
     memberCheckIns: 14,
   },
