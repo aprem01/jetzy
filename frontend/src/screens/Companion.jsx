@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { COMPANION_PROMPTS, SAMPLE_USERS } from '../data/seed';
-import { Send, Sparkles, ArrowLeft } from 'lucide-react';
+import { Send, Sparkles, ArrowLeft, Mic, Wand2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Companion() {
-  const { currentUser, chatMessages, setChatMessages } = useApp();
+  const { currentUser, chatMessages, setChatMessages, memories, extractMemories } = useApp();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -40,14 +40,16 @@ export default function Companion() {
             countriesVisited: user.countries,
             upcomingTrip: user.upcomingTrip?.destination,
             interests: user.interests,
+            memories: memories?.slice(0, 10),
           }
         })
       });
 
       const data = await res.json();
       setChatMessages([...newMessages, { role: 'assistant', content: data.response }]);
+      // Extract memories in background
+      extractMemories(text, data.response);
     } catch {
-      // Fallback for demo without backend
       const fallback = generateFallback(text, user);
       setChatMessages([...newMessages, { role: 'assistant', content: fallback }]);
     } finally {
@@ -70,10 +72,16 @@ export default function Companion() {
         <div className="w-10 h-10 rounded-full gradient-gold flex items-center justify-center">
           <Sparkles size={18} className="text-white" />
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-white font-semibold text-sm">Jetzy Companion</p>
           <p className="text-white/50 text-xs">Your travel intelligence</p>
         </div>
+        <button onClick={() => navigate('/voice')} className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-90">
+          <Mic size={16} className="text-gold" />
+        </button>
+        <button onClick={() => navigate('/concierge')} className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors active:scale-90">
+          <Wand2 size={16} className="text-gold" />
+        </button>
       </div>
 
       {/* Messages */}

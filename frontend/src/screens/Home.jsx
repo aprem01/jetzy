@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { LIVE_BROADCASTS, DESTINATIONS, RECOMMENDATIONS, SAMPLE_USERS, getUserById } from '../data/seed';
-import { Sparkles, MapPin, ArrowRight, Radio, ThumbsUp, Compass, Plus, MessageCircle } from 'lucide-react';
+import { Sparkles, MapPin, ArrowRight, Radio, ThumbsUp, Compass, Plus, MessageCircle, Mic, Wand2, Users, BarChart3 } from 'lucide-react';
 
 export default function Home() {
   const { currentUser } = useApp();
@@ -230,6 +230,33 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Phase 2 Quick Links */}
+        <div className="mt-7">
+          <h2 className="text-lg font-bold text-navy mb-3">More from Jetzy</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button onClick={() => navigate('/concierge')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
+              <Wand2 size={22} className="text-gold mx-auto mb-2" />
+              <p className="text-xs font-bold text-charcoal">Concierge</p>
+              <p className="text-[10px] text-charcoal-light mt-0.5">Full trip planner</p>
+            </button>
+            <button onClick={() => navigate('/match')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
+              <Users size={22} className="text-gold mx-auto mb-2" />
+              <p className="text-xs font-bold text-charcoal">Match</p>
+              <p className="text-[10px] text-charcoal-light mt-0.5">Find companions</p>
+            </button>
+            <button onClick={() => navigate('/for-two')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
+              <MessageCircle size={22} className="text-gold mx-auto mb-2" />
+              <p className="text-xs font-bold text-charcoal">For Two</p>
+              <p className="text-[10px] text-charcoal-light mt-0.5">Plan together</p>
+            </button>
+            <button onClick={() => navigate('/intel')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
+              <BarChart3 size={22} className="text-gold mx-auto mb-2" />
+              <p className="text-xs font-bold text-charcoal">Intel</p>
+              <p className="text-[10px] text-charcoal-light mt-0.5">Travel trends</p>
+            </button>
+          </div>
+        </div>
+
         {/* Perk card */}
         <div className="mt-7 mb-4">
           <button
@@ -253,6 +280,14 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* Floating Voice Button */}
+      <button
+        onClick={() => navigate('/voice')}
+        className="fixed bottom-24 right-5 w-14 h-14 rounded-full gradient-gold flex items-center justify-center shadow-2xl z-40 animate-pulse-gold active:scale-90 transition-transform"
+      >
+        <Mic size={22} className="text-white" />
+      </button>
     </div>
   );
 }

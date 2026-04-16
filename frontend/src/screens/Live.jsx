@@ -87,20 +87,28 @@ export default function Live() {
         </div>
       </div>
 
-      {/* Relevant For You */}
+      {/* Smart Routed — For You */}
       <div className="content-px mt-5">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles size={14} className="text-gold" />
-          <span className="text-xs font-semibold text-gold uppercase tracking-wider">Relevant for you</span>
+          <span className="text-xs font-semibold text-gold uppercase tracking-wider">Routed for you</span>
         </div>
 
-        <div className="p-4 bg-gold/5 rounded-2xl border border-gold/15 mb-4">
+        <div className="p-4 bg-gold/5 rounded-2xl border border-gold/20 mb-2 shadow-sm">
           <div className="flex items-center gap-2 mb-2">
-            <img src={getUserById('u1').avatar} alt="" className="w-7 h-7 rounded-full object-cover" />
-            <span className="text-xs font-semibold text-charcoal">Marco V</span>
-            <span className="text-[10px] text-charcoal-light">was just in Patagonia</span>
+            <img src={getUserById('u1').avatar} alt="" className="w-8 h-8 rounded-xl object-cover border border-gold" />
+            <div className="flex-1">
+              <span className="text-xs font-bold text-charcoal">Marco V</span>
+              <span className="text-[10px] text-charcoal-light block">was just in Patagonia</span>
+            </div>
+            <span className="text-[9px] font-bold bg-gold/15 text-gold px-2 py-0.5 rounded-full">98% match</span>
           </div>
-          <p className="text-sm text-charcoal">{LIVE_BROADCASTS[0].text}</p>
+          <p className="text-sm text-charcoal leading-relaxed">{LIVE_BROADCASTS[0].text}</p>
+          <div className="mt-2 p-2 bg-white rounded-lg">
+            <p className="text-[10px] text-gold font-medium flex items-center gap-1">
+              <Sparkles size={8} /> Relevant because you both hiked Fitz Roy and are Summit Seekers
+            </p>
+          </div>
           <div className="flex items-center justify-between mt-3">
             <div className="flex items-center gap-1">
               <MapPin size={12} className="text-gold" />

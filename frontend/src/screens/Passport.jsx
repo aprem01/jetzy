@@ -1,10 +1,10 @@
 import { useApp } from '../context/AppContext';
 import { SAMPLE_USERS, RECOMMENDATIONS, BADGES, getUserById } from '../data/seed';
-import { MapPin, Award, Star, Share2, Settings, ChevronRight, Plane, Globe, Zap } from 'lucide-react';
+import { MapPin, Award, Star, Share2, Settings, ChevronRight, Plane, Globe, Zap, Brain, X, Shield, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Passport() {
-  const { currentUser } = useApp();
+  const { currentUser, memories, removeMemory } = useApp();
   const navigate = useNavigate();
   const user = currentUser || SAMPLE_USERS[0];
 
@@ -143,6 +143,73 @@ export default function Passport() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Trust Profile */}
+      <div className="content-px mt-5">
+        <div className="p-5 bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <h2 className="text-base font-semibold text-navy mb-3 flex items-center gap-2">
+            <Shield size={16} className="text-gold" />
+            Trust Score
+          </h2>
+          <div className="flex items-center gap-4">
+            <div className="relative w-16 h-16">
+              <svg className="w-16 h-16 -rotate-90">
+                <circle cx="32" cy="32" r="28" fill="none" stroke="#E8E4DC" strokeWidth="5" />
+                <circle cx="32" cy="32" r="28" fill="none" stroke="#C9A84C" strokeWidth="5"
+                  strokeDasharray={`${94 * 1.76} 176`} strokeLinecap="round" />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-lg font-bold text-navy">94</span>
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Shield size={12} className="text-gold" />
+                <span className="text-xs font-bold text-gold uppercase">Gold Trust</span>
+              </div>
+              <p className="text-[11px] text-charcoal-light">Verified profile, 6 countries, {userRecs.length} recommendations shared, Select Black member</p>
+              <p className="text-[10px] text-gold mt-1 font-medium">Share 2 more recommendations to reach Black Trust</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Memory Layer */}
+      {memories && memories.length > 0 && (
+        <div className="content-px mt-5">
+          <h2 className="text-base font-semibold text-navy mb-3 flex items-center gap-2">
+            <Brain size={16} className="text-gold" />
+            What Jetzy Remembers
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {memories.slice(0, 8).map((memory, i) => (
+              <span key={i} className="inline-flex items-center gap-1.5 px-3 py-2 bg-gold/10 text-charcoal text-xs font-medium rounded-full border border-gold/20">
+                {memory}
+                <button onClick={() => removeMemory(memory)} className="text-charcoal-light hover:text-red-400 transition-colors">
+                  <X size={10} />
+                </button>
+              </span>
+            ))}
+          </div>
+          <p className="text-[10px] text-charcoal-light mt-2">Your Companion uses these to personalize every conversation</p>
+        </div>
+      )}
+
+      {/* Match + Intel links */}
+      <div className="content-px mt-5 flex gap-3">
+        <button onClick={() => navigate('/match')} className="flex-1 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 active:scale-[0.98] transition-transform">
+          <Users size={18} className="text-gold" />
+          <div className="text-left">
+            <p className="text-sm font-semibold text-charcoal">Travel Matches</p>
+            <p className="text-[10px] text-charcoal-light">Find companions</p>
+          </div>
+        </button>
+        <button onClick={() => navigate('/intel')} className="flex-1 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm flex items-center gap-3 active:scale-[0.98] transition-transform">
+          <Globe size={18} className="text-gold" />
+          <div className="text-left">
+            <p className="text-sm font-semibold text-charcoal">Jetzy Intel</p>
+            <p className="text-[10px] text-charcoal-light">Travel trends</p>
+          </div>
+        </button>
       </div>
 
       {/* Recent Trips */}

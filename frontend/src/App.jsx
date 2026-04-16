@@ -12,6 +12,13 @@ import Perks from './screens/Perks';
 import Live from './screens/Live';
 import Debrief from './screens/Debrief';
 import AddRecommendation from './screens/AddRecommendation';
+import Voice from './screens/Voice';
+import Match from './screens/Match';
+import Concierge from './screens/Concierge';
+import ForTwo from './screens/ForTwo';
+import Intel from './screens/Intel';
+
+const HIDE_NAV_PATHS = ['/companion', '/debrief', '/add-rec', '/voice', '/match', '/concierge', '/for-two', '/intel'];
 
 function AppLayout() {
   const { isOnboarded } = useApp();
@@ -21,7 +28,7 @@ function AppLayout() {
     return <Onboarding />;
   }
 
-  const hideNav = ['/companion', '/debrief', '/add-rec'].includes(location.pathname);
+  const hideNav = HIDE_NAV_PATHS.includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -36,6 +43,11 @@ function AppLayout() {
         <Route path="/live" element={<Live />} />
         <Route path="/debrief" element={<Debrief />} />
         <Route path="/add-rec" element={<AddRecommendation />} />
+        <Route path="/voice" element={<Voice />} />
+        <Route path="/match" element={<Match />} />
+        <Route path="/concierge" element={<Concierge />} />
+        <Route path="/for-two" element={<ForTwo />} />
+        <Route path="/intel" element={<Intel />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
       {!hideNav && <BottomNav />}
