@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { DESTINATIONS, RECOMMENDATIONS, SAMPLE_USERS } from '../data/seed';
-import { ArrowLeft, TrendingUp, TrendingDown, Globe, Sparkles, Users, BarChart3 } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Globe, Sparkles, Users, BarChart3, Database } from 'lucide-react';
+import { getGraphStats } from '../lib/knowledge-graph';
 
 const TRENDING = [
   { name: 'Tokyo', visits: 342, change: 23, up: true },
@@ -200,6 +201,43 @@ export default function Intel() {
             <span className="flex items-center gap-1.5 text-[10px] font-medium text-charcoal-light"><span className="w-3 h-2 rounded bg-navy/20 inline-block" /> Community avg</span>
           </div>
         </div>
+        {/* Knowledge Graph Stats */}
+        {(() => {
+          const stats = getGraphStats();
+          return (
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-md p-5">
+              <h2 className="text-base font-bold text-navy flex items-center gap-2 mb-4">
+                <Database size={16} className="text-gold" /> Knowledge Graph
+              </h2>
+              <p className="text-xs text-charcoal-light mb-4">3-Tiered Graph RAG powering every Companion response</p>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 bg-cream rounded-xl text-center">
+                  <p className="text-xl font-bold text-navy">{stats.tier1Facts}</p>
+                  <p className="text-[10px] text-charcoal-light mt-0.5">Tier 1 Facts</p>
+                  <p className="text-[8px] text-gold font-semibold mt-0.5">VERIFIED</p>
+                </div>
+                <div className="p-3 bg-cream rounded-xl text-center">
+                  <p className="text-xl font-bold text-navy">{stats.tier2Facts}</p>
+                  <p className="text-[10px] text-charcoal-light mt-0.5">Tier 2 Intel</p>
+                  <p className="text-[8px] text-gold font-semibold mt-0.5">COMMUNITY</p>
+                </div>
+                <div className="p-3 bg-cream rounded-xl text-center">
+                  <p className="text-xl font-bold text-navy">{stats.tier3Docs}</p>
+                  <p className="text-[10px] text-charcoal-light mt-0.5">Tier 3 Docs</p>
+                  <p className="text-[8px] text-gold font-semibold mt-0.5">FULL TEXT</p>
+                </div>
+              </div>
+              <div className="mt-3 p-3 bg-navy/5 rounded-xl">
+                <p className="text-[11px] text-charcoal leading-relaxed">
+                  <span className="font-semibold">{stats.totalEntities} entities</span> indexed across{' '}
+                  <span className="font-semibold">{stats.destinations} destinations</span> and{' '}
+                  <span className="font-semibold">{stats.recommendations} recommendations</span>.
+                  Every Companion response is grounded by this graph — verified facts override community intel, community intel overrides generic knowledge.
+                </p>
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

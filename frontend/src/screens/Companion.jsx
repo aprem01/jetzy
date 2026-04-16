@@ -46,8 +46,8 @@ export default function Companion() {
       });
 
       const data = await res.json();
-      setChatMessages([...newMessages, { role: 'assistant', content: data.response }]);
-      // Extract memories in background
+      const meta = data.graphContext ? { graphRAG: true, entities: data.entitiesFound } : {};
+      setChatMessages([...newMessages, { role: 'assistant', content: data.response, ...meta }]);
       extractMemories(text, data.response);
     } catch {
       const fallback = generateFallback(text, user);
@@ -127,6 +127,14 @@ export default function Companion() {
               msg.role === 'user' ? 'bubble-user' : 'bubble-ai'
             }`}>
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+              {msg.graphRAG && (
+                <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-gray-100">
+                  <div className="w-3 h-3 rounded-full bg-green-400 flex items-center justify-center">
+                    <span className="text-[6px] text-white font-bold">G</span>
+                  </div>
+                  <span className="text-[10px] text-charcoal-light">Grounded by Knowledge Graph · {msg.entities?.length || 0} entities matched</span>
+                </div>
+              )}
             </div>
           </div>
         ))}
