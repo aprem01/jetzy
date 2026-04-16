@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { LIVE_BROADCASTS, DESTINATIONS, RECOMMENDATIONS, SAMPLE_USERS, getUserById } from '../data/seed';
-import { Sparkles, MapPin, ArrowRight, Radio, ThumbsUp, Compass, Plus, MessageCircle, Mic, Wand2, Users, BarChart3 } from 'lucide-react';
+import { Sparkles, MapPin, ArrowRight, Radio, ThumbsUp, Compass, Plus, MessageCircle, Mic, Wand2, Users, BarChart3, Languages, Play, Bell, BookOpen, Backpack, DollarSign, Shield, Heart, Calendar, ShoppingBag } from 'lucide-react';
 
 export default function Home() {
   const { currentUser } = useApp();
@@ -233,27 +233,33 @@ export default function Home() {
         {/* Phase 2 Quick Links */}
         <div className="mt-7">
           <h2 className="text-lg font-bold text-navy mb-3">More from Jetzy</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <button onClick={() => navigate('/concierge')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
-              <Wand2 size={22} className="text-gold mx-auto mb-2" />
-              <p className="text-xs font-bold text-charcoal">Concierge</p>
-              <p className="text-[10px] text-charcoal-light mt-0.5">Full trip planner</p>
-            </button>
-            <button onClick={() => navigate('/match')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
-              <Users size={22} className="text-gold mx-auto mb-2" />
-              <p className="text-xs font-bold text-charcoal">Match</p>
-              <p className="text-[10px] text-charcoal-light mt-0.5">Find companions</p>
-            </button>
-            <button onClick={() => navigate('/for-two')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
-              <MessageCircle size={22} className="text-gold mx-auto mb-2" />
-              <p className="text-xs font-bold text-charcoal">For Two</p>
-              <p className="text-[10px] text-charcoal-light mt-0.5">Plan together</p>
-            </button>
-            <button onClick={() => navigate('/intel')} className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97]">
-              <BarChart3 size={22} className="text-gold mx-auto mb-2" />
-              <p className="text-xs font-bold text-charcoal">Intel</p>
-              <p className="text-[10px] text-charcoal-light mt-0.5">Travel trends</p>
-            </button>
+          <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+            {[
+              { icon: <Wand2 size={20} />, label: 'Concierge', sub: 'Plan a full trip', path: '/concierge' },
+              { icon: <Users size={20} />, label: 'Match', sub: 'Find companions', path: '/match' },
+              { icon: <MessageCircle size={20} />, label: 'For Two', sub: 'Plan together', path: '/for-two' },
+              { icon: <BarChart3 size={20} />, label: 'Intel', sub: 'Travel trends', path: '/intel' },
+              { icon: <Languages size={20} />, label: 'Translate', sub: 'Menu + context', path: '/translate' },
+              { icon: <Play size={20} />, label: 'Trip Replay', sub: 'Your story', path: '/replay' },
+              { icon: <Bell size={20} />, label: 'Alerts', sub: 'Live intel', path: '/alerts' },
+              { icon: <Users size={20} />, label: 'Fixers', sub: 'Local guides', path: '/fixers' },
+              { icon: <BookOpen size={20} />, label: 'Journal', sub: 'Travel diary', path: '/journal' },
+              { icon: <Backpack size={20} />, label: 'Packing', sub: 'Smart lists', path: '/packing' },
+              { icon: <DollarSign size={20} />, label: 'Costs', sub: 'Real prices', path: '/costs' },
+              { icon: <Shield size={20} />, label: 'Safety', sub: 'Travel safe', path: '/safety' },
+              { icon: <Heart size={20} />, label: 'Wishlist', sub: 'Dream trips', path: '/wishlist' },
+              { icon: <Calendar size={20} />, label: 'Calendar', sub: 'Best time to go', path: '/calendar' },
+              { icon: <ShoppingBag size={20} />, label: 'Gear', sub: 'What works', path: '/gear' },
+              { icon: <DollarSign size={20} />, label: 'Expenses', sub: 'Track spend', path: '/expenses' },
+            ].map((item, i) => (
+              <button key={item.path} onClick={() => navigate(item.path)}
+                className="p-3 bg-white rounded-2xl border border-gray-100 shadow-sm text-center hover:shadow-md transition-all active:scale-[0.97] animate-fade-up"
+                style={{ animationDelay: `${i * 0.03}s` }}>
+                <div className="text-gold mx-auto mb-1.5">{item.icon}</div>
+                <p className="text-[11px] font-bold text-charcoal">{item.label}</p>
+                <p className="text-[9px] text-charcoal-light mt-0.5">{item.sub}</p>
+              </button>
+            ))}
           </div>
         </div>
 

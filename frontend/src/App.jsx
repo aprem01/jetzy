@@ -17,8 +17,20 @@ import Match from './screens/Match';
 import Concierge from './screens/Concierge';
 import ForTwo from './screens/ForTwo';
 import Intel from './screens/Intel';
+import Translate from './screens/Translate';
+import Replay from './screens/Replay';
+import Alerts from './screens/Alerts';
+import Fixers from './screens/Fixers';
+import Journal from './screens/Journal';
+import Packing from './screens/Packing';
+import Costs from './screens/Costs';
+import Safety from './screens/Safety';
+import Wishlist from './screens/Wishlist';
+import SeasonalCalendar from './screens/Calendar';
+import Gear from './screens/Gear';
+import Expenses from './screens/Expenses';
 
-const HIDE_NAV_PATHS = ['/companion', '/debrief', '/add-rec', '/voice', '/match', '/concierge', '/for-two', '/intel'];
+const SHOW_NAV_PATHS = ['/home', '/discover', '/circles', '/passport', '/perks', '/live'];
 
 function AppLayout() {
   const { isOnboarded } = useApp();
@@ -28,7 +40,7 @@ function AppLayout() {
     return <Onboarding />;
   }
 
-  const hideNav = HIDE_NAV_PATHS.includes(location.pathname);
+  const showNav = SHOW_NAV_PATHS.includes(location.pathname);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -48,9 +60,21 @@ function AppLayout() {
         <Route path="/concierge" element={<Concierge />} />
         <Route path="/for-two" element={<ForTwo />} />
         <Route path="/intel" element={<Intel />} />
+        <Route path="/translate" element={<Translate />} />
+        <Route path="/replay" element={<Replay />} />
+        <Route path="/alerts" element={<Alerts />} />
+        <Route path="/fixers" element={<Fixers />} />
+        <Route path="/journal" element={<Journal />} />
+        <Route path="/packing" element={<Packing />} />
+        <Route path="/costs" element={<Costs />} />
+        <Route path="/safety" element={<Safety />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/calendar" element={<SeasonalCalendar />} />
+        <Route path="/gear" element={<Gear />} />
+        <Route path="/expenses" element={<Expenses />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
-      {!hideNav && <BottomNav />}
+      {showNav && <BottomNav />}
     </div>
   );
 }
