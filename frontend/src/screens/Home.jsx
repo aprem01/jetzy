@@ -230,8 +230,33 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Phase 2 Quick Links */}
+        {/* Avatar Concierge Hero Card */}
         <div className="mt-7">
+          <button
+            onClick={() => navigate('/avatar')}
+            className="w-full p-5 bg-white rounded-3xl border border-gold/30 shadow-xl text-left relative overflow-hidden group active:scale-[0.99] transition-all"
+          >
+            <div className="absolute top-0 right-0 w-40 h-40 bg-gold/5 rounded-full -translate-y-16 translate-x-16" />
+            <div className="relative flex items-center gap-4">
+              <div className="relative flex-shrink-0">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=face" alt="" className="w-16 h-16 rounded-2xl border-2 border-gold object-cover shadow-lg" />
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <Sparkles size={12} className="text-gold" />
+                  <span className="text-[10px] font-bold text-gold uppercase tracking-wider">AI Concierge — New</span>
+                </div>
+                <p className="text-base font-bold text-navy">Talk to Avery</p>
+                <p className="text-xs text-charcoal-light mt-0.5">Book cruises, flights, hotels, experiences — by voice or text</p>
+              </div>
+              <ArrowRight size={18} className="text-gold group-hover:translate-x-1 transition-transform" />
+            </div>
+          </button>
+        </div>
+
+        {/* Phase 2 Quick Links */}
+        <div className="mt-5">
           <h2 className="text-lg font-bold text-navy mb-3">More from Jetzy</h2>
           <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
             {[
