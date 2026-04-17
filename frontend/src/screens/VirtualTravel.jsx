@@ -132,6 +132,19 @@ export default function VirtualTravel() {
     } catch {}
   }, [cart]);
 
+  // Re-sync cart from localStorage when window regains focus
+  // (so emptying it on /itinerary reflects when user comes back)
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+        setCart(saved.items || []);
+      } catch {}
+    };
+    window.addEventListener('focus', sync);
+    return () => window.removeEventListener('focus', sync);
+  }, []);
+
   // On mount, check for resumable session
   useEffect(() => {
     try {

@@ -50,9 +50,8 @@ export default function Itinerary() {
     } catch {}
   }, []);
 
-  // Auto-save
+  // Auto-save (always — including empty state, so removed items stick)
   useEffect(() => {
-    if (items.length === 0 && !tripName) return;
     const data = { items, tripName, tripDates, travelers, savedAt: Date.now() };
     localStorage.setItem('jetzy_cart', JSON.stringify(data));
     setSavedAt(Date.now());
