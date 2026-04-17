@@ -1,9 +1,11 @@
 /**
  * Voice-first conversational endpoint for the Virtual Travel avatar.
- * Returns: { response, locations, mood }
- *  - response: short conversational reply suitable for TTS (under 80 words)
- *  - locations: any place names mentioned by user OR worth showing the user
- *  - mood: tone hint for the avatar
+ * Returns: { response, locations, mood, cartItems }
+ *  - response: short conversational reply for TTS (under 80 words)
+ *  - locations: place names mentioned that we should show as background
+ *  - mood: tone hint
+ *  - cartItems: bookable items mentioned by the avatar (hotels, flights,
+ *    experiences, restaurants, fixers) with structured details
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -25,42 +27,48 @@ export default async function handler(req, res) {
   const systemPrompt = `${avatarPersona}
 
 You are having a SPOKEN conversation with ${user?.name || 'a traveler'}. Your responses will be played back as audio. So:
-- Keep responses SHORT (40-80 words max).
+- Keep responses SHORT (40-90 words max).
 - Sound natural, conversational, like talking on the phone.
 - Use vivid sensory language — sounds, smells, light, food.
 - React with personality. Show emotion in your words.
-- When the user mentions a place, paint it with one or two strong details before asking what they want to see.
-- Ask one short follow-up question to keep the conversation going.
-- Do NOT use markdown, bullet points, or lists in your response.
-- If they ask to "go to" a place, narrate the arrival as if you've just landed there together.
+- When the user mentions a place, paint it with one or two strong sensory details.
+- Naturally suggest specific bookable things — a hotel, a tour, a restaurant, a guide, a flight — with prices when you can.
+- Build their trip turn by turn. After they show interest, propose a concrete next step ("we can stay at...", "I can book the temple tour for...").
+- Ask one short follow-up question.
+- No markdown, no bullets, no lists in your spoken text.
 
-CRITICAL: After your response, on a new line, output a JSON object on a single line with this exact format:
-{"locations":["place1","place2"],"mood":"warm"}
+CRITICAL: After your spoken response, on a NEW LINE output a JSON object on a single line in this exact format:
+{"locations":["place"],"mood":"warm","cartItems":[{"type":"hotel","name":"Vivanta Mahabalipuram","location":"Mahabalipuram","price":"$180/night","detail":"Beachfront, 3 nights, includes breakfast"}]}
 
-- "locations" should include any place names mentioned in YOUR response or theirs that we could show as a background image. Include cities, neighborhoods, landmarks, parks, monuments, beaches. Use proper names (e.g., "Mahabalipuram" not "the temples"). If multiple, put the most visually relevant FIRST.
-- "mood" should be one of: warm, excited, curious, calm, adventurous, nostalgic, dreamy.
-- If no location is mentioned, return {"locations":[],"mood":"warm"}.
+Rules for the JSON:
+- "locations": list any concrete place names mentioned (cities, neighborhoods, landmarks, parks, monuments). Most visually compelling FIRST. Empty array if none.
+- "mood": one of: warm, excited, curious, calm, adventurous, nostalgic, dreamy.
+- "cartItems": list any SPECIFIC bookable items YOU just mentioned in your spoken response. Each item must have:
+    - type: one of "hotel", "flight", "experience", "restaurant", "fixer", "transport"
+    - name: specific name (e.g., "Shore Temple Sunrise Tour", "JAL Premium Economy SFO→HND")
+    - location: city or destination
+    - price: include currency and unit ("$180/night", "₹2,500", "$45 per person")
+    - detail: 1-line description (dates, duration, what's included)
+- Empty cartItems array if you didn't propose anything bookable this turn.
+- ONLY include cartItems for things you actually mentioned in your spoken response. Don't invent.
 
 Example output:
-Mahabalipuram! Oh, you must go. The Shore Temple sitting right at the edge of the Bay of Bengal — 1300 years old, still standing, still watching the ocean. We can be there in two hours from Chennai. Sunrise or sunset?
-{"locations":["Mahabalipuram Shore Temple","Mahabalipuram"],"mood":"excited"}`;
+Mahabalipuram is magic at sunrise. The Shore Temple, 1300 years old, sitting at the edge of the Bay of Bengal — orange light hitting black stone. We can stay at Vivanta on the beach, $180 a night, breakfast included. I'll book a private guide for the morning, $45 a person. Want me to add both?
+{"locations":["Mahabalipuram Shore Temple","Mahabalipuram"],"mood":"excited","cartItems":[{"type":"hotel","name":"Vivanta Mahabalipuram","location":"Mahabalipuram","price":"$180/night","detail":"Beachfront, breakfast included"},{"type":"experience","name":"Shore Temple Sunrise Private Tour","location":"Mahabalipuram","price":"$45/person","detail":"Local guide, 2 hours at sunrise"}]}`;
 
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 400,
+      max_tokens: 600,
       system: systemPrompt,
       messages: messages.map(m => ({ role: m.role, content: m.content })),
     });
 
     const fullText = response.content[0].text.trim();
-
-    // Split response from metadata JSON (last line)
     const lines = fullText.split('\n').filter(l => l.trim());
-    let metadata = { locations: [], mood: 'warm' };
+    let metadata = { locations: [], mood: 'warm', cartItems: [] };
     let spokenResponse = fullText;
 
-    // Find the JSON line (starts with {)
     for (let i = lines.length - 1; i >= 0; i--) {
       const line = lines[i].trim();
       if (line.startsWith('{') && line.endsWith('}')) {
@@ -76,6 +84,7 @@ Mahabalipuram! Oh, you must go. The Shore Temple sitting right at the edge of th
       response: spokenResponse,
       locations: metadata.locations || [],
       mood: metadata.mood || 'warm',
+      cartItems: metadata.cartItems || [],
     });
   } catch (error) {
     console.error('Voice-chat error:', error);

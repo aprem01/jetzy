@@ -2,7 +2,21 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { SAMPLE_USERS } from '../data/seed';
-import { ArrowLeft, Mic, MicOff, Sparkles, Volume2, VolumeX, MapPin, X, Pause, Play } from 'lucide-react';
+import { ArrowLeft, Mic, MicOff, Sparkles, Volume2, VolumeX, MapPin, X, Pause, Play, ShoppingBag, Plus, Check, Hotel, Plane, Mountain, Utensils, Users as UsersIcon, Bus, Trash2 } from 'lucide-react';
+
+const TYPE_ICONS = {
+  hotel: Hotel, flight: Plane, experience: Mountain,
+  restaurant: Utensils, fixer: UsersIcon, transport: Bus,
+};
+
+const SESSION_KEY = 'jetzy_avatar_session';
+const CART_KEY = 'jetzy_cart';
+
+function parsePrice(p) {
+  if (!p) return 0;
+  const m = String(p).replace(/,/g, '').match(/[\d.]+/);
+  return m ? parseFloat(m[0]) : 0;
+}
 
 // === Avatar Characters ===
 const AVATARS = [
@@ -56,6 +70,16 @@ const AVATARS = [
     greeting: 'Olá! I\'m Sophie, from Lisbon. Europe is full of cities pretending to be old — I\'ll show you the ones that actually are. Where shall we begin?',
     suggestions: ['Take me to Lisbon', 'I want to see Paris', 'Show me Santorini', 'Tell me about Rome'],
   },
+  {
+    id: 'zara', name: 'Zara', region: 'Pakistan & Central Asia', home: 'Lahore',
+    accent: 'Pakistani English, hospitable and animated',
+    avatar: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400&h=400&fit=crop&crop=face',
+    color: 'from-emerald-600 to-teal-700',
+    personality: 'a warm, hospitable Lahori with a poet\'s love for Mughal history, food, and the mountains of the north. You believe no traveler should leave Pakistan hungry, alone, or without a story.',
+    voiceRate: 0.93, voicePitch: 1.04,
+    greeting: 'Assalam-o-alaikum! I\'m Zara, from Lahore. Mughal palaces in the morning, naan from a clay oven at noon, and the snow-capped Hunza Valley calling from the north. Where shall I take you?',
+    suggestions: ['Take me to Lahore', 'I want to see Hunza Valley', 'Show me K2 base camp', 'Tell me about Karachi'],
+  },
 ];
 
 const HOME_BG = 'https://images.unsplash.com/photo-1556377483-9aacf8a08adf?w=1600&h=1000&fit=crop';
@@ -77,6 +101,17 @@ export default function VirtualTravel() {
   const [interimText, setInterimText] = useState('');
   const [transporting, setTransporting] = useState(false);
 
+  // Cart state — persists across sessions
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem(CART_KEY);
+      return saved ? JSON.parse(saved).items || [] : [];
+    } catch { return []; }
+  });
+  const [showCart, setShowCart] = useState(false);
+  const [cartPing, setCartPing] = useState(false);
+  const [hasResumeSession, setHasResumeSession] = useState(false);
+
   const recognitionRef = useRef(null);
   const isSpeakingRef = useRef(false);
   const autoListenRef = useRef(true);
@@ -88,6 +123,83 @@ export default function VirtualTravel() {
   useEffect(() => { autoListenRef.current = autoListen; }, [autoListen]);
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { selectedAvatarRef.current = selectedAvatar; }, [selectedAvatar]);
+
+  // Persist cart to localStorage
+  useEffect(() => {
+    try {
+      const existing = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+      localStorage.setItem(CART_KEY, JSON.stringify({ ...existing, items: cart, savedAt: Date.now() }));
+    } catch {}
+  }, [cart]);
+
+  // On mount, check for resumable session
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (saved) {
+        const data = JSON.parse(saved);
+        // Resume if session is less than 7 days old and has messages
+        if (data.messages?.length > 1 && Date.now() - (data.savedAt || 0) < 7 * 24 * 60 * 60 * 1000) {
+          setHasResumeSession(true);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Auto-save session on every message change
+  useEffect(() => {
+    if (!selectedAvatar || messages.length === 0) return;
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        avatarId: selectedAvatar.id,
+        messages,
+        bgImage,
+        currentLocation,
+        savedAt: Date.now(),
+      }));
+    } catch {}
+  }, [messages, selectedAvatar, bgImage, currentLocation]);
+
+  const resumeSession = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+      const avatar = AVATARS.find(a => a.id === saved.avatarId);
+      if (!avatar) return;
+      setSelectedAvatar(avatar);
+      selectedAvatarRef.current = avatar;
+      setMessages(saved.messages || []);
+      messagesRef.current = saved.messages || [];
+      setBgImage(saved.bgImage || HOME_BG);
+      setCurrentLocation(saved.currentLocation || null);
+      setHasResumeSession(false);
+      // Re-enable auto-listen
+      setTimeout(() => {
+        if (autoListenRef.current) startListening();
+      }, 800);
+    } catch {}
+  };
+
+  const dismissResume = () => {
+    setHasResumeSession(false);
+    localStorage.removeItem(SESSION_KEY);
+  };
+
+  const addToCart = (items) => {
+    if (!items?.length) return;
+    setCart(prev => {
+      const existing = new Set(prev.map(i => i.name?.toLowerCase()));
+      const newItems = items.filter(i => i.name && !existing.has(i.name.toLowerCase()));
+      if (newItems.length > 0) {
+        setCartPing(true);
+        setTimeout(() => setCartPing(false), 1500);
+      }
+      return [...prev, ...newItems];
+    });
+  };
+
+  const removeFromCart = (idx) => setCart(prev => prev.filter((_, i) => i !== idx));
+
+  const cartTotal = cart.reduce((s, it) => s + parsePrice(it.price), 0);
 
   // === Image fetching ===
   const fetchLocationImage = useCallback(async (location) => {
@@ -251,7 +363,12 @@ export default function VirtualTravel() {
         fetchLocationImage(data.locations[0]);
       }
 
-      setMessages(prev => [...prev, { role: 'assistant', content: reply, mood: data.mood }]);
+      // Add any bookable items mentioned to the cart
+      if (data.cartItems?.length > 0) {
+        addToCart(data.cartItems);
+      }
+
+      setMessages(prev => [...prev, { role: 'assistant', content: reply, mood: data.mood, addedItems: data.cartItems || [] }]);
       setIsThinking(false);
 
       // Speak the reply, then re-enable listening
@@ -323,6 +440,51 @@ export default function VirtualTravel() {
         </div>
 
         <div className="content-px mt-6">
+          {/* Resume session banner */}
+          {hasResumeSession && (() => {
+            try {
+              const saved = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+              const avatar = AVATARS.find(a => a.id === saved.avatarId);
+              if (!avatar) return null;
+              const ago = Math.round((Date.now() - (saved.savedAt || 0)) / 60000);
+              const agoLabel = ago < 60 ? `${ago}m ago` : ago < 1440 ? `${Math.round(ago/60)}h ago` : `${Math.round(ago/1440)}d ago`;
+              return (
+                <div className="mb-5 p-4 bg-white rounded-2xl border border-gold/30 shadow-md flex items-center gap-3 animate-fade-up">
+                  <img src={avatar.avatar} alt="" className="w-12 h-12 rounded-xl border-2 border-gold object-cover flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-gold uppercase tracking-wider">Resume conversation</p>
+                    <p className="text-sm font-semibold text-charcoal truncate">{avatar.name} · {saved.currentLocation || avatar.region}</p>
+                    <p className="text-[10px] text-charcoal-light">{saved.messages?.length || 0} messages · {agoLabel}</p>
+                  </div>
+                  <button onClick={resumeSession}
+                    className="px-4 py-2.5 gradient-gold rounded-xl text-white text-xs font-bold active:scale-95 transition-transform">
+                    Continue
+                  </button>
+                  <button onClick={dismissResume} className="w-8 h-8 rounded-full bg-cream flex items-center justify-center">
+                    <X size={14} className="text-charcoal-light" />
+                  </button>
+                </div>
+              );
+            } catch { return null; }
+          })()}
+
+          {/* Cart preview if items exist */}
+          {cart.length > 0 && (
+            <div className="mb-5">
+              <button onClick={() => navigate('/itinerary')}
+                className="w-full p-4 bg-charcoal rounded-2xl shadow-md flex items-center gap-3 active:scale-[0.99] transition-transform">
+                <div className="w-11 h-11 rounded-xl gradient-gold flex items-center justify-center flex-shrink-0">
+                  <ShoppingBag size={18} className="text-white" />
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="text-xs text-gold font-bold uppercase tracking-wider">Your saved trip</p>
+                  <p className="text-sm font-semibold text-white">{cart.length} items · ${cartTotal.toLocaleString()}</p>
+                </div>
+                <span className="text-gold text-sm font-bold">Review →</span>
+              </button>
+            </div>
+          )}
+
           <p className="text-sm font-bold text-navy mb-3">Meet your local guides</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {AVATARS.map((a, i) => (
@@ -413,6 +575,19 @@ export default function VirtualTravel() {
           </p>
         </div>
 
+        {/* Cart button */}
+        <button onClick={() => setShowCart(true)}
+          className={`relative w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${
+            cartPing ? 'bg-gold animate-pulse-gold scale-110' : 'bg-black/40'
+          }`}>
+          <ShoppingBag size={14} className="text-gold" />
+          {cart.length > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-gold text-charcoal rounded-full text-[10px] font-bold flex items-center justify-center shadow-lg">
+              {cart.length}
+            </span>
+          )}
+        </button>
+
         {/* Mute toggle */}
         <button onClick={() => { setMuted(m => !m); stopSpeaking(); }}
           className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center">
@@ -431,7 +606,7 @@ export default function VirtualTravel() {
 
         {/* Latest avatar message — large and centered */}
         {messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !transporting && (
-          <div className="bg-black/70 backdrop-blur-md rounded-2xl p-5 border border-white/10 animate-fade-up mb-3 max-h-[40vh] overflow-y-auto">
+          <div className="bg-black/70 backdrop-blur-md rounded-2xl p-5 border border-white/10 animate-fade-up mb-3 max-h-[50vh] overflow-y-auto">
             <div className="flex items-center gap-2 mb-2">
               <img src={selectedAvatar.avatar} alt="" className="w-6 h-6 rounded-md object-cover" />
               <span className="text-gold text-[10px] font-bold uppercase tracking-wider">{selectedAvatar.name}</span>
@@ -440,6 +615,28 @@ export default function VirtualTravel() {
               )}
             </div>
             <p className="text-white text-base leading-relaxed">{messages[messages.length - 1].content}</p>
+
+            {/* Items added to cart this turn */}
+            {messages[messages.length - 1].addedItems?.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-white/10 space-y-1.5 animate-fade-up">
+                <p className="text-[10px] font-bold text-gold uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                  <Plus size={10} /> Added to your trip
+                </p>
+                {messages[messages.length - 1].addedItems.map((it, i) => {
+                  const Icon = TYPE_ICONS[it.type] || Mountain;
+                  return (
+                    <div key={i} className="flex items-center gap-2 p-2 bg-gold/10 rounded-lg border border-gold/20">
+                      <Icon size={12} className="text-gold flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold text-white truncate">{it.name}</p>
+                        <p className="text-[10px] text-white/60 truncate">{it.detail}</p>
+                      </div>
+                      <span className="text-xs font-bold text-gold flex-shrink-0">{it.price}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
@@ -520,6 +717,77 @@ export default function VirtualTravel() {
           </div>
         </div>
       </div>
+
+      {/* Slide-up Cart Panel */}
+      {showCart && (
+        <div className="fixed inset-0 z-50 flex items-end animate-fade-in">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCart(false)} />
+          <div className="relative w-full max-h-[85vh] bg-cream rounded-t-3xl shadow-2xl flex flex-col animate-fade-up">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+              <div>
+                <p className="text-[10px] font-bold text-gold uppercase tracking-wider">Your Trip So Far</p>
+                <h3 className="font-display text-xl font-bold text-navy">{cart.length} {cart.length === 1 ? 'item' : 'items'} · ${cartTotal.toLocaleString()}</h3>
+              </div>
+              <button onClick={() => setShowCart(false)} className="w-9 h-9 rounded-full bg-cream border border-gray-200 flex items-center justify-center">
+                <X size={16} className="text-charcoal-light" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-2">
+              {cart.length === 0 ? (
+                <div className="text-center py-12">
+                  <ShoppingBag size={32} className="text-charcoal-light/20 mx-auto mb-3" />
+                  <p className="text-charcoal-light text-sm">Nothing yet — keep talking and {selectedAvatar?.name} will add things as you discover them.</p>
+                </div>
+              ) : (
+                cart.map((item, idx) => {
+                  const Icon = TYPE_ICONS[item.type] || Mountain;
+                  return (
+                    <div key={idx} className="p-3 bg-white rounded-xl border border-gray-100 flex items-start gap-3 animate-fade-up">
+                      <div className="w-10 h-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold flex-shrink-0">
+                        <Icon size={16} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-0.5">
+                          <span className="text-[9px] font-bold text-charcoal-light uppercase">{item.type}</span>
+                          <span className="text-sm font-bold text-navy">{item.price}</span>
+                        </div>
+                        <p className="text-sm font-semibold text-charcoal">{item.name}</p>
+                        <p className="text-[10px] text-charcoal-light flex items-center gap-1 mt-0.5"><MapPin size={9} /> {item.location}</p>
+                        {item.detail && <p className="text-[11px] text-charcoal-light mt-1">{item.detail}</p>}
+                      </div>
+                      <button onClick={() => removeFromCart(idx)} className="text-charcoal-light/30 hover:text-red-400 p-1">
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="p-5 border-t border-gray-100 space-y-2">
+              {cart.length > 0 && (
+                <button onClick={() => { setShowCart(false); navigate('/itinerary'); }}
+                  className="w-full py-4 gradient-gold rounded-2xl text-white font-bold text-base flex items-center justify-center gap-2 shadow-xl active:scale-[0.97] transition-transform">
+                  <Sparkles size={16} /> Build My Itinerary
+                </button>
+              )}
+              <button onClick={() => setShowCart(false)}
+                className="w-full py-3 bg-white border border-gray-200 rounded-2xl text-charcoal-light font-medium text-sm active:scale-[0.97]">
+                Keep Talking to {selectedAvatar?.name}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating "Build Itinerary" CTA when 3+ items */}
+      {cart.length >= 3 && !showCart && (
+        <button onClick={() => navigate('/itinerary')}
+          className="absolute top-28 right-5 z-20 px-3 py-2 gradient-gold rounded-full text-white text-[11px] font-bold shadow-2xl flex items-center gap-1.5 animate-fade-up active:scale-95">
+          <Sparkles size={11} /> Review Trip ({cart.length})
+        </button>
+      )}
     </div>
   );
 }

@@ -31,6 +31,7 @@ import Gear from './screens/Gear';
 import Expenses from './screens/Expenses';
 import Avatar from './screens/Avatar';
 import VirtualTravel from './screens/VirtualTravel';
+import Itinerary from './screens/Itinerary';
 
 const SHOW_NAV_PATHS = ['/home', '/discover', '/circles', '/passport', '/perks', '/live'];
 
@@ -76,6 +77,7 @@ function AppLayout() {
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/avatar" element={<Avatar />} />
         <Route path="/virtual-travel" element={<VirtualTravel />} />
+        <Route path="/itinerary" element={<Itinerary />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
       {showNav && <BottomNav />}
