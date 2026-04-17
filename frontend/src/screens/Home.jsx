@@ -230,8 +230,35 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Avatar Concierge Hero Card */}
+        {/* Virtual Travel Hero Card */}
         <div className="mt-7">
+          <button
+            onClick={() => navigate('/virtual-travel')}
+            className="w-full rounded-3xl shadow-2xl text-left relative overflow-hidden group active:scale-[0.99] transition-all h-44"
+          >
+            <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1200&h=600&fit=crop" alt="" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-black/20" />
+            <div className="relative h-full flex items-center gap-4 p-5">
+              <div className="flex -space-x-3">
+                <img src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=200&h=200&fit=crop&crop=face" alt="" className="w-12 h-12 rounded-2xl border-2 border-white object-cover shadow-xl" />
+                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=200&h=200&fit=crop&crop=face" alt="" className="w-12 h-12 rounded-2xl border-2 border-white object-cover shadow-xl" />
+                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=face" alt="" className="w-12 h-12 rounded-2xl border-2 border-white object-cover shadow-xl" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[9px] font-bold bg-gold text-charcoal px-2 py-0.5 rounded-full uppercase">New</span>
+                  <span className="text-[10px] font-bold text-gold uppercase tracking-wider">Virtual Travel</span>
+                </div>
+                <p className="text-xl font-display font-bold text-white">Travel with a Local</p>
+                <p className="text-white/80 text-xs mt-0.5">Pick a guide. Be transported. Then book.</p>
+              </div>
+              <ArrowRight size={20} className="text-gold flex-shrink-0" />
+            </div>
+          </button>
+        </div>
+
+        {/* Avatar Concierge Hero Card */}
+        <div className="mt-3">
           <button
             onClick={() => navigate('/avatar')}
             className="w-full p-5 bg-white rounded-3xl border border-gold/30 shadow-xl text-left relative overflow-hidden group active:scale-[0.99] transition-all"
