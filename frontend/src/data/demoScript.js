@@ -28,6 +28,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Welcome',
     image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&h=1000&fit=crop',
+    video: 'https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4',
     pause: 200,
   },
   {
@@ -38,7 +39,7 @@ export const PATAGONIA_DEMO = [
       color: 'from-indigo-500 to-purple-600',
       voiceRate: 0.95, voicePitch: 1.0, accent: 'warm',
     },
-    text: "Hey Marco. Where to next?",
+    text: "Hey Marco. Welcome back. So — last time we talked, you were saying Patagonia was on your mind. Still thinking about it?",
     mood: 'warm',
     pause: 400,
   },
@@ -48,16 +49,16 @@ export const PATAGONIA_DEMO = [
   // ============================================================
   {
     type: 'user',
-    text: "I want to hike Patagonia. I've been planning this for years and honestly, I keep getting stuck.",
+    text: "Yeah. I've been planning this for years and I keep getting stuck. I don't even know where to start.",
     pause: 400,
   },
 
   // ============================================================
-  // ARIA HANDS OFF — MATTER OF FACT (6s)
+  // ARIA HANDS OFF — REFERENCES MARCO'S PROFILE (8s)
   // ============================================================
   {
     type: 'avatar',
-    text: "Yeah, that part's the worst. Let me bring in Valentina — she lives down there, she's done Fitz Roy a bunch of times. She's better than any blog.",
+    text: "Okay. Given your Kilimanjaro trip last February, I think you'll actually love this. Let me bring in Valentina — she lives in Buenos Aires, she's helped a few of our travelers do Fitz Roy. She'll know what fits you.",
     mood: 'warm',
     pause: 300,
   },
@@ -80,13 +81,14 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Buenos Aires · Palermo',
     image: 'https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1600&h=1000&fit=crop',
+    video: 'https://videos.pexels.com/video-files/2034115/2034115-hd_1920_1080_30fps.mp4',
     dayLabel: 'Day 1 — Buenos Aires',
     dayNumber: 1,
     pause: 400,
   },
   {
     type: 'avatar',
-    text: "Hey Marco. Patagonia's a great choice. Let's keep this simple — I'll build the trip, you tell me when something doesn't fit.",
+    text: "Hey Marco. Aria filled me in. Patagonia's a great choice — and honestly, since you've already done Kilimanjaro, you're more than ready for this. Let's keep it simple. I'll build the trip, you tell me when something doesn't fit.",
     mood: 'warm',
     pause: 400,
   },
@@ -131,6 +133,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'El Chaltén · Patagonia',
     image: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=1600&h=1000&fit=crop',
+    video: 'https://videos.pexels.com/video-files/1409899/1409899-hd_1920_1080_25fps.mp4',
     dayLabel: 'Day 3 — El Chaltén',
     dayNumber: 3,
     pause: 400,
@@ -162,13 +165,14 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Laguna de los Tres at sunrise',
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=1000&fit=crop',
+    video: 'https://videos.pexels.com/video-files/2098989/2098989-hd_1920_1080_30fps.mp4',
     dayLabel: 'Day 4 — Sunrise on Fitz Roy',
     dayNumber: 4,
     pause: 400,
   },
   {
     type: 'avatar',
-    text: "Day four. You start at four-thirty in the morning with my friend Lucas — he's been guiding the Laguna de los Tres trail for twelve years. You'll catch sunrise on Fitz Roy. People come from all over the world for that view, and most of them are actually awake when it happens, which helps.",
+    text: "Day four is the big one. You start at four-thirty in the morning with Lucas — he's our local guide. You'll catch sunrise on Fitz Roy. People come from all over the world for that view, and most of them are actually awake when it happens, which helps.",
     mood: 'warm',
     cartItems: [
       { type: 'fixer', name: 'Lucas — Mountain Guide', location: 'El Chaltén', price: '$180', detail: 'Full day Fitz Roy sunrise route', day: 4 },
@@ -207,6 +211,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Cavas Wine Lodge · Mendoza',
     image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
+    video: 'https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4',
     dayLabel: 'Day 8 — Mendoza',
     dayNumber: 8,
     pause: 400,

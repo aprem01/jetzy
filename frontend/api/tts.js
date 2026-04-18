@@ -36,11 +36,12 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         text: safeText,
-        model_id: modelId || 'eleven_turbo_v2_5',
+        // multilingual_v2 sounds significantly more human than turbo
+        model_id: modelId || 'eleven_multilingual_v2',
         voice_settings: {
-          stability: stability ?? 0.5,
-          similarity_boost: similarity ?? 0.75,
-          style: style ?? 0.3,
+          stability: stability ?? 0.45,
+          similarity_boost: similarity ?? 0.85,
+          style: style ?? 0.35,
           use_speaker_boost: speakerBoost ?? true,
         },
       }),

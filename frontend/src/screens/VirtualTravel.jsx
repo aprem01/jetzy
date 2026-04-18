@@ -6,7 +6,7 @@ import {
   ArrowLeft, Mic, MicOff, Sparkles, Volume2, VolumeX, MapPin, X,
   Pause, Play, ShoppingBag, Plus, Hotel, Plane, Mountain, Utensils,
   Users as UsersIcon, Bus, Trash2, PlayCircle, Subtitles, Captions,
-  MessageSquare, MessageSquareOff
+  MessageSquare, MessageSquareOff, Video, VideoOff
 } from 'lucide-react';
 import { PATAGONIA_DEMO } from '../data/demoScript';
 import { VOICES, voiceForPersona, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
@@ -65,6 +65,13 @@ export default function VirtualTravel() {
   const [autoListen, setAutoListen] = useState(true);
   const [muted, setMuted] = useState(false);
   const [bgImage, setBgImage] = useState(HOME_BG);
+  const [bgVideo, setBgVideo] = useState(null);
+  const [videoOn, setVideoOn] = useState(() => {
+    try { return localStorage.getItem('jetzy_video_bg') !== 'off'; } catch { return true; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem('jetzy_video_bg', videoOn ? 'on' : 'off'); } catch {}
+  }, [videoOn]);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [interimText, setInterimText] = useState('');
   const [transporting, setTransporting] = useState(false);
@@ -531,6 +538,7 @@ export default function VirtualTravel() {
     setAutoListen(false);
     setMuted(false);
     setBgImage(HOME_BG);
+    setBgVideo(null);
     setCurrentLocation(null);
     setSceneLabel(null);
     setMissionOverlay(null);
@@ -580,6 +588,7 @@ export default function VirtualTravel() {
       else if (step.type === 'background') {
         setTransporting(true);
         setBgImage(step.image);
+        setBgVideo(step.video || null);
         setCurrentLocation(step.location);
         if (step.dayLabel) {
           setSceneLabel({ dayLabel: step.dayLabel, dayNumber: step.dayNumber, location: step.location });
@@ -868,14 +877,29 @@ export default function VirtualTravel() {
   // === LIVE CONVERSATION VIEW ===
   return (
     <div className="h-screen flex flex-col relative overflow-hidden bg-charcoal">
-      {/* Cinematic background */}
+      {/* Cinematic background — video preferred, image as poster/fallback */}
       <div className="absolute inset-0">
-        <img
-          key={bgImage}
-          src={bgImage}
-          alt=""
-          className={`w-full h-full object-cover transition-all duration-[1500ms] ${transporting ? 'scale-110 blur-md opacity-60' : 'scale-100 blur-0 opacity-100 animate-fade-in'}`}
-        />
+        {videoOn && bgVideo ? (
+          <video
+            key={bgVideo}
+            src={bgVideo}
+            poster={bgImage}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            className={`w-full h-full object-cover transition-all duration-[1500ms] ${transporting ? 'scale-110 blur-md opacity-60' : 'scale-100 blur-0 opacity-100 animate-fade-in'}`}
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        ) : (
+          <img
+            key={bgImage}
+            src={bgImage}
+            alt=""
+            className={`w-full h-full object-cover transition-all duration-[1500ms] ${transporting ? 'scale-110 blur-md opacity-60' : 'scale-100 blur-0 opacity-100 animate-fade-in'}`}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/30" />
       </div>
 
@@ -1007,6 +1031,15 @@ export default function VirtualTravel() {
           {messagesOn
             ? <MessageSquare size={14} className="text-white" />
             : <MessageSquareOff size={14} className="text-white/60" />}
+        </button>
+
+        {/* Video background toggle */}
+        <button onClick={() => setVideoOn(v => !v)}
+          className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${videoOn ? 'bg-gold' : 'bg-black/40'}`}
+          aria-label="Toggle video background">
+          {videoOn
+            ? <Video size={14} className="text-white" />
+            : <VideoOff size={14} className="text-white/60" />}
         </button>
 
         {/* CC / Captions toggle */}

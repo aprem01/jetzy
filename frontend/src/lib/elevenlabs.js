@@ -3,74 +3,64 @@
  * All voice IDs verified working on the free tier.
  */
 
-// Best-pick voices for the demo
+// All voices use eleven_multilingual_v2 for more natural human sound
+// Settings tuned for warmth, conversational delivery (lower stability =
+// more emotion, higher similarity = closer to original voice).
+
 export const VOICE_MARCO = {
-  id: 'nPczCjzI2devNBz1zQrb', // Brian — deep American male, conversational
+  id: 'nPczCjzI2devNBz1zQrb', // Brian — warm American male, conversational
   name: 'Brian',
-  settings: { stability: 0.5, similarity: 0.85, style: 0.4, speakerBoost: true },
+  settings: { stability: 0.4, similarity: 0.9, style: 0.4, speakerBoost: true },
 };
 
 export const VOICE_AVATAR_DEFAULT = {
   id: 'EXAVITQu4vr4xnSDxMaL', // Sarah — warm American female
   name: 'Sarah',
-  settings: { stability: 0.5, similarity: 0.85, style: 0.45, speakerBoost: true },
+  settings: { stability: 0.4, similarity: 0.88, style: 0.45, speakerBoost: true },
 };
 
 export const VOICES = {
-  // === USER ===
   marco: VOICE_MARCO,
-
-  // === AVATAR PERSONAS — all free tier voices ===
-  default: VOICE_AVATAR_DEFAULT, // Sarah
+  default: VOICE_AVATAR_DEFAULT,
   india: {
-    id: 'XrExE9yKIg1WjnnlVkGX', // Matilda — warm female
-    name: 'Matilda',
-    settings: { stability: 0.55, similarity: 0.85, style: 0.5, speakerBoost: true },
+    id: 'XrExE9yKIg1WjnnlVkGX', name: 'Matilda',
+    settings: { stability: 0.45, similarity: 0.88, style: 0.5, speakerBoost: true },
   },
   pakistan: {
-    id: 'XrExE9yKIg1WjnnlVkGX', // Matilda
-    name: 'Matilda',
-    settings: { stability: 0.55, similarity: 0.85, style: 0.45, speakerBoost: true },
+    id: 'XrExE9yKIg1WjnnlVkGX', name: 'Matilda',
+    settings: { stability: 0.45, similarity: 0.88, style: 0.45, speakerBoost: true },
   },
   latam: {
-    id: 'cgSgspJ2msm6clMCkdW9', // Jessica — confident expressive female
-    name: 'Jessica',
-    settings: { stability: 0.42, similarity: 0.85, style: 0.65, speakerBoost: true },
+    id: 'cgSgspJ2msm6clMCkdW9', name: 'Jessica',
+    settings: { stability: 0.4, similarity: 0.88, style: 0.55, speakerBoost: true },
   },
   east_asia: {
-    id: 'pFZP5JQG7iQjIQuC4Bku', // Lily — soft female
-    name: 'Lily',
-    settings: { stability: 0.65, similarity: 0.8, style: 0.25, speakerBoost: true },
+    id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily',
+    settings: { stability: 0.55, similarity: 0.85, style: 0.3, speakerBoost: true },
   },
   southeast_asia: {
-    id: 'pFZP5JQG7iQjIQuC4Bku', // Lily
-    name: 'Lily',
-    settings: { stability: 0.55, similarity: 0.8, style: 0.35, speakerBoost: true },
-  },
-  africa: {
-    id: 'cgSgspJ2msm6clMCkdW9', // Jessica — confident female
-    name: 'Jessica',
+    id: 'pFZP5JQG7iQjIQuC4Bku', name: 'Lily',
     settings: { stability: 0.5, similarity: 0.85, style: 0.4, speakerBoost: true },
   },
+  africa: {
+    id: 'cgSgspJ2msm6clMCkdW9', name: 'Jessica',
+    settings: { stability: 0.45, similarity: 0.88, style: 0.4, speakerBoost: true },
+  },
   middle_east: {
-    id: 'FGY2WhTYpPnrIDTdsKH5', // Laura — sophisticated female
-    name: 'Laura',
-    settings: { stability: 0.55, similarity: 0.85, style: 0.45, speakerBoost: true },
+    id: 'FGY2WhTYpPnrIDTdsKH5', name: 'Laura',
+    settings: { stability: 0.45, similarity: 0.88, style: 0.45, speakerBoost: true },
   },
   europe: {
-    id: 'FGY2WhTYpPnrIDTdsKH5', // Laura
-    name: 'Laura',
-    settings: { stability: 0.55, similarity: 0.85, style: 0.4, speakerBoost: true },
+    id: 'FGY2WhTYpPnrIDTdsKH5', name: 'Laura',
+    settings: { stability: 0.45, similarity: 0.88, style: 0.4, speakerBoost: true },
   },
   oceania: {
-    id: 'IKne3meq5aSn9XLyUdCD', // Charlie — relaxed Australian-ish male
-    name: 'Charlie',
-    settings: { stability: 0.5, similarity: 0.8, style: 0.35, speakerBoost: true },
+    id: 'IKne3meq5aSn9XLyUdCD', name: 'Charlie',
+    settings: { stability: 0.45, similarity: 0.85, style: 0.4, speakerBoost: true },
   },
   north_america: {
-    id: 'JBFqnCBsd6RMkjVDRZzb', // George — sharp male
-    name: 'George',
-    settings: { stability: 0.45, similarity: 0.85, style: 0.45, speakerBoost: true },
+    id: 'JBFqnCBsd6RMkjVDRZzb', name: 'George',
+    settings: { stability: 0.4, similarity: 0.88, style: 0.45, speakerBoost: true },
   },
 };
 
