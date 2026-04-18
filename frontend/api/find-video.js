@@ -59,51 +59,49 @@ function pickBestVideoFile(videoFiles) {
 
 export default async function handler(req, res) {
   const query = req.query.q || req.body?.query;
+  const n = Math.min(Math.max(parseInt(req.query.n || '1', 10) || 1, 1), 8);
   if (!query) return res.status(400).json({ error: 'q (query) required' });
 
   const apiKey = process.env.PEXELS_API_KEY;
 
   // No API key — return curated fallback immediately
   if (!apiKey) {
+    const url = pickFallback(query);
     res.setHeader('Cache-Control', 's-maxage=86400');
     return res.status(200).json({
-      url: pickFallback(query),
-      query,
-      source: 'fallback-no-api-key',
+      url, urls: [url], query, source: 'fallback-no-api-key',
     });
   }
 
   try {
-    const url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=8&orientation=landscape&size=medium`;
+    const perPage = Math.max(n, 8);
+    const url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&per_page=${perPage}&orientation=landscape&size=medium`;
     const r = await fetch(url, { headers: { Authorization: apiKey } });
     if (!r.ok) {
       const detail = await r.text();
+      const u = pickFallback(query);
       return res.status(200).json({
-        url: pickFallback(query),
-        query,
-        source: 'fallback-api-error',
-        detail,
+        url: u, urls: [u], query, source: 'fallback-api-error', detail,
       });
     }
     const data = await r.json();
-    const first = data.videos?.[0];
-    const videoUrl = pickBestVideoFile(first?.video_files);
+    const videos = (data.videos || []).slice(0, n);
+    const urls = videos.map(v => pickBestVideoFile(v.video_files)).filter(Boolean);
+    const photographers = videos.map(v => v.user?.name).filter(Boolean);
 
     res.setHeader('Cache-Control', 's-maxage=86400, stale-while-revalidate');
     return res.status(200).json({
-      url: videoUrl || pickFallback(query),
+      url: urls[0] || pickFallback(query),
+      urls: urls.length ? urls : [pickFallback(query)],
       query,
-      source: videoUrl ? 'pexels' : 'fallback-no-results',
-      photographer: first?.user?.name || null,
-      photographer_url: first?.user?.url || null,
-      preview_image: first?.image || null,
+      source: urls.length ? 'pexels' : 'fallback-no-results',
+      photographer: photographers[0] || null,
+      photographers,
     });
   } catch (e) {
+    const u = pickFallback(query);
     return res.status(200).json({
-      url: pickFallback(query),
-      query,
-      source: 'fallback-exception',
-      error: e.message,
+      url: u, urls: [u], query, source: 'fallback-exception', error: e.message,
     });
   }
 }

@@ -116,6 +116,7 @@ export default function VirtualTravel() {
   const personaRef = useRef(DEFAULT_PERSONA);
   const elevenAudioRef = useRef(null);
   const videoCacheRef = useRef(new Map()); // query → resolved video URL
+  const sceneRotationRef = useRef(null); // setInterval id for in-scene video rotation
 
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
   useEffect(() => { autoListenRef.current = autoListen; }, [autoListen]);
@@ -341,6 +342,10 @@ export default function VirtualTravel() {
     if (captionTypewriterRef.current) {
       clearInterval(captionTypewriterRef.current);
       captionTypewriterRef.current = null;
+    }
+    if (sceneRotationRef.current) {
+      clearInterval(sceneRotationRef.current);
+      sceneRotationRef.current = null;
     }
     stopEleven(elevenAudioRef);
     window.speechSynthesis?.cancel();
@@ -587,6 +592,12 @@ export default function VirtualTravel() {
       }
 
       else if (step.type === 'background') {
+        // Stop any prior in-scene rotation
+        if (sceneRotationRef.current) {
+          clearInterval(sceneRotationRef.current);
+          sceneRotationRef.current = null;
+        }
+
         setTransporting(true);
         setBgImage(step.image);
         setCurrentLocation(step.location);
@@ -594,37 +605,79 @@ export default function VirtualTravel() {
           setSceneLabel({ dayLabel: step.dayLabel, dayNumber: step.dayNumber, location: step.location });
         }
 
-        // Resolve video URL: prefer explicit `video`, otherwise fetch by `query`
-        let resolvedVideo = step.video || null;
-        if (!resolvedVideo && step.query) {
-          try {
-            const cached = videoCacheRef.current.get(step.query);
-            if (cached) {
-              resolvedVideo = cached;
-            } else {
-              const r = await fetch(`/api/find-video?q=${encodeURIComponent(step.query)}`);
+        // Resolve to a list of video URLs for this scene
+        // Priority: explicit `videos` array > explicit `video` > queries[] > query
+        let videoUrls = [];
+
+        if (Array.isArray(step.videos) && step.videos.length) {
+          videoUrls = step.videos;
+        } else if (step.video) {
+          videoUrls = [step.video];
+        } else if (Array.isArray(step.queries) && step.queries.length) {
+          // Fetch all queries in parallel — each becomes one video in the rotation
+          const results = await Promise.all(
+            step.queries.map(async (q) => {
+              const cached = videoCacheRef.current.get(q);
+              if (cached) return cached;
+              try {
+                const r = await fetch(`/api/find-video?q=${encodeURIComponent(q)}`);
+                const data = await r.json();
+                if (data?.url) {
+                  videoCacheRef.current.set(q, data.url);
+                  return data.url;
+                }
+              } catch {}
+              return null;
+            })
+          );
+          videoUrls = results.filter(Boolean);
+        } else if (step.query) {
+          const cached = videoCacheRef.current.get(step.query);
+          if (cached) {
+            videoUrls = [cached];
+          } else {
+            try {
+              const r = await fetch(`/api/find-video?q=${encodeURIComponent(step.query)}&n=3`);
               const data = await r.json();
-              if (data?.url) {
-                resolvedVideo = data.url;
-                videoCacheRef.current.set(step.query, resolvedVideo);
+              if (data?.urls?.length) {
+                videoUrls = data.urls;
+                videoCacheRef.current.set(step.query, data.urls[0]);
+              } else if (data?.url) {
+                videoUrls = [data.url];
+                videoCacheRef.current.set(step.query, data.url);
               }
-            }
-          } catch (e) {
-            console.warn('find-video failed:', e.message);
+            } catch {}
           }
         }
-        setBgVideo(resolvedVideo);
 
-        // Fire-and-forget pre-fetch of upcoming background queries (next 3)
+        // Set the first video immediately
+        if (videoUrls.length > 0) {
+          setBgVideo(videoUrls[0]);
+        } else {
+          setBgVideo(null);
+        }
+
+        // If multiple videos, start a rotation interval that cycles every 6.5s
+        if (videoUrls.length > 1) {
+          let idx = 0;
+          sceneRotationRef.current = setInterval(() => {
+            idx = (idx + 1) % videoUrls.length;
+            setBgVideo(videoUrls[idx]);
+          }, 6500);
+        }
+
+        // Fire-and-forget pre-fetch of upcoming scenes' first queries
         try {
           const upcoming = PATAGONIA_DEMO
             .slice(PATAGONIA_DEMO.indexOf(step) + 1)
-            .filter(s => s.type === 'background' && s.query && !videoCacheRef.current.has(s.query))
-            .slice(0, 3);
+            .filter(s => s.type === 'background' && (s.query || (Array.isArray(s.queries) && s.queries.length)))
+            .slice(0, 2);
           upcoming.forEach(s => {
-            fetch(`/api/find-video?q=${encodeURIComponent(s.query)}`)
+            const q = s.query || s.queries[0];
+            if (videoCacheRef.current.has(q)) return;
+            fetch(`/api/find-video?q=${encodeURIComponent(q)}`)
               .then(r => r.json())
-              .then(d => { if (d?.url) videoCacheRef.current.set(s.query, d.url); })
+              .then(d => { if (d?.url) videoCacheRef.current.set(q, d.url); })
               .catch(() => {});
           });
         } catch {}
