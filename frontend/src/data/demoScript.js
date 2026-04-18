@@ -1,12 +1,16 @@
 // JETZY · 3-Minute Investor Demo Script
 //
-// Tone: confident, human, light. 85% clarity + trust, 15% personality.
-// No theatrics. No "mi amor". Real conversation a real person would have.
-// People buy confidence, not charm.
+// Each background step uses a `query` field — at runtime the app calls
+// /api/find-video?q=<query> to fetch the best matching Pexels video.
+// Falls back to a curated map if no PEXELS_API_KEY is set.
+//
+// Architecture: every time the conversation shifts to a new topic
+// (steakhouse, sunrise, vineyard, hiking trail), the background shifts
+// to a video that actually depicts that topic. Real virtual travel.
 
 export const PATAGONIA_DEMO = [
   // ============================================================
-  // OPENING — clear value props (~9s)
+  // OPENING — clear value props
   // ============================================================
   {
     type: 'mission',
@@ -22,13 +26,13 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // SCENE 1 — ARIA OPENS, NO FLUFF (8s)
+  // SCENE 1 — ARIA OPENS
   // ============================================================
   {
     type: 'background',
     location: 'Welcome',
+    query: 'aerial travel earth clouds',
     image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/3576378/3576378-hd_1920_1080_25fps.mp4',
     pause: 200,
   },
   {
@@ -45,7 +49,7 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // MARCO — REAL PROBLEM (8s)
+  // MARCO — REAL PROBLEM
   // ============================================================
   {
     type: 'user',
@@ -54,7 +58,7 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // ARIA HANDS OFF — REFERENCES MARCO'S PROFILE (8s)
+  // ARIA HANDS OFF
   // ============================================================
   {
     type: 'avatar',
@@ -64,7 +68,7 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // SCENE 2 — VALENTINA, BUENOS AIRES (12s)
+  // SCENE 2 — VALENTINA APPEARS, BUENOS AIRES STREETS
   // ============================================================
   {
     type: 'morph',
@@ -79,9 +83,9 @@ export const PATAGONIA_DEMO = [
   },
   {
     type: 'background',
-    location: 'Buenos Aires · Palermo',
+    location: 'Buenos Aires',
+    query: 'Buenos Aires city street aerial',
     image: 'https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/856975/856975-hd_1920_1080_25fps.mp4',
     dayLabel: 'Day 1 — Buenos Aires',
     dayNumber: 1,
     pause: 400,
@@ -94,7 +98,7 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // MARCO AGREES (4s)
+  // MARCO AGREES
   // ============================================================
   {
     type: 'user',
@@ -103,8 +107,17 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // VALENTINA BUILDS BUENOS AIRES (15s)
+  // SCENE 3 — DON JULIO STEAKHOUSE
   // ============================================================
+  {
+    type: 'background',
+    location: 'Don Julio · Palermo',
+    query: 'argentine steak grill restaurant asado',
+    image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 1 — Don Julio',
+    dayNumber: 1,
+    pause: 400,
+  },
   {
     type: 'avatar',
     text: "Day one — fly into Buenos Aires. One night to recover. Eat at Don Julio in Palermo. The entraña is worth it. Then we head south.",
@@ -118,7 +131,7 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // MARCO ASKS ABOUT THE HIKE (4s)
+  // MARCO ASKS ABOUT THE HIKE
   // ============================================================
   {
     type: 'user',
@@ -127,30 +140,51 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // SCENE 3 — EL CHALTÉN (12s)
+  // SCENE 4 — FLYING SOUTH OVER PATAGONIA
   // ============================================================
   {
     type: 'background',
-    location: 'El Chaltén · Patagonia',
-    image: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/2611250/2611250-hd_1920_1080_30fps.mp4',
-    dayLabel: 'Day 3 — El Chaltén',
+    location: 'Patagonian Steppe',
+    query: 'Patagonia steppe aerial mountains landscape',
+    image: 'https://images.unsplash.com/photo-1493780474015-ba834fd0ce2f?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 3 — Flying south',
     dayNumber: 3,
     pause: 400,
   },
   {
     type: 'avatar',
-    text: "Day three you fly to El Calafate, then a bus into El Chaltén. I'd put you at Senderos Hostería — small place, climbers stay there, you'll meet people.",
+    text: "Day three you fly to El Calafate, then a bus into El Chaltén.",
     mood: 'warm',
     cartItems: [
       { type: 'flight', name: 'Aerolíneas EZE → FTE', location: 'El Calafate', price: '$185', detail: '3hr scenic flight south', day: 3 },
+    ],
+    pause: 400,
+  },
+
+  // ============================================================
+  // SCENE 5 — EL CHALTÉN VILLAGE / LODGE
+  // ============================================================
+  {
+    type: 'background',
+    location: 'El Chaltén',
+    query: 'mountain village wooden lodge cabin Patagonia',
+    image: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 3 — Senderos Hostería',
+    dayNumber: 3,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "I'd put you at Senderos Hostería — small place, climbers stay there, you'll meet people right away.",
+    mood: 'warm',
+    cartItems: [
       { type: 'hotel', name: 'Senderos Hostería', location: 'El Chaltén', price: '$480', detail: '4 nights, mountain view, breakfast', day: 3 },
     ],
     pause: 500,
   },
 
   // ============================================================
-  // MARCO ASKS ABOUT FITZ ROY (3s)
+  // MARCO ASKS ABOUT FITZ ROY
   // ============================================================
   {
     type: 'user',
@@ -159,29 +193,48 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // SCENE 4 — THE SUNRISE (the heart, 18s)
+  // SCENE 6 — HIKING TRAIL AT DAWN
+  // ============================================================
+  {
+    type: 'background',
+    location: 'On the trail · Dawn',
+    query: 'hiker headlamp mountain trail dark dawn',
+    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 4 — On the trail',
+    dayNumber: 4,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "Day four is the big one. You start at four-thirty in the morning with Lucas — he's our local guide.",
+    mood: 'warm',
+    cartItems: [
+      { type: 'fixer', name: 'Lucas — Mountain Guide', location: 'El Chaltén', price: '$180', detail: 'Full day Fitz Roy sunrise route', day: 4 },
+    ],
+    pause: 400,
+  },
+
+  // ============================================================
+  // SCENE 7 — FITZ ROY SUNRISE (the heart of the demo)
   // ============================================================
   {
     type: 'background',
     location: 'Laguna de los Tres at sunrise',
+    query: 'Fitz Roy mountain sunrise alpenglow snow peak',
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/2421545/2421545-hd_1920_1080_30fps.mp4',
     dayLabel: 'Day 4 — Sunrise on Fitz Roy',
     dayNumber: 4,
     pause: 400,
   },
   {
     type: 'avatar',
-    text: "Day four is the big one. You start at four-thirty in the morning with Lucas — he's our local guide. You'll catch sunrise on Fitz Roy. People come from all over the world for that view, and most of them are actually awake when it happens, which helps.",
+    text: "You'll catch sunrise on Fitz Roy. People come from all over the world for that view, and most of them are actually awake when it happens, which helps.",
     mood: 'warm',
-    cartItems: [
-      { type: 'fixer', name: 'Lucas — Mountain Guide', location: 'El Chaltén', price: '$180', detail: 'Full day Fitz Roy sunrise route', day: 4 },
-    ],
     pause: 800,
   },
 
   // ============================================================
-  // MARCO QUIET (4s)
+  // MARCO QUIET
   // ============================================================
   {
     type: 'user',
@@ -190,8 +243,15 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // THE COMMUNITY MOMENT — THE MOAT (12s)
+  // SCENE 8 — COMMUNITY (hikers together)
   // ============================================================
+  {
+    type: 'background',
+    location: 'On the trail · Together',
+    query: 'group hikers backpack mountain trail friends',
+    image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1600&h=1000&fit=crop',
+    pause: 300,
+  },
   {
     type: 'avatar',
     text: "Yeah. It lives up to it. Three other Jetzy travelers are on that trail next week — Aisha, James, Sofia. Want me to introduce you? It's easier than figuring it out alone.",
@@ -205,30 +265,49 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // SCENE 5 — MENDOZA (10s)
+  // SCENE 9 — MENDOZA VINEYARDS
   // ============================================================
   {
     type: 'background',
-    location: 'Cavas Wine Lodge · Mendoza',
+    location: 'Mendoza Vineyards',
+    query: 'vineyard rows mountains Mendoza wine country',
     image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/4763824/4763824-hd_1920_1080_24fps.mp4',
     dayLabel: 'Day 8 — Mendoza',
     dayNumber: 8,
     pause: 400,
   },
   {
     type: 'avatar',
-    text: "After the trek you'll be wrecked, so we wind down in Mendoza. One night at Cavas Wine Lodge — plunge pool, tasting at Catena Zapata. Soft landing.",
+    text: "After the trek you'll be wrecked, so we wind down in Mendoza. One night at Cavas Wine Lodge — plunge pool, Andes in your window.",
     mood: 'warm',
     cartItems: [
-      { type: 'hotel', name: 'Cavas Wine Lodge', location: 'Mendoza', price: '$340', detail: '1 night, private bungalow + tasting', day: 8 },
+      { type: 'hotel', name: 'Cavas Wine Lodge', location: 'Mendoza', price: '$340', detail: '1 night, private bungalow', day: 8 },
+    ],
+    pause: 400,
+  },
+
+  // ============================================================
+  // SCENE 10 — WINE TASTING / POUR
+  // ============================================================
+  {
+    type: 'background',
+    location: 'Catena Zapata · Tasting',
+    query: 'red wine pour glass tasting cellar',
+    image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
+    pause: 300,
+  },
+  {
+    type: 'avatar',
+    text: "Tasting at Catena Zapata at sunset. Soft landing. Then home.",
+    mood: 'warm',
+    cartItems: [
       { type: 'experience', name: 'Catena Zapata Tasting', location: 'Mendoza', price: '$85/person', detail: 'Cellar tour + 6 wines', day: 8 },
     ],
     pause: 500,
   },
 
   // ============================================================
-  // CLOSING — VALENTINA WRAPS (8s)
+  // CLOSING — VALENTINA WRAPS
   // ============================================================
   {
     type: 'avatar',
@@ -238,7 +317,7 @@ export const PATAGONIA_DEMO = [
   },
 
   // ============================================================
-  // FINAL MISSION OVERLAY (3.5s)
+  // FINAL MISSION OVERLAY
   // ============================================================
   {
     type: 'mission',

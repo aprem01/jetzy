@@ -115,6 +115,7 @@ export default function VirtualTravel() {
   const messagesRef = useRef([]);
   const personaRef = useRef(DEFAULT_PERSONA);
   const elevenAudioRef = useRef(null);
+  const videoCacheRef = useRef(new Map()); // query → resolved video URL
 
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
   useEffect(() => { autoListenRef.current = autoListen; }, [autoListen]);
@@ -588,11 +589,46 @@ export default function VirtualTravel() {
       else if (step.type === 'background') {
         setTransporting(true);
         setBgImage(step.image);
-        setBgVideo(step.video || null);
         setCurrentLocation(step.location);
         if (step.dayLabel) {
           setSceneLabel({ dayLabel: step.dayLabel, dayNumber: step.dayNumber, location: step.location });
         }
+
+        // Resolve video URL: prefer explicit `video`, otherwise fetch by `query`
+        let resolvedVideo = step.video || null;
+        if (!resolvedVideo && step.query) {
+          try {
+            const cached = videoCacheRef.current.get(step.query);
+            if (cached) {
+              resolvedVideo = cached;
+            } else {
+              const r = await fetch(`/api/find-video?q=${encodeURIComponent(step.query)}`);
+              const data = await r.json();
+              if (data?.url) {
+                resolvedVideo = data.url;
+                videoCacheRef.current.set(step.query, resolvedVideo);
+              }
+            }
+          } catch (e) {
+            console.warn('find-video failed:', e.message);
+          }
+        }
+        setBgVideo(resolvedVideo);
+
+        // Fire-and-forget pre-fetch of upcoming background queries (next 3)
+        try {
+          const upcoming = PATAGONIA_DEMO
+            .slice(PATAGONIA_DEMO.indexOf(step) + 1)
+            .filter(s => s.type === 'background' && s.query && !videoCacheRef.current.has(s.query))
+            .slice(0, 3);
+          upcoming.forEach(s => {
+            fetch(`/api/find-video?q=${encodeURIComponent(s.query)}`)
+              .then(r => r.json())
+              .then(d => { if (d?.url) videoCacheRef.current.set(s.query, d.url); })
+              .catch(() => {});
+          });
+        } catch {}
+
         await sleep(1200);
         setTransporting(false);
       }
