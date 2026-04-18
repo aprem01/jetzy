@@ -33,9 +33,9 @@ export const VOICES = {
     settings: { stability: 0.55, similarity: 0.85, style: 0.45, speakerBoost: true },
   },
   latam: {
-    id: 'ErXwobaYiN019PkySvjV', // Antoni — warm male, lightly accented
-    name: 'Antoni',
-    settings: { stability: 0.4, similarity: 0.85, style: 0.65, speakerBoost: true },
+    id: 'cgSgspJ2msm6clMCkdW9', // Jessica — confident expressive female
+    name: 'Jessica',
+    settings: { stability: 0.42, similarity: 0.85, style: 0.65, speakerBoost: true },
   },
   east_asia: {
     id: 'pFZP5JQG7iQjIQuC4Bku', // Lily — soft female
