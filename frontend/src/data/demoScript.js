@@ -31,7 +31,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Welcome',
-    queries: ['tropical beach palm trees vacation', 'turquoise ocean island paradise', 'maldives overwater bungalow drone'],
+    queries: ['Mount Kilimanjaro Tanzania', 'Serengeti national park safari'],
     image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&h=1000&fit=crop',
     pause: 200,
   },
@@ -84,7 +84,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Buenos Aires',
-    queries: ['Buenos Aires Argentina', 'Buenos Aires obelisco', 'Buenos Aires Palermo street', 'Argentina city aerial'],
+    queries: ['Buenos Aires Argentina', 'Buenos Aires obelisco aerial'],
     image: 'https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 1 — Buenos Aires',
     dayNumber: 1,
@@ -112,7 +112,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Don Julio · Palermo',
-    queries: ['argentine asado grill', 'steak being cooked grill', 'argentine restaurant interior dim', 'red wine pour glass restaurant'],
+    queries: ['argentine asado grill', 'steak being cooked slow grill'],
     image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 1 — Don Julio',
     dayNumber: 1,
@@ -145,7 +145,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Patagonian Steppe',
-    queries: ['Patagonia landscape', 'plane window mountain view', 'Patagonia road empty steppe'],
+    queries: ['Patagonia landscape aerial', 'plane window mountain view'],
     image: 'https://images.unsplash.com/photo-1493780474015-ba834fd0ce2f?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 3 — Flying south',
     dayNumber: 3,
@@ -167,7 +167,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'El Chaltén',
-    queries: ['El Chalten Argentina', 'mountain village wooden lodge', 'Patagonia hostel hikers'],
+    queries: ['El Chalten Argentina', 'mountain village wooden lodge'],
     image: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 3 — Senderos Hostería',
     dayNumber: 3,
@@ -198,7 +198,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'On the trail · Dawn',
-    queries: ['hiker headlamp dawn dark', 'hiking boots trail rocks', 'mountain trail morning light'],
+    queries: ['hiker headlamp dawn dark trail', 'mountain trail morning light'],
     image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 4 — On the trail',
     dayNumber: 4,
@@ -220,7 +220,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Laguna de los Tres at sunrise',
-    queries: ['Fitz Roy sunrise alpenglow', 'Patagonia mountain golden light', 'snow peak dawn pink', 'mountain reflection lake sunrise'],
+    queries: ['Fitz Roy sunrise alpenglow', 'snow peak dawn pink alpenglow'],
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 4 — Sunrise on Fitz Roy',
     dayNumber: 4,
@@ -248,7 +248,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'On the trail · Together',
-    queries: ['hikers group friends mountain', 'travelers backpack adventure', 'campfire mountain friends'],
+    queries: ['hikers group friends mountain', 'travelers backpack adventure trail'],
     image: 'https://images.unsplash.com/photo-1551632811-561732d1e306?w=1600&h=1000&fit=crop',
     pause: 300,
   },
@@ -270,7 +270,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Mendoza Vineyards',
-    queries: ['Mendoza vineyard Andes', 'wine country aerial vineyard rows', 'vineyard sunset Argentina', 'malbec grapes vine'],
+    queries: ['Mendoza vineyard Andes mountains', 'wine country aerial vineyard rows'],
     image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 8 — Mendoza',
     dayNumber: 8,
@@ -292,7 +292,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Catena Zapata · Tasting',
-    queries: ['red wine pour glass slow motion', 'wine cellar barrels', 'wine swirl glass tasting'],
+    queries: ['red wine pour glass slow motion', 'wine cellar barrels candle'],
     image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
     pause: 300,
   },

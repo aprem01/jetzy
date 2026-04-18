@@ -657,13 +657,13 @@ export default function VirtualTravel() {
           setBgVideo(null);
         }
 
-        // If multiple videos, start a rotation interval that cycles every 6.5s
+        // If multiple videos, rotate every 14s (slow + comfortable)
         if (videoUrls.length > 1) {
           let idx = 0;
           sceneRotationRef.current = setInterval(() => {
             idx = (idx + 1) % videoUrls.length;
             setBgVideo(videoUrls[idx]);
-          }, 6500);
+          }, 14000);
         }
 
         // Fire-and-forget pre-fetch of upcoming scenes' first queries
@@ -966,7 +966,8 @@ export default function VirtualTravel() {
   // === LIVE CONVERSATION VIEW ===
   return (
     <div className="h-screen flex flex-col relative overflow-hidden bg-charcoal">
-      {/* Cinematic background — video preferred, image as poster/fallback */}
+      {/* Cinematic background — video preferred, image as poster/fallback
+          Smooth 1.2s opacity crossfade between video swaps */}
       <div className="absolute inset-0">
         {videoOn && bgVideo ? (
           <video
@@ -978,7 +979,8 @@ export default function VirtualTravel() {
             loop
             playsInline
             preload="auto"
-            className={`w-full h-full object-cover transition-all duration-[1500ms] ${transporting ? 'scale-110 blur-md opacity-60' : 'scale-100 blur-0 opacity-100 animate-fade-in'}`}
+            style={{ transition: 'opacity 1200ms ease-in-out' }}
+            className={`w-full h-full object-cover ${transporting ? 'scale-110 blur-md opacity-60 transition-all duration-[1500ms]' : 'scale-100 blur-0 opacity-100 animate-fade-in'}`}
             onError={(e) => { e.target.style.display = 'none'; }}
           />
         ) : (

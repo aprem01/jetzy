@@ -85,7 +85,11 @@ export default async function handler(req, res) {
       });
     }
     const data = await r.json();
-    const videos = (data.videos || []).slice(0, n);
+    // Prefer videos at least 10 seconds — short clips feel jumpy
+    const allVideos = data.videos || [];
+    const longEnough = allVideos.filter(v => (v.duration || 0) >= 10);
+    const pool = longEnough.length >= n ? longEnough : allVideos;
+    const videos = pool.slice(0, n);
     const urls = videos.map(v => pickBestVideoFile(v.video_files)).filter(Boolean);
     const photographers = videos.map(v => v.user?.name).filter(Boolean);
 
