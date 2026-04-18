@@ -5,8 +5,9 @@ import { SAMPLE_USERS } from '../data/seed';
 import {
   ArrowLeft, Mic, MicOff, Sparkles, Volume2, VolumeX, MapPin, X,
   Pause, Play, ShoppingBag, Plus, Hotel, Plane, Mountain, Utensils,
-  Users as UsersIcon, Bus, Trash2
+  Users as UsersIcon, Bus, Trash2, PlayCircle
 } from 'lucide-react';
+import { PATAGONIA_DEMO } from '../data/demoScript';
 
 const TYPE_ICONS = {
   hotel: Hotel, flight: Plane, experience: Mountain,
@@ -75,6 +76,12 @@ export default function VirtualTravel() {
   const [showCart, setShowCart] = useState(false);
   const [cartPing, setCartPing] = useState(false);
   const [hasResumeSession, setHasResumeSession] = useState(false);
+
+  // Demo mode
+  const [demoMode, setDemoMode] = useState(false);
+  const demoModeRef = useRef(false);
+  const demoTimeoutsRef = useRef([]);
+  useEffect(() => { demoModeRef.current = demoMode; }, [demoMode]);
 
   const recognitionRef = useRef(null);
   const isSpeakingRef = useRef(false);
@@ -278,6 +285,107 @@ export default function VirtualTravel() {
     }, 1100);
   };
 
+  // === Demo runner ===
+  const stopDemo = useCallback(() => {
+    demoModeRef.current = false;
+    setDemoMode(false);
+    demoTimeoutsRef.current.forEach(t => clearTimeout(t));
+    demoTimeoutsRef.current = [];
+    stopSpeaking();
+  }, [stopSpeaking]);
+
+  const speakNoListen = useCallback((text) => {
+    if (!window.speechSynthesis || muted) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const p = personaRef.current;
+    u.rate = p?.voiceRate || 0.95;
+    u.pitch = p?.voicePitch || 1.0;
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+    if (preferred) u.voice = preferred;
+    u.onstart = () => setIsSpeaking(true);
+    u.onend = () => setIsSpeaking(false);
+    u.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(u);
+  }, [muted]);
+
+  const runDemo = useCallback(() => {
+    // Reset state for clean demo
+    try { localStorage.removeItem(CART_KEY); } catch {}
+    setCart([]);
+    setMessages([]);
+    setHasStarted(true);
+    setAutoListen(false); // disable real mic during demo
+    setMuted(false);
+    setBgImage(HOME_BG);
+    setCurrentLocation(null);
+    setPersona(DEFAULT_PERSONA);
+    personaRef.current = DEFAULT_PERSONA;
+    setDemoMode(true);
+    demoModeRef.current = true;
+    demoTimeoutsRef.current = [];
+
+    let cumulative = 0;
+
+    PATAGONIA_DEMO.forEach((step, i) => {
+      cumulative += step.delay;
+
+      const t = setTimeout(() => {
+        if (!demoModeRef.current) return;
+
+        if (step.type === 'avatar') {
+          // If step includes its own persona (greeting), set it directly
+          if (step.persona) {
+            setPersona(step.persona);
+            personaRef.current = step.persona;
+          }
+          const newMsg = {
+            role: 'assistant',
+            content: step.text,
+            mood: step.mood,
+            addedItems: step.cartItems || [],
+            persona: personaRef.current,
+          };
+          setMessages(prev => [...prev, newMsg]);
+          if (step.cartItems?.length) addToCart(step.cartItems);
+          speakNoListen(step.text);
+        }
+
+        else if (step.type === 'user') {
+          setMessages(prev => [...prev, { role: 'user', content: step.text }]);
+        }
+
+        else if (step.type === 'morph') {
+          morphPersona(step.persona);
+        }
+
+        else if (step.type === 'background') {
+          setTransporting(true);
+          setBgImage(step.image);
+          setCurrentLocation(step.location);
+          setTimeout(() => setTransporting(false), 1200);
+        }
+
+        else if (step.type === 'goto') {
+          stopSpeaking();
+          setDemoMode(false);
+          demoModeRef.current = false;
+          navigate(step.path);
+        }
+      }, cumulative);
+
+      demoTimeoutsRef.current.push(t);
+    });
+  }, [speakNoListen, navigate, stopSpeaking]);
+
+  // Cleanup demo timeouts on unmount
+  useEffect(() => {
+    return () => {
+      demoTimeoutsRef.current.forEach(t => clearTimeout(t));
+    };
+  }, []);
+
   // === Send message ===
   const sendMessage = useCallback(async (text) => {
     if (!text.trim()) return;
@@ -475,10 +583,22 @@ export default function VirtualTravel() {
 
           {/* Big start button */}
           <button onClick={startConversation}
-            className="w-full p-6 gradient-gold rounded-3xl text-white shadow-2xl active:scale-[0.98] transition-transform mb-5">
+            className="w-full p-6 gradient-gold rounded-3xl text-white shadow-2xl active:scale-[0.98] transition-transform mb-3">
             <Mic size={32} className="mx-auto mb-2" />
             <p className="font-display text-xl font-bold">Start the Conversation</p>
             <p className="text-white/80 text-sm mt-1">Just speak. Your companion will listen.</p>
+          </button>
+
+          {/* Auto-demo button */}
+          <button onClick={runDemo}
+            className="w-full p-4 bg-charcoal rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform mb-5 border border-gold/30">
+            <div className="flex items-center justify-center gap-3">
+              <PlayCircle size={22} className="text-gold" />
+              <div className="text-left">
+                <p className="font-bold text-sm">Watch the Auto Demo</p>
+                <p className="text-white/50 text-[11px]">Patagonia hiking trip — full end-to-end · 90 sec</p>
+              </div>
+            </div>
           </button>
 
           {/* How it works */}
@@ -688,23 +808,43 @@ export default function VirtualTravel() {
       {/* Voice control bar */}
       <div className="relative z-10 pb-8 pt-3 px-5 bg-black/50 backdrop-blur-md border-t border-white/10">
         <div className="flex items-center gap-3">
-          <button
-            onClick={() => isListening ? stopListening() : startListening()}
-            disabled={isSpeaking || isThinking}
-            className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-30 ${isListening ? 'bg-red-500 shadow-2xl animate-pulse-gold' : 'gradient-gold shadow-2xl'}`}>
-            {isListening ? <MicOff size={26} className="text-white" /> : <Mic size={26} className="text-white" />}
-          </button>
+          {demoMode ? (
+            <button
+              onClick={stopDemo}
+              className="w-16 h-16 rounded-full flex items-center justify-center bg-red-500 shadow-2xl active:scale-90 transition-all">
+              <X size={26} className="text-white" />
+            </button>
+          ) : (
+            <button
+              onClick={() => isListening ? stopListening() : startListening()}
+              disabled={isSpeaking || isThinking}
+              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-30 ${isListening ? 'bg-red-500 shadow-2xl animate-pulse-gold' : 'gradient-gold shadow-2xl'}`}>
+              {isListening ? <MicOff size={26} className="text-white" /> : <Mic size={26} className="text-white" />}
+            </button>
+          )}
           <div className="flex-1">
-            <p className="text-white text-sm font-semibold">
-              {isSpeaking ? `${persona.name} is speaking...` :
-               isThinking ? 'Thinking...' :
-               isListening ? 'Listening — speak naturally' :
-               autoListen ? 'I\'ll listen automatically' :
-               'Tap mic to talk'}
-            </p>
-            <p className="text-white/50 text-[11px] mt-0.5">
-              {autoListen ? '🟢 Continuous conversation on' : '⚪ Tap-to-talk mode'}
-            </p>
+            {demoMode ? (
+              <>
+                <p className="text-white text-sm font-semibold flex items-center gap-1.5">
+                  <PlayCircle size={14} className="text-gold animate-pulse" />
+                  Auto Demo Playing
+                </p>
+                <p className="text-white/50 text-[11px] mt-0.5">Tap × to stop · Trip will auto-checkout at the end</p>
+              </>
+            ) : (
+              <>
+                <p className="text-white text-sm font-semibold">
+                  {isSpeaking ? `${persona.name} is speaking...` :
+                   isThinking ? 'Thinking...' :
+                   isListening ? 'Listening — speak naturally' :
+                   autoListen ? 'I\'ll listen automatically' :
+                   'Tap mic to talk'}
+                </p>
+                <p className="text-white/50 text-[11px] mt-0.5">
+                  {autoListen ? '🟢 Continuous conversation on' : '⚪ Tap-to-talk mode'}
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>

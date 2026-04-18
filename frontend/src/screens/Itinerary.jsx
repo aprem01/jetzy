@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { SAMPLE_USERS } from '../data/seed';
 import {
@@ -26,6 +26,8 @@ function parsePrice(priceStr) {
 export default function Itinerary() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const isDemo = searchParams.get('demo') === 'auto';
   const user = currentUser || SAMPLE_USERS[0];
 
   const [items, setItems] = useState([]);
@@ -35,6 +37,7 @@ export default function Itinerary() {
   const [savedAt, setSavedAt] = useState(null);
   const [stage, setStage] = useState('review'); // review, payment, confirmed
   const [collapsed, setCollapsed] = useState({});
+  const [demoStep, setDemoStep] = useState('');
 
   // Load cart from localStorage
   useEffect(() => {
@@ -56,6 +59,53 @@ export default function Itinerary() {
     localStorage.setItem('jetzy_cart', JSON.stringify(data));
     setSavedAt(Date.now());
   }, [items, tripName, tripDates, travelers]);
+
+  // === Auto-demo: walk through review → payment → confirmed ===
+  useEffect(() => {
+    if (!isDemo) return;
+    if (items.length === 0) return; // wait for cart to load
+
+    const timeouts = [];
+    const schedule = (delay, fn) => {
+      const t = setTimeout(fn, delay);
+      timeouts.push(t);
+    };
+
+    // 1. Type trip name
+    schedule(800, () => {
+      setDemoStep('Naming your trip...');
+      setTripName('Patagonia — Hiking Trip');
+    });
+    // 2. Type dates
+    schedule(1800, () => {
+      setDemoStep('Adding dates...');
+      setTripDates('Oct 12 – 19, 2026');
+    });
+    // 3. Set travelers
+    schedule(2600, () => {
+      setDemoStep('Setting travelers...');
+      setTravelers('2');
+    });
+    // 4. Highlight total
+    schedule(3500, () => {
+      setDemoStep('Reviewing total...');
+    });
+    // 5. Go to payment
+    schedule(5000, () => {
+      setDemoStep('Going to checkout...');
+      setStage('payment');
+    });
+    // 6. Confirm
+    schedule(8500, () => {
+      setDemoStep('Processing payment...');
+    });
+    schedule(10500, () => {
+      setDemoStep('');
+      setStage('confirmed');
+    });
+
+    return () => timeouts.forEach(t => clearTimeout(t));
+  }, [isDemo, items.length]);
 
   const removeItem = (idx) => setItems(prev => prev.filter((_, i) => i !== idx));
 
@@ -89,15 +139,30 @@ export default function Itinerary() {
             <p className="text-2xl font-bold text-navy mt-1">${total.toLocaleString()}</p>
             <p className="text-[11px] text-charcoal-light mt-1">+250 JetPoints earned</p>
           </div>
+          {isDemo && (
+            <div className="mt-6 p-4 bg-charcoal text-white rounded-2xl">
+              <p className="text-[10px] font-bold text-gold uppercase tracking-wider mb-1">Demo Complete</p>
+              <p className="text-sm">You just watched a full Patagonia trip planned, built, and booked end-to-end — all by voice.</p>
+            </div>
+          )}
           <div className="flex gap-3 mt-6">
-            <button onClick={() => { localStorage.removeItem('jetzy_cart'); navigate('/passport'); }}
-              className="flex-1 py-3.5 bg-white border border-gray-200 rounded-2xl text-charcoal font-medium text-sm active:scale-[0.97]">
-              View Passport
-            </button>
-            <button onClick={() => { localStorage.removeItem('jetzy_cart'); navigate('/home'); }}
-              className="flex-1 py-3.5 gradient-gold rounded-2xl text-white font-semibold text-sm shadow-lg active:scale-[0.97]">
-              Back Home
-            </button>
+            {isDemo ? (
+              <button onClick={() => { localStorage.removeItem('jetzy_cart'); navigate('/virtual-travel'); }}
+                className="flex-1 py-3.5 gradient-gold rounded-2xl text-white font-semibold text-sm shadow-lg active:scale-[0.97]">
+                Replay Demo
+              </button>
+            ) : (
+              <>
+                <button onClick={() => { localStorage.removeItem('jetzy_cart'); navigate('/passport'); }}
+                  className="flex-1 py-3.5 bg-white border border-gray-200 rounded-2xl text-charcoal font-medium text-sm active:scale-[0.97]">
+                  View Passport
+                </button>
+                <button onClick={() => { localStorage.removeItem('jetzy_cart'); navigate('/home'); }}
+                  className="flex-1 py-3.5 gradient-gold rounded-2xl text-white font-semibold text-sm shadow-lg active:scale-[0.97]">
+                  Back Home
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -107,6 +172,12 @@ export default function Itinerary() {
   if (stage === 'payment') {
     return (
       <div className="min-h-screen bg-cream pb-8">
+        {isDemo && demoStep && (
+          <div className="fixed top-0 left-0 right-0 z-50 bg-charcoal text-white py-2 text-center text-xs font-semibold animate-fade-up flex items-center justify-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+            Auto Demo · {demoStep}
+          </div>
+        )}
         <div className="gradient-navy content-px pt-12 pb-6 rounded-b-3xl">
           <button onClick={() => setStage('review')} className="text-white/60 mb-4"><ArrowLeft size={20} /></button>
           <div className="flex items-center gap-2 mb-1">
@@ -165,6 +236,12 @@ export default function Itinerary() {
   // === REVIEW STAGE ===
   return (
     <div className="min-h-screen bg-cream pb-32">
+      {isDemo && demoStep && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-charcoal text-white py-2 text-center text-xs font-semibold animate-fade-up flex items-center justify-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
+          Auto Demo · {demoStep}
+        </div>
+      )}
       <div className="gradient-navy content-px pt-12 pb-6 rounded-b-3xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-48 h-48 bg-gold/5 rounded-full -translate-y-20 translate-x-20" />
         <div className="relative">
