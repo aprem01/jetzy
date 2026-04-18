@@ -79,7 +79,50 @@ export function voiceForPersona(personaId) {
 }
 
 // === Audio playback ===
+// iOS Safari requires audio to be initiated within a user gesture handler.
+// We keep ONE persistent Audio element that gets unlocked on the user's
+// first tap, then reuse it for all subsequent playback. Once unlocked,
+// iOS allows updating the src and replaying.
 const audioCache = new Map();
+let persistentAudio = null;
+let audioUnlocked = false;
+
+// 0.05s of silent MP3, base64 encoded
+const SILENT_MP3 = 'data:audio/mpeg;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBQbHVzIMKpIE5DSCBTb2Z0d2FyZQBUSVQyAAAABgAAAzIyMzUAVFNTRQAAAA8AAANMYXZmNTcuODMuMTAwAAAAAAAAAAAAAAD/80DEAAAAA0gAAAAATEFNRTMuMTAwVVVVVVVVVVVVVUxBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MUZAAAAAGkAAAAAAAAA0gAAAAATEFN';
+
+/**
+ * MUST be called synchronously inside a user gesture (button click).
+ * Creates and primes the persistent audio element so iOS allows future
+ * programmatic playback in the same session.
+ */
+export function unlockAudio() {
+  if (audioUnlocked) return;
+  try {
+    if (!persistentAudio) {
+      persistentAudio = new Audio();
+      persistentAudio.setAttribute('playsinline', 'true');
+      persistentAudio.setAttribute('webkit-playsinline', 'true');
+    }
+    persistentAudio.src = SILENT_MP3;
+    persistentAudio.muted = false;
+    persistentAudio.volume = 1.0;
+    const playPromise = persistentAudio.play();
+    if (playPromise && typeof playPromise.then === 'function') {
+      playPromise.then(() => { audioUnlocked = true; }).catch(() => {});
+    } else {
+      audioUnlocked = true;
+    }
+
+    // Also unlock SpeechSynthesis (Safari needs a synthesis call inside gesture)
+    if (window.speechSynthesis) {
+      const u = new SpeechSynthesisUtterance('');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+    }
+  } catch (e) {
+    console.warn('Audio unlock failed:', e);
+  }
+}
 
 export async function playEleven({ text, voiceId, settings, onStart, onEnd, audioRef }) {
   if (!text || !voiceId) {
@@ -112,20 +155,39 @@ export async function playEleven({ text, voiceId, settings, onStart, onEnd, audi
   }
 
   return new Promise((resolve) => {
-    const audio = new Audio(url);
+    // Reuse the persistent audio element so iOS allows playback
+    if (!persistentAudio) {
+      persistentAudio = new Audio();
+      persistentAudio.setAttribute('playsinline', 'true');
+      persistentAudio.setAttribute('webkit-playsinline', 'true');
+    }
+    const audio = persistentAudio;
     if (audioRef) audioRef.current = audio;
+
+    const cleanup = () => {
+      audio.onplay = null;
+      audio.onended = null;
+      audio.onerror = null;
+    };
     audio.onplay = () => onStart?.();
-    audio.onended = () => { onEnd?.(); resolve(); };
-    audio.onerror = () => { onEnd?.(); resolve(); };
-    audio.play().catch(() => { onEnd?.(); resolve(); });
+    audio.onended = () => { cleanup(); onEnd?.(); resolve(); };
+    audio.onerror = () => { cleanup(); onEnd?.(); resolve(); };
+
+    audio.src = url;
+    audio.currentTime = 0;
+    const p = audio.play();
+    if (p && typeof p.catch === 'function') {
+      p.catch(() => { cleanup(); onEnd?.(); resolve(); });
+    }
   });
 }
 
 export function stopEleven(audioRef) {
   try {
-    if (audioRef?.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    const a = audioRef?.current || persistentAudio;
+    if (a) {
+      a.pause();
+      a.currentTime = 0;
     }
   } catch {}
 }

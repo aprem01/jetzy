@@ -8,7 +8,7 @@ import {
   Users as UsersIcon, Bus, Trash2, PlayCircle
 } from 'lucide-react';
 import { PATAGONIA_DEMO } from '../data/demoScript';
-import { VOICES, voiceForPersona, playEleven, stopEleven } from '../lib/elevenlabs';
+import { VOICES, voiceForPersona, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
 
 const TYPE_ICONS = {
   hotel: Hotel, flight: Plane, experience: Mountain,
@@ -748,7 +748,7 @@ export default function VirtualTravel() {
           )}
 
           {/* Big start button */}
-          <button onClick={startConversation}
+          <button onClick={() => { unlockAudio(); startConversation(); }}
             className="w-full p-6 gradient-gold rounded-3xl text-white shadow-2xl active:scale-[0.98] transition-transform mb-3">
             <Mic size={32} className="mx-auto mb-2" />
             <p className="font-display text-xl font-bold">Start the Conversation</p>
@@ -756,7 +756,7 @@ export default function VirtualTravel() {
           </button>
 
           {/* Auto-demo button */}
-          <button onClick={runDemo}
+          <button onClick={() => { unlockAudio(); runDemo(); }}
             className="w-full p-4 bg-charcoal rounded-2xl text-white shadow-lg active:scale-[0.98] transition-transform mb-5 border border-gold/30">
             <div className="flex items-center justify-center gap-3">
               <PlayCircle size={22} className="text-gold" />
@@ -776,13 +776,13 @@ export default function VirtualTravel() {
               <span className="text-[9px] font-bold bg-gold/15 text-gold px-2 py-0.5 rounded-full uppercase tracking-wider">ElevenLabs HD</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <button onClick={() => previewVoice('user')}
+              <button onClick={() => { unlockAudio(); previewVoice('user'); }}
                 className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
                 <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Marco · You</p>
                 <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">Adam — deep male</p>
                 <p className="text-[10px] text-gold mt-1 flex items-center gap-1"><Play size={9} /> Tap to hear</p>
               </button>
-              <button onClick={() => previewVoice('avatar')}
+              <button onClick={() => { unlockAudio(); previewVoice('avatar'); }}
                 className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
                 <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Aria · Avatar</p>
                 <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">Rachel — warm female</p>
