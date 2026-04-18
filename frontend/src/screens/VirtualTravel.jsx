@@ -8,6 +8,7 @@ import {
   Users as UsersIcon, Bus, Trash2, PlayCircle
 } from 'lucide-react';
 import { PATAGONIA_DEMO } from '../data/demoScript';
+import { VOICES, voiceForPersona, playEleven, stopEleven } from '../lib/elevenlabs';
 
 const TYPE_ICONS = {
   hotel: Hotel, flight: Plane, experience: Mountain,
@@ -90,6 +91,7 @@ export default function VirtualTravel() {
   const finalBufferRef = useRef('');
   const messagesRef = useRef([]);
   const personaRef = useRef(DEFAULT_PERSONA);
+  const elevenAudioRef = useRef(null);
 
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
   useEffect(() => { autoListenRef.current = autoListen; }, [autoListen]);
@@ -157,12 +159,29 @@ export default function VirtualTravel() {
     }
   }, []);
 
-  // === Voice synthesis ===
-  const speak = useCallback((text, onComplete) => {
-    if (!window.speechSynthesis || muted) {
+  // === Voice synthesis (ElevenLabs primary, browser fallback) ===
+  const speak = useCallback(async (text, onComplete) => {
+    if (muted) { onComplete?.(); return; }
+
+    const voiceConfig = voiceForPersona(personaRef.current?.id);
+
+    // Try ElevenLabs first
+    try {
+      stopEleven(elevenAudioRef);
+      await playEleven({
+        text,
+        voiceId: voiceConfig.id,
+        settings: voiceConfig.settings,
+        audioRef: elevenAudioRef,
+        onStart: () => setIsSpeaking(true),
+        onEnd: () => setIsSpeaking(false),
+      });
       onComplete?.();
       return;
-    }
+    } catch {}
+
+    // Fallback to browser
+    if (!window.speechSynthesis) { onComplete?.(); return; }
     window.speechSynthesis.cancel();
     const u = new SpeechSynthesisUtterance(text);
     const p = personaRef.current;
@@ -178,8 +197,10 @@ export default function VirtualTravel() {
   }, [muted]);
 
   const stopSpeaking = useCallback(() => {
+    stopEleven(elevenAudioRef);
     window.speechSynthesis?.cancel();
     setIsSpeaking(false);
+    setUserSpeaking(false);
   }, []);
 
   // === Speech recognition ===
@@ -349,58 +370,95 @@ export default function VirtualTravel() {
            en[0] || voices[0];
   }
 
-  // Speak and resolve when finished — much stronger pitch contrast
-  const speakAndWait = (text, kind = 'avatar') => {
+  // Speak and resolve when finished
+  // Primary path: ElevenLabs (high quality voices)
+  // Fallback: browser SpeechSynthesis if ElevenLabs fails or is muted
+  const speakAndWait = async (text, kind = 'avatar') => {
+    if (muted) return;
+
+    const onStart = () => kind === 'user' ? setUserSpeaking(true) : setIsSpeaking(true);
+    const onEnd = () => kind === 'user' ? setUserSpeaking(false) : setIsSpeaking(false);
+
+    // Pick voice config
+    let voiceConfig;
+    if (kind === 'user') {
+      voiceConfig = VOICES.marco;
+    } else {
+      voiceConfig = voiceForPersona(personaRef.current?.id);
+    }
+
+    // Try ElevenLabs first
+    try {
+      stopEleven(elevenAudioRef);
+      await playEleven({
+        text,
+        voiceId: voiceConfig.id,
+        settings: voiceConfig.settings,
+        audioRef: elevenAudioRef,
+        onStart,
+        onEnd,
+      });
+      return;
+    } catch (e) {
+      console.warn('ElevenLabs unavailable, using browser TTS:', e.message);
+    }
+
+    // Fallback: browser SpeechSynthesis
+    if (!window.speechSynthesis) {
+      onEnd();
+      return;
+    }
     return new Promise(resolve => {
-      if (!window.speechSynthesis || muted) {
-        resolve();
-        return;
-      }
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
 
       if (kind === 'user') {
-        // Marco — DEEP & slightly faster (clearly different from avatar)
         u.rate = 1.05;
         u.pitch = 0.7;
         u.voice = pickedVoices.user || pickVoice('user');
-        u.onstart = () => setUserSpeaking(true);
-        u.onend = () => { setUserSpeaking(false); resolve(); };
-        u.onerror = () => { setUserSpeaking(false); resolve(); };
       } else {
-        // Avatar — HIGHER & slightly slower (clearly female-coded)
         const p = personaRef.current;
         u.rate = (p?.voiceRate || 0.95) * 0.97;
         u.pitch = Math.max(1.15, (p?.voicePitch || 1.0) + 0.1);
         u.voice = pickedVoices.avatar || pickVoice('avatar');
-        u.onstart = () => setIsSpeaking(true);
-        u.onend = () => { setIsSpeaking(false); resolve(); };
-        u.onerror = () => { setIsSpeaking(false); resolve(); };
       }
 
-      window.speechSynthesis.speak(u);
+      u.onstart = onStart;
+      u.onend = () => { onEnd(); resolve(); };
+      u.onerror = () => { onEnd(); resolve(); };
 
-      // Safety timeout — some browsers swallow onend
+      window.speechSynthesis.speak(u);
       setTimeout(() => resolve(), Math.max(text.length * 100, 5000));
     });
   };
 
-  // Quick voice preview (used on entry screen)
-  const previewVoice = (kind) => {
+  // Quick voice preview (used on entry screen) — ElevenLabs first, browser fallback
+  const previewVoice = async (kind) => {
+    const text = kind === 'user'
+      ? "Hey, this is Marco. I'm planning a trip to Patagonia."
+      : "Hi Marco, I'm your travel companion. I'll take you anywhere.";
+    const voiceConfig = kind === 'user' ? VOICES.marco : VOICES.default;
+
+    try {
+      stopEleven(elevenAudioRef);
+      await playEleven({
+        text,
+        voiceId: voiceConfig.id,
+        settings: voiceConfig.settings,
+        audioRef: elevenAudioRef,
+      });
+      return;
+    } catch {}
+
+    // Fallback to browser
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(
-      kind === 'user'
-        ? "Hey, this is me — Marco. I'm planning a trip to Patagonia."
-        : "Hi Marco, I'm your travel companion. I'll take you anywhere."
-    );
+    const u = new SpeechSynthesisUtterance(text);
     if (kind === 'user') {
-      u.rate = 1.05;
-      u.pitch = 0.7;
+      u.rate = 1.05; u.pitch = 0.7;
       u.voice = pickedVoices.user || pickVoice('user');
     } else {
-      u.rate = 0.92;
-      u.pitch = 1.15;
+      u.rate = 0.92; u.pitch = 1.15;
       u.voice = pickedVoices.avatar || pickVoice('avatar');
     }
     window.speechSynthesis.speak(u);
@@ -697,28 +755,29 @@ export default function VirtualTravel() {
             </div>
           </button>
 
-          {/* Voice preview */}
-          {voicesReady && (
-            <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm mb-5">
-              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider mb-2.5 flex items-center gap-1">
-                <Volume2 size={11} className="text-gold" /> Preview the demo voices
+          {/* Voice preview — ElevenLabs */}
+          <div className="p-4 bg-white rounded-2xl border border-gold/30 shadow-sm mb-5">
+            <div className="flex items-center justify-between mb-2.5">
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider flex items-center gap-1">
+                <Volume2 size={11} className="text-gold" /> Demo Voices
               </p>
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={() => previewVoice('user')}
-                  className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
-                  <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Marco · You</p>
-                  <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">{pickedVoices.user?.name || 'default'}</p>
-                  <p className="text-[10px] text-gold mt-1 flex items-center gap-1"><Play size={9} /> Tap to hear</p>
-                </button>
-                <button onClick={() => previewVoice('avatar')}
-                  className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
-                  <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Aria · Avatar</p>
-                  <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">{pickedVoices.avatar?.name || 'default'}</p>
-                  <p className="text-[10px] text-gold mt-1 flex items-center gap-1"><Play size={9} /> Tap to hear</p>
-                </button>
-              </div>
+              <span className="text-[9px] font-bold bg-gold/15 text-gold px-2 py-0.5 rounded-full uppercase tracking-wider">ElevenLabs HD</span>
             </div>
-          )}
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => previewVoice('user')}
+                className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
+                <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Marco · You</p>
+                <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">Adam — deep male</p>
+                <p className="text-[10px] text-gold mt-1 flex items-center gap-1"><Play size={9} /> Tap to hear</p>
+              </button>
+              <button onClick={() => previewVoice('avatar')}
+                className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
+                <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Aria · Avatar</p>
+                <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">Rachel — warm female</p>
+                <p className="text-[10px] text-gold mt-1 flex items-center gap-1"><Play size={9} /> Tap to hear</p>
+              </button>
+            </div>
+          </div>
 
           {/* How it works */}
           <div className="p-5 bg-white rounded-3xl border border-gold/20 shadow-sm">
