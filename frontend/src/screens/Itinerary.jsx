@@ -119,6 +119,36 @@ export default function Itinerary() {
     return acc;
   }, {});
 
+  // Group by day (if items have day numbers)
+  const hasDays = items.some(it => it.day);
+  const byDay = items.reduce((acc, item, idx) => {
+    const d = item.day || 0;
+    if (!acc[d]) acc[d] = [];
+    acc[d].push({ ...item, _idx: idx });
+    return acc;
+  }, {});
+  const dayKeys = Object.keys(byDay).map(Number).sort((a, b) => a - b);
+
+  // Default group mode: by day if day numbers exist, else by destination
+  const [groupMode, setGroupMode] = useState('day');
+  useEffect(() => {
+    if (!hasDays && groupMode === 'day') setGroupMode('destination');
+  }, [hasDays]);
+
+  // Day → scene image map (for itinerary day cards)
+  const DAY_IMAGES = {
+    1: 'https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=800&h=400&fit=crop',
+    2: 'https://images.unsplash.com/photo-1545959570-a94084071b5d?w=800&h=400&fit=crop',
+    3: 'https://images.unsplash.com/photo-1493780474015-ba834fd0ce2f?w=800&h=400&fit=crop',
+    4: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=800&h=400&fit=crop',
+    5: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=400&fit=crop',
+    6: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',
+    7: 'https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=800&h=400&fit=crop',
+    8: 'https://images.unsplash.com/photo-1531176175280-33e81d2bcb1b?w=800&h=400&fit=crop',
+    9: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=800&h=400&fit=crop',
+    10: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&h=400&fit=crop',
+  };
+
   if (stage === 'confirmed') {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center content-px">
@@ -296,7 +326,21 @@ export default function Itinerary() {
           </div>
         </div>
 
-        {/* Items by destination */}
+        {/* Group toggle */}
+        {hasDays && items.length > 0 && (
+          <div className="flex gap-2 p-1 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <button onClick={() => setGroupMode('day')}
+              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${groupMode === 'day' ? 'gradient-gold text-white shadow-md' : 'text-charcoal-light'}`}>
+              By Day
+            </button>
+            <button onClick={() => setGroupMode('destination')}
+              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${groupMode === 'destination' ? 'gradient-gold text-white shadow-md' : 'text-charcoal-light'}`}>
+              By Destination
+            </button>
+          </div>
+        )}
+
+        {/* Items */}
         {items.length === 0 ? (
           <div className="text-center py-12">
             <Sparkles size={32} className="text-charcoal-light/20 mx-auto mb-3" />
@@ -306,6 +350,62 @@ export default function Itinerary() {
               Talk to a Guide
             </button>
           </div>
+        ) : groupMode === 'day' && hasDays ? (
+          // === BY DAY VIEW (cinematic day cards with scene images) ===
+          dayKeys.map(d => {
+            const dayItems = byDay[d];
+            const dayTotal = dayItems.reduce((s, it) => s + parsePrice(it.price), 0);
+            const location = dayItems[0]?.location || '';
+            const isCollapsed = collapsed[`day-${d}`];
+            return (
+              <div key={d} className="bg-white rounded-3xl border border-gray-100 shadow-md overflow-hidden animate-fade-up">
+                {/* Day hero image */}
+                <button onClick={() => setCollapsed(c => ({ ...c, [`day-${d}`]: !isCollapsed }))}
+                  className="w-full text-left active:scale-[0.99] transition-transform">
+                  <div className="relative h-32 overflow-hidden">
+                    <img src={DAY_IMAGES[d] || DAY_IMAGES[1]} alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+                    <div className="absolute top-3 left-4">
+                      <p className="text-gold text-[9px] font-bold uppercase tracking-[0.2em]">Day {d}</p>
+                    </div>
+                    <div className="absolute bottom-3 left-4 right-4">
+                      <p className="text-white font-display text-xl font-bold">{location}</p>
+                      <p className="text-white/70 text-[11px] mt-0.5">{dayItems.length} {dayItems.length === 1 ? 'item' : 'items'} · ${dayTotal.toLocaleString()}</p>
+                    </div>
+                    <div className="absolute bottom-3 right-4">
+                      {isCollapsed ? <ChevronDown size={18} className="text-white" /> : <ChevronUp size={18} className="text-white" />}
+                    </div>
+                  </div>
+                </button>
+                {!isCollapsed && (
+                  <div>
+                    {dayItems.map(item => {
+                      const meta = TYPE_META[item.type] || TYPE_META.experience;
+                      const Icon = meta.icon;
+                      return (
+                        <div key={item._idx} className="p-4 flex items-start gap-3 border-b border-gray-50 last:border-0 animate-fade-up">
+                          <div className={`w-10 h-10 rounded-xl ${meta.color} flex items-center justify-center text-white flex-shrink-0`}>
+                            <Icon size={16} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-[9px] font-bold bg-gray-100 text-charcoal-light px-1.5 py-0.5 rounded uppercase">{meta.label}</span>
+                              <span className="text-sm font-bold text-navy">{item.price}</span>
+                            </div>
+                            <p className="text-sm font-semibold text-charcoal">{item.name}</p>
+                            {item.detail && <p className="text-[11px] text-charcoal-light mt-0.5">{item.detail}</p>}
+                          </div>
+                          <button onClick={() => removeItem(item._idx)} className="text-charcoal-light/30 hover:text-red-400 transition-colors p-1">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })
         ) : (
           Object.entries(byDestination).map(([dest, destItems]) => {
             const isCollapsed = collapsed[dest];

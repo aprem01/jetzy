@@ -66,6 +66,7 @@ export default function VirtualTravel() {
   const [currentLocation, setCurrentLocation] = useState(null);
   const [interimText, setInterimText] = useState('');
   const [transporting, setTransporting] = useState(false);
+  const [sceneLabel, setSceneLabel] = useState(null); // { dayLabel, dayNumber }
 
   const [cart, setCart] = useState(() => {
     try {
@@ -372,6 +373,7 @@ export default function VirtualTravel() {
     setMuted(false);
     setBgImage(HOME_BG);
     setCurrentLocation(null);
+    setSceneLabel(null);
     setPersona(DEFAULT_PERSONA);
     personaRef.current = DEFAULT_PERSONA;
     setDemoMode(true);
@@ -415,6 +417,9 @@ export default function VirtualTravel() {
         setTransporting(true);
         setBgImage(step.image);
         setCurrentLocation(step.location);
+        if (step.dayLabel) {
+          setSceneLabel({ dayLabel: step.dayLabel, dayNumber: step.dayNumber, location: step.location });
+        }
         await sleep(1200);
         setTransporting(false);
       }
@@ -678,9 +683,9 @@ export default function VirtualTravel() {
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/30" />
       </div>
 
-      {/* Transport overlay */}
+      {/* Transport overlay (with day label if available) */}
       {transporting && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/30 backdrop-blur-sm pointer-events-none">
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40 backdrop-blur-sm pointer-events-none">
           <div className="text-center animate-fade-in">
             <div className="relative w-20 h-20 mx-auto mb-3">
               <div className="absolute inset-0 rounded-full bg-gold/30 animate-ping" />
@@ -689,8 +694,29 @@ export default function VirtualTravel() {
                 <MapPin size={28} className="text-gold" />
               </div>
             </div>
-            <p className="text-white font-display text-lg font-bold animate-pulse">Taking you there...</p>
+            {sceneLabel ? (
+              <>
+                <p className="text-gold text-[11px] font-bold uppercase tracking-[0.2em] mb-1">
+                  Day {sceneLabel.dayNumber}
+                </p>
+                <p className="text-white font-display text-2xl font-bold drop-shadow-2xl">
+                  {sceneLabel.location}
+                </p>
+              </>
+            ) : (
+              <p className="text-white font-display text-lg font-bold animate-pulse">Taking you there...</p>
+            )}
           </div>
+        </div>
+      )}
+
+      {/* Persistent day chip (when in a destination) */}
+      {!transporting && sceneLabel && demoMode && (
+        <div className="absolute top-28 left-5 z-20 bg-black/60 backdrop-blur-md rounded-full px-3 py-1.5 border border-gold/30 animate-fade-up">
+          <p className="text-[10px] font-bold text-gold uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
+            {sceneLabel.dayLabel}
+          </p>
         </div>
       )}
 

@@ -1,23 +1,17 @@
-// Self-running Patagonia demo script for Virtual Travel.
-// Now event-driven: each speech step waits for prior speech to finish,
-// then pauses for `pause` ms (natural conversation gap) before firing.
+// Self-running 10-day Argentina journey demo.
+// Travels through 9 distinct scenes — each background image change is
+// a new leg of the trip. Cart items tagged with `day` for the
+// itinerary screen to group them chronologically.
 //
 // Step types:
 //   { type: 'avatar', text, mood, persona?, cartItems?, pause? }
-//     — speaks as avatar, waits for speech to end, then pauses
 //   { type: 'user', text, pause? }
-//     — speaks as Marco (user voice), waits, pauses
 //   { type: 'morph', persona, pause? }
-//     — triggers persona morph animation (~1.1s)
-//   { type: 'background', location, image, pause? }
-//     — fades background to new image
+//   { type: 'background', location, image, dayLabel?, dayNumber?, pause? }
 //   { type: 'goto', path, pause? }
-//     — navigates away (ends demo)
-//
-// All `pause` values are in ms and apply AFTER the action completes.
 
 export const PATAGONIA_DEMO = [
-  // 1. Aria greets
+  // === ARRIVAL — meeting Aria ===
   {
     type: 'avatar',
     persona: {
@@ -28,17 +22,17 @@ export const PATAGONIA_DEMO = [
     },
     text: "Hi Marco — I'm your travel companion. Tell me about a place you've been dreaming about, and I'll take you there.",
     mood: 'warm',
+    pause: 500,
+  },
+
+  // === USER PITCHES THE TRIP ===
+  {
+    type: 'user',
+    text: "I want to plan a 10-day trip through Argentina — start in Buenos Aires, hike Patagonia, end in the wine country.",
     pause: 600,
   },
 
-  // 2. User asks about Patagonia
-  {
-    type: 'user',
-    text: "I want to plan a hiking trip to Patagonia.",
-    pause: 700,
-  },
-
-  // 3. Diego morphs in
+  // === DIEGO MORPHS IN ===
   {
     type: 'morph',
     persona: {
@@ -51,147 +45,221 @@ export const PATAGONIA_DEMO = [
     pause: 200,
   },
 
-  // 4. Background to Fitz Roy
+  // ============ DAY 1: BUENOS AIRES ============
   {
     type: 'background',
-    location: 'Fitz Roy, Patagonia',
-    image: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=1600&h=1000&fit=crop',
-    pause: 400,
+    location: 'Buenos Aires',
+    image: 'https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 1 — Buenos Aires',
+    dayNumber: 1,
+    pause: 300,
   },
-
-  // 5. Diego speaks first response
   {
     type: 'avatar',
-    text: "Patagonia! Che, you have excellent taste. The wind there is going to push you around like a child — and that's the best part. Are we talking El Chaltén for Fitz Roy, or Torres del Paine for the W Circuit?",
+    text: "Che, perfect. We start in Buenos Aires. Land Wednesday, settle into Palermo Soho — Mio Hotel, beautiful boutique. That night, we eat. Don Julio. Skip-the-line table, entraña medium-rare, a bottle of Mendoza Malbec.",
     mood: 'excited',
-    pause: 800,
-  },
-
-  // 6. User picks El Chaltén
-  {
-    type: 'user',
-    text: "Let's do El Chaltén. I want to hike Laguna de los Tres.",
+    cartItems: [
+      { type: 'flight', name: 'AA Philly → EZE Buenos Aires', location: 'Buenos Aires', price: '$890', detail: 'Round-trip economy + 1 stop', day: 1 },
+      { type: 'hotel', name: 'Mio Buenos Aires', location: 'Palermo Soho', price: '$220/night', detail: '2 nights, junior suite', day: 1 },
+      { type: 'restaurant', name: 'Don Julio — VIP Table', location: 'Palermo', price: '$95', detail: 'Skip the line, chef\'s table for 2', day: 1 },
+    ],
     pause: 600,
   },
 
-  // 7. Background to Laguna de los Tres
+  // ============ DAY 2: TANGO NIGHT ============
+  {
+    type: 'user',
+    text: "I want to see real tango, not the tourist show.",
+    pause: 500,
+  },
   {
     type: 'background',
-    location: 'Laguna de los Tres',
-    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=1000&fit=crop',
-    pause: 400,
+    location: 'La Catedral, San Telmo',
+    image: 'https://images.unsplash.com/photo-1545959570-a94084071b5d?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 2 — Tango Night',
+    dayNumber: 2,
+    pause: 300,
   },
-
-  // 8. Diego adds flight + hotel
   {
     type: 'avatar',
-    text: "Brilliant choice. Ten hours round trip, 4:30 in the morning if you want Fitz Roy at sunrise — and you do. Let me set this up. Flight to El Calafate, then I'm putting you at Senderos Hostería for five nights. María at the front desk draws trail maps on napkins.",
-    mood: 'warm',
-    cartItems: [
-      { type: 'flight', name: 'LATAM EZE → FTE', location: 'El Calafate', price: '$480', detail: 'Round trip, October dates' },
-      { type: 'hotel', name: 'Senderos Hostería', location: 'El Chaltén', price: '$600', detail: '5 nights, mountain view, breakfast included' },
-    ],
-    pause: 700,
-  },
-
-  // 9. User asks about a guide
-  {
-    type: 'user',
-    text: "Yes, do it. What about a guide for the trail?",
-    pause: 500,
-  },
-
-  // 10. Diego adds the guide
-  {
-    type: 'avatar',
-    text: "You don't strictly need one, but I'd hire Lucas. Local mountaineer, knows every viewpoint that isn't on Instagram. He'll have you at the lake before any of the day-trippers get there.",
+    text: "La Catedral. Raw warehouse, dim lights, real porteños dancing. Tuesday milonga. I'll get you in for free, but bring cash for the bar. Wear something simple — overdressed gringo is a tell.",
     mood: 'curious',
     cartItems: [
-      { type: 'fixer', name: 'Lucas — Mountain Guide', location: 'El Chaltén', price: '$180', detail: 'Private guide, Fitz Roy sunrise route' },
+      { type: 'experience', name: 'La Catedral Milonga + Lesson', location: 'San Telmo', price: '$45', detail: 'Beginner class + entry to milonga', day: 2 },
     ],
-    pause: 700,
+    pause: 600,
   },
 
-  // 11. User asks about food
+  // ============ DAY 3: FLIGHT TO PATAGONIA ============
   {
-    type: 'user',
-    text: "What should I eat after a 10-hour hike?",
-    pause: 500,
+    type: 'background',
+    location: 'Patagonian Steppe',
+    image: 'https://images.unsplash.com/photo-1493780474015-ba834fd0ce2f?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 3 — Fly south',
+    dayNumber: 3,
+    pause: 400,
   },
-
-  // 12. Diego adds restaurant
   {
     type: 'avatar',
-    text: "Ah, the most important question. La Cervecería. Best craft stout south of the equator, lamb empanadas the size of your hand. I'll book you a table for the night you come down off the trail.",
-    mood: 'excited',
+    text: "Friday morning, we fly south. Aerolíneas to El Calafate — three hours over endless steppe. From the air, you'll see Lago Argentino turn turquoise. From there, a three-hour bus to El Chaltén. Worth every minute.",
+    mood: 'adventurous',
     cartItems: [
-      { type: 'restaurant', name: 'La Cervecería — Reservation', location: 'El Chaltén', price: '$50', detail: 'Table for 2, post-hike dinner' },
+      { type: 'flight', name: 'Aerolíneas EZE → FTE', location: 'El Calafate', price: '$185', detail: '1-way, 3hr', day: 3 },
+      { type: 'transport', name: 'Chaltén Travel Bus', location: 'El Calafate → El Chaltén', price: '$22', detail: '3hr scenic transfer', day: 3 },
     ],
-    pause: 700,
+    pause: 600,
   },
 
-  // 13. User asks about Perito Moreno
+  // ============ DAY 4: ARRIVE EL CHALTÉN ============
+  {
+    type: 'background',
+    location: 'El Chaltén Village',
+    image: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 4 — El Chaltén',
+    dayNumber: 4,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "Senderos Hostería for four nights. María at the front desk draws trail maps on napkins. That afternoon, easy walk to Mirador de los Cóndores — small hill, big view of Fitz Roy. Sunset wine at Patagonicus.",
+    mood: 'warm',
+    cartItems: [
+      { type: 'hotel', name: 'Senderos Hostería', location: 'El Chaltén', price: '$480', detail: '4 nights, mountain view, breakfast', day: 4 },
+    ],
+    pause: 600,
+  },
+
+  // ============ DAY 5: THE BIG HIKE — LAGUNA DE LOS TRES ============
   {
     type: 'user',
-    text: "Can we add Perito Moreno on the way out?",
+    text: "Day five is Laguna de los Tres — the sunrise hike, right?",
     pause: 500,
   },
+  {
+    type: 'background',
+    location: 'Laguna de los Tres at sunrise',
+    image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 5 — Laguna de los Tres',
+    dayNumber: 5,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "Yes. Headlamp on at 4:30 a.m., ten hours round trip. I'm putting Lucas with you — local mountaineer, 100% sunrise success rate. Post-hike, La Cervecería. Best stout south of the equator. Lamb empanadas the size of your hand.",
+    mood: 'excited',
+    cartItems: [
+      { type: 'fixer', name: 'Lucas — Mountain Guide', location: 'El Chaltén', price: '$180', detail: 'Full-day Fitz Roy sunrise route', day: 5 },
+      { type: 'restaurant', name: 'La Cervecería — Reservation', location: 'El Chaltén', price: '$50', detail: 'Post-hike dinner for 2', day: 5 },
+    ],
+    pause: 600,
+  },
 
-  // 14. Background to Perito Moreno
+  // ============ DAY 6: LAGUNA TORRE ============
+  {
+    type: 'background',
+    location: 'Laguna Torre',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 6 — Laguna Torre',
+    dayNumber: 6,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "Easier day. Six-hour hike to Laguna Torre — Cerro Torre's impossible spire reflected in the glacier lake. The refugio there sells the best hot chocolate in Patagonia, made with real Bariloche chocolate. Two thousand pesos — pay cash.",
+    mood: 'calm',
+    cartItems: [
+      { type: 'experience', name: 'Laguna Torre self-guided trail', location: 'El Chaltén', price: '$0', detail: 'Trail access free, refugio cash only', day: 6 },
+    ],
+    pause: 600,
+  },
+
+  // ============ DAY 7: PERITO MORENO GLACIER ============
   {
     type: 'background',
     location: 'Perito Moreno Glacier',
     image: 'https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=1600&h=1000&fit=crop',
-    pause: 300,
+    dayLabel: 'Day 7 — Perito Moreno',
+    dayNumber: 7,
+    pause: 400,
   },
-
-  // 15. Diego adds glacier experiences
   {
     type: 'avatar',
-    text: "Of course. National park entry, plus a guided ice trek. Two hours on the glacier with crampons. You'll never look at ice the same way again. Trust me.",
+    text: "We bus back to El Calafate, into the national park. Perito Moreno — sixty meters of ice cracking and calving in front of you. I'm booking the Big Ice trek. Two hours on the glacier with crampons. You'll never look at ice the same way.",
     mood: 'adventurous',
     cartItems: [
-      { type: 'experience', name: 'Perito Moreno Park Entry', location: 'El Calafate', price: '$35', detail: 'National park access' },
-      { type: 'experience', name: 'Big Ice Glacier Trek', location: 'El Calafate', price: '$120', detail: '2 hours on the glacier, crampons + lead guide' },
+      { type: 'experience', name: 'Perito Moreno Park Entry', location: 'El Calafate', price: '$35', detail: 'National park access', day: 7 },
+      { type: 'experience', name: 'Big Ice Glacier Trek', location: 'El Calafate', price: '$120', detail: '2 hours on the ice + lead guide', day: 7 },
+      { type: 'hotel', name: 'Esplendor El Calafate', location: 'El Calafate', price: '$165', detail: '1 night, lake view', day: 7 },
     ],
-    pause: 700,
-  },
-
-  // 16. User asks for vineyard rest day
-  {
-    type: 'user',
-    text: "Add a rest day at a vineyard somewhere on the way back.",
-    pause: 500,
-  },
-
-  // 17. Background to Mendoza
-  {
-    type: 'background',
-    location: 'Cavas Wine Lodge, Mendoza',
-    image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
-    pause: 300,
-  },
-
-  // 18. Diego adds vineyard
-  {
-    type: 'avatar',
-    text: "Mendoza is the move. Cavas Wine Lodge — boutique vineyard, private bungalow, wine tasting included. You'll thank me after five days of trail food.",
-    mood: 'dreamy',
-    cartItems: [
-      { type: 'hotel', name: 'Cavas Wine Lodge', location: 'Mendoza', price: '$340', detail: '1 night, private bungalow + tasting' },
-    ],
-    pause: 700,
-  },
-
-  // 19. Diego wraps up
-  {
-    type: 'avatar',
-    text: "Alright, that's a complete trip — flights, lodge, guide, dinner, glacier, and a vineyard finish. Let me take you to the itinerary to lock it in.",
-    mood: 'warm',
     pause: 600,
   },
 
-  // 20. Auto-navigate to itinerary
+  // ============ DAY 8: BARILOCHE LAKE STOP ============
+  {
+    type: 'user',
+    text: "Can we stop in Bariloche on the way back?",
+    pause: 500,
+  },
+  {
+    type: 'background',
+    location: 'Bariloche Lake District',
+    image: 'https://images.unsplash.com/photo-1531176175280-33e81d2bcb1b?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 8 — Bariloche',
+    dayNumber: 8,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "Done. One night at Llao Llao on the lake. Late lunch at Cassis — fresh trout, lake-front terrace. Drive the Circuito Chico in the afternoon. Mountains, lakes, chocolate shops. The Argentina Switzerland.",
+    mood: 'dreamy',
+    cartItems: [
+      { type: 'flight', name: 'Aerolíneas FTE → BRC', location: 'Bariloche', price: '$140', detail: '1-way, 1.5hr', day: 8 },
+      { type: 'hotel', name: 'Llao Llao Resort', location: 'Bariloche', price: '$540', detail: '1 night, lakefront classic room', day: 8 },
+    ],
+    pause: 600,
+  },
+
+  // ============ DAY 9: MENDOZA WINE COUNTRY ============
+  {
+    type: 'background',
+    location: 'Mendoza Vineyards',
+    image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 9 — Mendoza',
+    dayNumber: 9,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "Final stretch. Cavas Wine Lodge in Lujan de Cuyo — boutique vineyard, private bungalow, your own plunge pool. Tasting at Catena Zapata in the afternoon. Andes on the horizon. This is how the trip should end.",
+    mood: 'dreamy',
+    cartItems: [
+      { type: 'flight', name: 'Aerolíneas BRC → MDZ', location: 'Mendoza', price: '$130', detail: '1-way, 1.5hr', day: 9 },
+      { type: 'hotel', name: 'Cavas Wine Lodge', location: 'Lujan de Cuyo', price: '$340', detail: '1 night, private bungalow', day: 9 },
+      { type: 'experience', name: 'Catena Zapata — Tasting', location: 'Mendoza', price: '$85/person', detail: 'Premium tasting + cellar tour', day: 9 },
+    ],
+    pause: 600,
+  },
+
+  // ============ DAY 10: HOME ============
+  {
+    type: 'background',
+    location: 'Mendoza → Home',
+    image: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&h=1000&fit=crop',
+    dayLabel: 'Day 10 — Home',
+    dayNumber: 10,
+    pause: 400,
+  },
+  {
+    type: 'avatar',
+    text: "Day ten — slow morning at the vineyard, then Mendoza to Buenos Aires, then home. That's the whole trip. Three regions, ten days, and you'll come back changed. Let me take you to the itinerary.",
+    mood: 'warm',
+    cartItems: [
+      { type: 'flight', name: 'Aerolíneas MDZ → EZE → PHL', location: 'Mendoza → Philly', price: '$0', detail: 'Already covered in opening flight', day: 10 },
+    ],
+    pause: 700,
+  },
+
+  // === FINAL: AUTO-NAVIGATE ===
   {
     type: 'goto',
     path: '/itinerary?demo=auto',
