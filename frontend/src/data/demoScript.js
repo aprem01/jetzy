@@ -1,35 +1,28 @@
 // JETZY · 3-Minute Investor Demo Script
-// Mission: "Build the intelligent travel companion that knows you,
-//          guides you, and connects you with real travelers who've been there."
 //
-// Real conversation. Fun. Emotional. ElevenLabs HD voices.
-// Two personas: Aria (warm female guide), Valentina (Argentine female local).
+// Tone: confident, human, light. 85% clarity + trust, 15% personality.
+// No theatrics. No "mi amor". Real conversation a real person would have.
+// People buy confidence, not charm.
 
 export const PATAGONIA_DEMO = [
   // ============================================================
-  // OPENING — THE HOOK (~12s)
+  // OPENING — clear value props (~9s)
   // ============================================================
   {
     type: 'mission',
-    title: 'Travel is broken.',
-    subtitle: 'Forty browser tabs. Fake reviews. Missed magic.',
-    pause: 3500,
-  },
-  {
-    type: 'mission',
-    title: 'What if you had ONE friend',
-    subtitle: 'who\'d been everywhere?',
-    pause: 3500,
-  },
-  {
-    type: 'mission',
-    title: 'Meet Jetzy.',
-    subtitle: 'Your intelligent travel companion. Powered by people who\'ve already been.',
+    title: 'Trip planning is a mess.',
+    subtitle: 'Twenty browser tabs. No clear answers.',
     pause: 3000,
+  },
+  {
+    type: 'mission',
+    title: 'Jetzy fixes that.',
+    subtitle: 'A travel companion that knows you, plus the people who\'ve actually been there.',
+    pause: 3500,
   },
 
   // ============================================================
-  // SCENE 1 — ARIA OPENS (10s)
+  // SCENE 1 — ARIA OPENS, NO FLUFF (8s)
   // ============================================================
   {
     type: 'background',
@@ -45,32 +38,32 @@ export const PATAGONIA_DEMO = [
       color: 'from-indigo-500 to-purple-600',
       voiceRate: 0.95, voicePitch: 1.0, accent: 'warm',
     },
-    text: "Hey Marco. So — I've been thinking about you. Where in the world has been calling you lately?",
+    text: "Hey Marco. Where to next?",
     mood: 'warm',
     pause: 400,
   },
 
   // ============================================================
-  // MARCO OPENS UP (8s)
+  // MARCO — REAL PROBLEM (8s)
   // ============================================================
   {
     type: 'user',
-    text: "Honestly? Patagonia. I've wanted to hike Fitz Roy my whole life. But I've never been to South America. I have no idea where to start.",
-    pause: 500,
+    text: "I want to hike Patagonia. I've been planning this for years and honestly, I keep getting stuck.",
+    pause: 400,
   },
 
   // ============================================================
-  // ARIA HANDS OFF — to Valentina (5s)
+  // ARIA HANDS OFF — MATTER OF FACT (6s)
   // ============================================================
   {
     type: 'avatar',
-    text: "Then you don't need me. You need Valentina. She grew up in Buenos Aires, she's hiked Fitz Roy fifteen times, and she's the reason my sister came back from Argentina different. One second.",
-    mood: 'excited',
+    text: "Yeah, that part's the worst. Let me bring in Valentina — she lives down there, she's done Fitz Roy a bunch of times. She's better than any blog.",
+    mood: 'warm',
     pause: 300,
   },
 
   // ============================================================
-  // SCENE 2 — VALENTINA MORPHS IN, BUENOS AIRES (15s)
+  // SCENE 2 — VALENTINA, BUENOS AIRES (12s)
   // ============================================================
   {
     type: 'morph',
@@ -79,7 +72,7 @@ export const PATAGONIA_DEMO = [
       avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=face',
       color: 'from-amber-500 to-rose-600',
       voiceRate: 0.97, voicePitch: 1.05,
-      accent: 'Argentine, warm and theatrical',
+      accent: 'Argentine, warm and grounded',
     },
     pause: 200,
   },
@@ -93,46 +86,46 @@ export const PATAGONIA_DEMO = [
   },
   {
     type: 'avatar',
-    text: "Marco, mi amor. Listen — I'm going to ruin you. By the end of this trip, you'll never look at a regular Tuesday the same way again. You ready?",
-    mood: 'excited',
-    pause: 500,
-  },
-
-  // ============================================================
-  // MARCO LAUGHS (5s)
-  // ============================================================
-  {
-    type: 'user',
-    text: "Okay, that is exactly the energy I want. Let's do this.",
+    text: "Hey Marco. Patagonia's a great choice. Let's keep this simple — I'll build the trip, you tell me when something doesn't fit.",
+    mood: 'warm',
     pause: 400,
   },
 
   // ============================================================
-  // VALENTINA STARTS BUILDING — DON JULIO (15s)
+  // MARCO AGREES (4s)
+  // ============================================================
+  {
+    type: 'user',
+    text: "Perfect. That's exactly what I need.",
+    pause: 400,
+  },
+
+  // ============================================================
+  // VALENTINA BUILDS BUENOS AIRES (15s)
   // ============================================================
   {
     type: 'avatar',
-    text: "Perfect. We start in Buenos Aires. One night, Palermo Soho, Mio Hotel. Then dinner at Don Julio. Order the entraña medium-rare. Cry a little. Then go to bed. The real trip starts tomorrow.",
+    text: "Day one — fly into Buenos Aires. One night to recover. Eat at Don Julio in Palermo. The entraña is worth it. Then we head south.",
     mood: 'warm',
     cartItems: [
       { type: 'flight', name: 'AA Philadelphia → Buenos Aires', location: 'Buenos Aires', price: '$890', detail: 'Round-trip economy', day: 1 },
       { type: 'hotel', name: 'Mio Hotel — Palermo Soho', location: 'Buenos Aires', price: '$220', detail: '1 night, junior suite', day: 1 },
-      { type: 'restaurant', name: 'Don Julio — VIP Table', location: 'Palermo', price: '$95', detail: 'Skip the line, chef\'s table for 2', day: 1 },
+      { type: 'restaurant', name: 'Don Julio — Reservation', location: 'Palermo', price: '$95', detail: 'Skip the line, table for 2', day: 1 },
     ],
-    pause: 600,
+    pause: 500,
   },
 
   // ============================================================
-  // MARCO GOES FOR IT (5s)
+  // MARCO ASKS ABOUT THE HIKE (4s)
   // ============================================================
   {
     type: 'user',
-    text: "I want the hiking part to wreck me. I've been training six months for this.",
+    text: "Sounds good. What about the hike itself?",
     pause: 400,
   },
 
   // ============================================================
-  // SCENE 3 — EL CHALTÉN (15s)
+  // SCENE 3 — EL CHALTÉN (12s)
   // ============================================================
   {
     type: 'background',
@@ -144,17 +137,26 @@ export const PATAGONIA_DEMO = [
   },
   {
     type: 'avatar',
-    text: "Then we go south. Day three, you fly to El Calafate, then a bus into El Chaltén. Stay at Senderos Hostería — María at the front desk draws trail maps on napkins. The other guests are climbers. You'll find your tribe immediately.",
+    text: "Day three you fly to El Calafate, then a bus into El Chaltén. I'd put you at Senderos Hostería — small place, climbers stay there, you'll meet people.",
     mood: 'warm',
     cartItems: [
       { type: 'flight', name: 'Aerolíneas EZE → FTE', location: 'El Calafate', price: '$185', detail: '3hr scenic flight south', day: 3 },
       { type: 'hotel', name: 'Senderos Hostería', location: 'El Chaltén', price: '$480', detail: '4 nights, mountain view, breakfast', day: 3 },
     ],
-    pause: 600,
+    pause: 500,
   },
 
   // ============================================================
-  // SCENE 4 — THE SUNRISE (the heart of the demo, 22s)
+  // MARCO ASKS ABOUT FITZ ROY (3s)
+  // ============================================================
+  {
+    type: 'user',
+    text: "And Fitz Roy?",
+    pause: 400,
+  },
+
+  // ============================================================
+  // SCENE 4 — THE SUNRISE (the heart, 18s)
   // ============================================================
   {
     type: 'background',
@@ -166,40 +168,40 @@ export const PATAGONIA_DEMO = [
   },
   {
     type: 'avatar',
-    text: "And then... day four. Four-thirty in the morning. You hike three hours in the dark with my friend Lucas — he's been guiding Fitz Roy for twelve years. And then the sky turns pink. Then orange. Then Fitz Roy catches first light, and Marco — you stand there for twenty minutes, and you forget your name. This is the moment. This is why people come.",
-    mood: 'dreamy',
+    text: "Day four. You start at four-thirty in the morning with my friend Lucas — he's been guiding the Laguna de los Tres trail for twelve years. You'll catch sunrise on Fitz Roy. People come from all over the world for that view, and most of them are actually awake when it happens, which helps.",
+    mood: 'warm',
     cartItems: [
       { type: 'fixer', name: 'Lucas — Mountain Guide', location: 'El Chaltén', price: '$180', detail: 'Full day Fitz Roy sunrise route', day: 4 },
     ],
-    pause: 1200,
+    pause: 800,
   },
 
   // ============================================================
-  // MARCO EMOTIONAL (5s)
+  // MARCO QUIET (4s)
   // ============================================================
   {
     type: 'user',
-    text: "Valentina... that's the moment I've been waiting for my whole life.",
-    pause: 700,
-  },
-
-  // ============================================================
-  // THE COMMUNITY MOMENT — THE MOAT (15s)
-  // ============================================================
-  {
-    type: 'avatar',
-    text: "I know, mi amor. That's why I'm telling you. And listen — there are three other Jetzy travelers on that exact trail next week. Aisha just summited Kilimanjaro. James is descending from the W Circuit right now. Sofia is flying in from Lisbon. They've all been waiting too. I'm introducing you to all three. You won't hike alone.",
-    mood: 'curious',
-    pause: 500,
-  },
-  {
-    type: 'user',
-    text: "Yes. All three. Please.",
+    text: "I've been waiting for that moment my whole life.",
     pause: 600,
   },
 
   // ============================================================
-  // SCENE 5 — MENDOZA WIND-DOWN (12s)
+  // THE COMMUNITY MOMENT — THE MOAT (12s)
+  // ============================================================
+  {
+    type: 'avatar',
+    text: "Yeah. It lives up to it. Three other Jetzy travelers are on that trail next week — Aisha, James, Sofia. Want me to introduce you? It's easier than figuring it out alone.",
+    mood: 'warm',
+    pause: 400,
+  },
+  {
+    type: 'user',
+    text: "Yes. All three.",
+    pause: 500,
+  },
+
+  // ============================================================
+  // SCENE 5 — MENDOZA (10s)
   // ============================================================
   {
     type: 'background',
@@ -211,33 +213,33 @@ export const PATAGONIA_DEMO = [
   },
   {
     type: 'avatar',
-    text: "After the mountains, you'll be raw. So we end soft. Mendoza wine country. Cavas Wine Lodge. Private bungalow, plunge pool, the Andes in your window, a tasting at Catena Zapata at sunset. This is how you come home.",
-    mood: 'dreamy',
+    text: "After the trek you'll be wrecked, so we wind down in Mendoza. One night at Cavas Wine Lodge — plunge pool, tasting at Catena Zapata. Soft landing.",
+    mood: 'warm',
     cartItems: [
       { type: 'hotel', name: 'Cavas Wine Lodge', location: 'Mendoza', price: '$340', detail: '1 night, private bungalow + tasting', day: 8 },
-      { type: 'experience', name: 'Catena Zapata Premium Tasting', location: 'Mendoza', price: '$85/person', detail: 'Cellar tour + 6 wines', day: 8 },
+      { type: 'experience', name: 'Catena Zapata Tasting', location: 'Mendoza', price: '$85/person', detail: 'Cellar tour + 6 wines', day: 8 },
     ],
-    pause: 600,
+    pause: 500,
   },
 
   // ============================================================
-  // VALENTINA LANDS THE CLOSE (10s)
+  // CLOSING — VALENTINA WRAPS (8s)
   // ============================================================
   {
     type: 'avatar',
-    text: "Eight days. Three regions. Eight bookings. Twenty-four hundred dollars. You leave October twelfth a tourist. You come back a different person. Trust me. I know.",
+    text: "That's the trip. Eight days, three regions, twenty-four hundred dollars. Pulling up the itinerary now.",
     mood: 'warm',
-    pause: 800,
+    pause: 700,
   },
 
   // ============================================================
-  // FINAL MISSION OVERLAY (4s)
+  // FINAL MISSION OVERLAY (3.5s)
   // ============================================================
   {
     type: 'mission',
     title: 'This is Jetzy.',
-    subtitle: 'We don\'t just plan trips. We connect you to the people who\'ve already been.',
-    pause: 4000,
+    subtitle: 'Your travel companion, plus the people who\'ve actually been there.',
+    pause: 3500,
   },
 
   // ============================================================
