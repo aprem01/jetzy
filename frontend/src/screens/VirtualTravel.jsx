@@ -79,8 +79,8 @@ export default function VirtualTravel() {
 
   // Demo mode
   const [demoMode, setDemoMode] = useState(false);
+  const [userSpeaking, setUserSpeaking] = useState(false);
   const demoModeRef = useRef(false);
-  const demoTimeoutsRef = useRef([]);
   useEffect(() => { demoModeRef.current = demoMode; }, [demoMode]);
 
   const recognitionRef = useRef(null);
@@ -285,38 +285,90 @@ export default function VirtualTravel() {
     }, 1100);
   };
 
-  // === Demo runner ===
+  // === Demo runner — chained, both voices, real conversation feel ===
   const stopDemo = useCallback(() => {
     demoModeRef.current = false;
     setDemoMode(false);
-    demoTimeoutsRef.current.forEach(t => clearTimeout(t));
-    demoTimeoutsRef.current = [];
-    stopSpeaking();
-  }, [stopSpeaking]);
+    setUserSpeaking(false);
+    window.speechSynthesis?.cancel();
+    setIsSpeaking(false);
+  }, []);
 
-  const speakNoListen = useCallback((text) => {
-    if (!window.speechSynthesis || muted) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    const p = personaRef.current;
-    u.rate = p?.voiceRate || 0.95;
-    u.pitch = p?.voicePitch || 1.0;
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en')) || voices.find(v => v.lang.startsWith('en')) || voices[0];
-    if (preferred) u.voice = preferred;
-    u.onstart = () => setIsSpeaking(true);
-    u.onend = () => setIsSpeaking(false);
-    u.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(u);
-  }, [muted]);
+  // Pre-warm voice list (needed on Chrome — voices load async)
+  useEffect(() => {
+    if (window.speechSynthesis) {
+      window.speechSynthesis.getVoices();
+      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+    }
+  }, []);
 
-  const runDemo = useCallback(() => {
-    // Reset state for clean demo
+  const pickVoice = (kind) => {
+    const voices = window.speechSynthesis?.getVoices() || [];
+    if (kind === 'user') {
+      // Distinct male voice for Marco
+      return voices.find(v => v.name === 'Daniel') ||
+             voices.find(v => v.name === 'Alex') ||
+             voices.find(v => v.name.includes('Microsoft David')) ||
+             voices.find(v => v.name.includes('Google UK English Male')) ||
+             voices.find(v => v.name.includes('Male') && v.lang.startsWith('en')) ||
+             voices.find(v => v.lang === 'en-GB') ||
+             voices.find(v => v.lang.startsWith('en')) ||
+             voices[0];
+    }
+    // Avatar — prefer female-leaning English voices
+    return voices.find(v => v.name === 'Samantha') ||
+           voices.find(v => v.name === 'Karen') ||
+           voices.find(v => v.name.includes('Google US English')) ||
+           voices.find(v => v.name.includes('Microsoft Zira')) ||
+           voices.find(v => v.name.includes('Female') && v.lang.startsWith('en')) ||
+           voices.find(v => v.lang === 'en-US') ||
+           voices.find(v => v.lang.startsWith('en')) ||
+           voices[0];
+  };
+
+  // Speak and resolve when finished
+  const speakAndWait = (text, kind = 'avatar') => {
+    return new Promise(resolve => {
+      if (!window.speechSynthesis || muted) {
+        resolve();
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+
+      if (kind === 'user') {
+        u.rate = 1.0;
+        u.pitch = 0.9;
+        u.voice = pickVoice('user');
+        u.onstart = () => setUserSpeaking(true);
+        u.onend = () => { setUserSpeaking(false); resolve(); };
+        u.onerror = () => { setUserSpeaking(false); resolve(); };
+      } else {
+        const p = personaRef.current;
+        u.rate = p?.voiceRate || 0.95;
+        u.pitch = p?.voicePitch || 1.0;
+        u.voice = pickVoice('avatar');
+        u.onstart = () => setIsSpeaking(true);
+        u.onend = () => { setIsSpeaking(false); resolve(); };
+        u.onerror = () => { setIsSpeaking(false); resolve(); };
+      }
+
+      window.speechSynthesis.speak(u);
+
+      // Safety timeout — some browsers swallow onend
+      setTimeout(() => resolve(), Math.max(text.length * 100, 5000));
+    });
+  };
+
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+  const runDemo = useCallback(async () => {
+    // Reset state
     try { localStorage.removeItem(CART_KEY); } catch {}
     setCart([]);
     setMessages([]);
     setHasStarted(true);
-    setAutoListen(false); // disable real mic during demo
+    setAutoListen(false);
     setMuted(false);
     setBgImage(HOME_BG);
     setCurrentLocation(null);
@@ -324,67 +376,61 @@ export default function VirtualTravel() {
     personaRef.current = DEFAULT_PERSONA;
     setDemoMode(true);
     demoModeRef.current = true;
-    demoTimeoutsRef.current = [];
 
-    let cumulative = 0;
+    // Initial settle
+    await sleep(800);
 
-    PATAGONIA_DEMO.forEach((step, i) => {
-      cumulative += step.delay;
+    for (const step of PATAGONIA_DEMO) {
+      if (!demoModeRef.current) return;
 
-      const t = setTimeout(() => {
-        if (!demoModeRef.current) return;
-
-        if (step.type === 'avatar') {
-          // If step includes its own persona (greeting), set it directly
-          if (step.persona) {
-            setPersona(step.persona);
-            personaRef.current = step.persona;
-          }
-          const newMsg = {
-            role: 'assistant',
-            content: step.text,
-            mood: step.mood,
-            addedItems: step.cartItems || [],
-            persona: personaRef.current,
-          };
-          setMessages(prev => [...prev, newMsg]);
-          if (step.cartItems?.length) addToCart(step.cartItems);
-          speakNoListen(step.text);
+      if (step.type === 'avatar') {
+        if (step.persona) {
+          setPersona(step.persona);
+          personaRef.current = step.persona;
         }
+        setMessages(prev => [...prev, {
+          role: 'assistant',
+          content: step.text,
+          mood: step.mood,
+          addedItems: step.cartItems || [],
+          persona: personaRef.current,
+        }]);
+        if (step.cartItems?.length) addToCart(step.cartItems);
+        await sleep(150); // tiny gap so UI updates before speech
+        await speakAndWait(step.text, 'avatar');
+      }
 
-        else if (step.type === 'user') {
-          setMessages(prev => [...prev, { role: 'user', content: step.text }]);
-        }
+      else if (step.type === 'user') {
+        setMessages(prev => [...prev, { role: 'user', content: step.text }]);
+        await sleep(150);
+        await speakAndWait(step.text, 'user');
+      }
 
-        else if (step.type === 'morph') {
-          morphPersona(step.persona);
-        }
+      else if (step.type === 'morph') {
+        morphPersona(step.persona);
+        await sleep(1100); // morph animation duration
+      }
 
-        else if (step.type === 'background') {
-          setTransporting(true);
-          setBgImage(step.image);
-          setCurrentLocation(step.location);
-          setTimeout(() => setTransporting(false), 1200);
-        }
+      else if (step.type === 'background') {
+        setTransporting(true);
+        setBgImage(step.image);
+        setCurrentLocation(step.location);
+        await sleep(1200);
+        setTransporting(false);
+      }
 
-        else if (step.type === 'goto') {
-          stopSpeaking();
-          setDemoMode(false);
-          demoModeRef.current = false;
-          navigate(step.path);
-        }
-      }, cumulative);
+      else if (step.type === 'goto') {
+        setDemoMode(false);
+        demoModeRef.current = false;
+        navigate(step.path);
+        return;
+      }
 
-      demoTimeoutsRef.current.push(t);
-    });
-  }, [speakNoListen, navigate, stopSpeaking]);
-
-  // Cleanup demo timeouts on unmount
-  useEffect(() => {
-    return () => {
-      demoTimeoutsRef.current.forEach(t => clearTimeout(t));
-    };
-  }, []);
+      if (step.pause && demoModeRef.current) {
+        await sleep(step.pause);
+      }
+    }
+  }, [muted, navigate]);
 
   // === Send message ===
   const sendMessage = useCallback(async (text) => {
@@ -757,7 +803,15 @@ export default function VirtualTravel() {
         {/* User's last message */}
         {messages.length > 0 && messages[messages.length - 1].role === 'user' && (
           <div className="flex justify-end mb-3 animate-fade-up">
-            <div className="bg-gold/90 backdrop-blur-md text-white px-4 py-2.5 rounded-2xl max-w-[80%]">
+            <div className={`backdrop-blur-md text-white px-4 py-2.5 rounded-2xl max-w-[80%] transition-all ${
+              userSpeaking ? 'bg-gold shadow-2xl scale-[1.02] ring-2 ring-gold/40' : 'bg-gold/90'
+            }`}>
+              {userSpeaking && (
+                <p className="text-[9px] font-bold uppercase tracking-wider opacity-80 mb-1 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                  Marco · speaking
+                </p>
+              )}
               <p className="text-sm">{messages[messages.length - 1].content}</p>
             </div>
           </div>
@@ -827,9 +881,11 @@ export default function VirtualTravel() {
               <>
                 <p className="text-white text-sm font-semibold flex items-center gap-1.5">
                   <PlayCircle size={14} className="text-gold animate-pulse" />
-                  Auto Demo Playing
+                  {userSpeaking ? 'Marco is speaking...' :
+                   isSpeaking ? `${persona.name} is speaking...` :
+                   'Auto Demo Playing'}
                 </p>
-                <p className="text-white/50 text-[11px] mt-0.5">Tap × to stop · Trip will auto-checkout at the end</p>
+                <p className="text-white/50 text-[11px] mt-0.5">Tap × to stop · Trip auto-checkouts at the end</p>
               </>
             ) : (
               <>
