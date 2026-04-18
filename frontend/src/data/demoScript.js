@@ -28,7 +28,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Welcome',
     image: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/3571264/3571264-uhd_2560_1440_30fps.mp4',
+    video: 'https://videos.pexels.com/video-files/3576378/3576378-hd_1920_1080_25fps.mp4',
     pause: 200,
   },
   {
@@ -58,7 +58,7 @@ export const PATAGONIA_DEMO = [
   // ============================================================
   {
     type: 'avatar',
-    text: "Okay. Given your Kilimanjaro trip last February, I think you'll actually love this. Let me bring in Valentina — she lives in Buenos Aires, she's helped a few of our travelers do Fitz Roy. She'll know what fits you.",
+    text: "Okay. Given your Kilimanjaro trip last February, I think you'll actually love this. Let me bring in Valentina — she's our Argentina specialist. She's helped a few of our travelers do Fitz Roy and she'll know what fits you.",
     mood: 'warm',
     pause: 300,
   },
@@ -69,7 +69,7 @@ export const PATAGONIA_DEMO = [
   {
     type: 'morph',
     persona: {
-      id: 'latam', name: 'Valentina', region: 'Buenos Aires',
+      id: 'latam', name: 'Valentina', region: 'Argentina Specialist',
       avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=face',
       color: 'from-amber-500 to-rose-600',
       voiceRate: 0.97, voicePitch: 1.05,
@@ -81,7 +81,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Buenos Aires · Palermo',
     image: 'https://images.unsplash.com/photo-1612294037637-ec328d0e075e?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/2034115/2034115-hd_1920_1080_30fps.mp4',
+    video: 'https://videos.pexels.com/video-files/856975/856975-hd_1920_1080_25fps.mp4',
     dayLabel: 'Day 1 — Buenos Aires',
     dayNumber: 1,
     pause: 400,
@@ -133,7 +133,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'El Chaltén · Patagonia',
     image: 'https://images.unsplash.com/photo-1589802829985-817e51171b92?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/1409899/1409899-hd_1920_1080_25fps.mp4',
+    video: 'https://videos.pexels.com/video-files/2611250/2611250-hd_1920_1080_30fps.mp4',
     dayLabel: 'Day 3 — El Chaltén',
     dayNumber: 3,
     pause: 400,
@@ -165,7 +165,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Laguna de los Tres at sunrise',
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/2098989/2098989-hd_1920_1080_30fps.mp4',
+    video: 'https://videos.pexels.com/video-files/2421545/2421545-hd_1920_1080_30fps.mp4',
     dayLabel: 'Day 4 — Sunrise on Fitz Roy',
     dayNumber: 4,
     pause: 400,
@@ -211,7 +211,7 @@ export const PATAGONIA_DEMO = [
     type: 'background',
     location: 'Cavas Wine Lodge · Mendoza',
     image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
-    video: 'https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4',
+    video: 'https://videos.pexels.com/video-files/4763824/4763824-hd_1920_1080_24fps.mp4',
     dayLabel: 'Day 8 — Mendoza',
     dayNumber: 8,
     pause: 400,
