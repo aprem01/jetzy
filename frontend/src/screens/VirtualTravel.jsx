@@ -68,6 +68,7 @@ export default function VirtualTravel() {
   const [interimText, setInterimText] = useState('');
   const [transporting, setTransporting] = useState(false);
   const [sceneLabel, setSceneLabel] = useState(null); // { dayLabel, dayNumber }
+  const [missionOverlay, setMissionOverlay] = useState(null); // { title, subtitle }
 
   const [cart, setCart] = useState(() => {
     try {
@@ -312,6 +313,8 @@ export default function VirtualTravel() {
     demoModeRef.current = false;
     setDemoMode(false);
     setUserSpeaking(false);
+    setMissionOverlay(null);
+    stopEleven(elevenAudioRef);
     window.speechSynthesis?.cancel();
     setIsSpeaking(false);
   }, []);
@@ -477,6 +480,7 @@ export default function VirtualTravel() {
     setBgImage(HOME_BG);
     setCurrentLocation(null);
     setSceneLabel(null);
+    setMissionOverlay(null);
     setPersona(DEFAULT_PERSONA);
     personaRef.current = DEFAULT_PERSONA;
     setDemoMode(true);
@@ -527,7 +531,15 @@ export default function VirtualTravel() {
         setTransporting(false);
       }
 
+      else if (step.type === 'mission') {
+        setMissionOverlay({ title: step.title, subtitle: step.subtitle });
+        await sleep(step.pause || 3000);
+        setMissionOverlay(null);
+        continue; // skip the post-step pause since we already waited
+      }
+
       else if (step.type === 'goto') {
+        setMissionOverlay(null);
         setDemoMode(false);
         demoModeRef.current = false;
         navigate(step.path);
@@ -844,6 +856,26 @@ export default function VirtualTravel() {
             <span className="w-1.5 h-1.5 bg-gold rounded-full animate-pulse" />
             {sceneLabel.dayLabel}
           </p>
+        </div>
+      )}
+
+      {/* Mission statement overlay (cinematic, full-screen) */}
+      {missionOverlay && (
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md pointer-events-none animate-fade-in">
+          <div className="text-center max-w-2xl content-px">
+            <div className="w-12 h-12 rounded-full gradient-gold mx-auto flex items-center justify-center mb-6 shadow-2xl animate-pulse">
+              <Sparkles size={20} className="text-white" />
+            </div>
+            <p className="text-gold text-[10px] font-bold uppercase tracking-[0.4em] mb-4">JETZY</p>
+            <h2 className="font-display text-3xl md:text-5xl font-bold text-white leading-tight animate-fade-up">
+              {missionOverlay.title}
+            </h2>
+            {missionOverlay.subtitle && (
+              <p className="text-white/70 text-base md:text-xl mt-5 leading-relaxed animate-fade-up" style={{ animationDelay: '0.4s' }}>
+                {missionOverlay.subtitle}
+              </p>
+            )}
+          </div>
         </div>
       )}
 

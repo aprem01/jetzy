@@ -1,72 +1,76 @@
 /**
  * ElevenLabs voice mapping + audio playback helper.
- *
- * Default voice IDs are from ElevenLabs' free voice library (no clones needed).
- * Each persona has its own voice tuned to match the personality.
+ * All voice IDs verified working on the free tier.
  */
+
+// Best-pick voices for the demo
+export const VOICE_MARCO = {
+  id: 'nPczCjzI2devNBz1zQrb', // Brian — deep American male, conversational
+  name: 'Brian',
+  settings: { stability: 0.5, similarity: 0.85, style: 0.4, speakerBoost: true },
+};
+
+export const VOICE_AVATAR_DEFAULT = {
+  id: 'EXAVITQu4vr4xnSDxMaL', // Sarah — warm American female
+  name: 'Sarah',
+  settings: { stability: 0.5, similarity: 0.85, style: 0.45, speakerBoost: true },
+};
 
 export const VOICES = {
   // === USER ===
-  marco: {
-    id: 'pNInz6obpgDQGcFmaJgB', // Adam — deep American male
-    settings: { stability: 0.55, similarity: 0.8, style: 0.25, speakerBoost: true },
-  },
+  marco: VOICE_MARCO,
 
-  // === AVATAR PERSONAS ===
-  default: {
-    // Aria — neutral warm
-    id: '21m00Tcm4TlvDq8ikWAM', // Rachel — warm female American
-    settings: { stability: 0.5, similarity: 0.8, style: 0.3, speakerBoost: true },
-  },
+  // === AVATAR PERSONAS — all free tier voices ===
+  default: VOICE_AVATAR_DEFAULT, // Sarah
   india: {
-    // Priya — warm Indian aunt energy
-    id: 'AZnzlk1XvdvUeBnXmlld', // Domi — strong female
-    settings: { stability: 0.6, similarity: 0.75, style: 0.45, speakerBoost: true },
+    id: 'XrExE9yKIg1WjnnlVkGX', // Matilda — warm female
+    name: 'Matilda',
+    settings: { stability: 0.55, similarity: 0.85, style: 0.5, speakerBoost: true },
   },
   pakistan: {
-    // Zara — hospitable Lahori
-    id: 'AZnzlk1XvdvUeBnXmlld', // Domi
-    settings: { stability: 0.6, similarity: 0.75, style: 0.4, speakerBoost: true },
+    id: 'XrExE9yKIg1WjnnlVkGX', // Matilda
+    name: 'Matilda',
+    settings: { stability: 0.55, similarity: 0.85, style: 0.45, speakerBoost: true },
   },
   latam: {
-    // Diego — theatrical porteño
     id: 'ErXwobaYiN019PkySvjV', // Antoni — warm male, lightly accented
-    settings: { stability: 0.4, similarity: 0.85, style: 0.6, speakerBoost: true },
+    name: 'Antoni',
+    settings: { stability: 0.4, similarity: 0.85, style: 0.65, speakerBoost: true },
   },
   east_asia: {
-    // Yuki — calm precise
-    id: 'EXAVITQu4vr4xnSDxMaL', // Bella — soft female
-    settings: { stability: 0.7, similarity: 0.75, style: 0.2, speakerBoost: true },
+    id: 'pFZP5JQG7iQjIQuC4Bku', // Lily — soft female
+    name: 'Lily',
+    settings: { stability: 0.65, similarity: 0.8, style: 0.25, speakerBoost: true },
   },
   southeast_asia: {
-    // Mai — quietly playful
-    id: 'EXAVITQu4vr4xnSDxMaL', // Bella
-    settings: { stability: 0.55, similarity: 0.78, style: 0.35, speakerBoost: true },
-  },
-  africa: {
-    // Amara — adventurous, grounded
-    id: 'AZnzlk1XvdvUeBnXmlld', // Domi
-    settings: { stability: 0.5, similarity: 0.8, style: 0.4, speakerBoost: true },
-  },
-  middle_east: {
-    // Layla — rich storyteller
-    id: 'XB0fDUnXU5powFXDhCwa', // Charlotte — sophisticated female
-    settings: { stability: 0.55, similarity: 0.8, style: 0.45, speakerBoost: true },
-  },
-  europe: {
-    // Sophie — sophisticated Lisboeta
-    id: 'XB0fDUnXU5powFXDhCwa', // Charlotte
+    id: 'pFZP5JQG7iQjIQuC4Bku', // Lily
+    name: 'Lily',
     settings: { stability: 0.55, similarity: 0.8, style: 0.35, speakerBoost: true },
   },
+  africa: {
+    id: 'cgSgspJ2msm6clMCkdW9', // Jessica — confident female
+    name: 'Jessica',
+    settings: { stability: 0.5, similarity: 0.85, style: 0.4, speakerBoost: true },
+  },
+  middle_east: {
+    id: 'FGY2WhTYpPnrIDTdsKH5', // Laura — sophisticated female
+    name: 'Laura',
+    settings: { stability: 0.55, similarity: 0.85, style: 0.45, speakerBoost: true },
+  },
+  europe: {
+    id: 'FGY2WhTYpPnrIDTdsKH5', // Laura
+    name: 'Laura',
+    settings: { stability: 0.55, similarity: 0.85, style: 0.4, speakerBoost: true },
+  },
   oceania: {
-    // Kai — easy Australian
-    id: 'TxGEqnHWrfWFTfGW9XjX', // Josh — younger male
+    id: 'IKne3meq5aSn9XLyUdCD', // Charlie — relaxed Australian-ish male
+    name: 'Charlie',
     settings: { stability: 0.5, similarity: 0.8, style: 0.35, speakerBoost: true },
   },
   north_america: {
-    // Jordan — sharp NYC
-    id: 'pNInz6obpgDQGcFmaJgB', // Adam
-    settings: { stability: 0.45, similarity: 0.8, style: 0.4, speakerBoost: true },
+    id: 'JBFqnCBsd6RMkjVDRZzb', // George — sharp male
+    name: 'George',
+    settings: { stability: 0.45, similarity: 0.85, style: 0.45, speakerBoost: true },
   },
 };
 
@@ -74,11 +78,7 @@ export function voiceForPersona(personaId) {
   return VOICES[personaId] || VOICES.default;
 }
 
-// === Audio playback helper ===
-// Returns a Promise that resolves when audio finishes (or fails).
-// Calls onStart and onEnd callbacks.
-//
-// In-memory cache so the same line plays instantly the second time.
+// === Audio playback ===
 const audioCache = new Map();
 
 export async function playEleven({ text, voiceId, settings, onStart, onEnd, audioRef }) {
@@ -95,14 +95,11 @@ export async function playEleven({ text, voiceId, settings, onStart, onEnd, audi
       const res = await fetch('/api/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text,
-          voiceId,
-          ...(settings || {}),
-        }),
+        body: JSON.stringify({ text, voiceId, ...(settings || {}) }),
       });
       if (!res.ok) {
-        throw new Error(`TTS failed: ${res.status}`);
+        const txt = await res.text();
+        throw new Error(`TTS ${res.status}: ${txt.slice(0, 200)}`);
       }
       const blob = await res.blob();
       url = URL.createObjectURL(blob);
@@ -110,7 +107,7 @@ export async function playEleven({ text, voiceId, settings, onStart, onEnd, audi
     } catch (e) {
       console.error('ElevenLabs TTS failed, falling back:', e);
       onEnd?.();
-      throw e; // caller can fall back to browser TTS
+      throw e;
     }
   }
 
@@ -131,4 +128,24 @@ export function stopEleven(audioRef) {
       audioRef.current.currentTime = 0;
     }
   } catch {}
+}
+
+// Pre-cache an array of texts so the demo plays without network delays
+export async function precacheTexts(items) {
+  // Fire all requests in parallel; ignore failures
+  await Promise.all(items.map(({ text, voiceId, settings }) =>
+    fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voiceId, ...(settings || {}) }),
+    })
+      .then(r => r.ok ? r.blob() : null)
+      .then(blob => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          audioCache.set(`${voiceId}:${text}`, url);
+        }
+      })
+      .catch(() => {})
+  ));
 }
