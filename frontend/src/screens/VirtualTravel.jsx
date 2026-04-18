@@ -5,7 +5,8 @@ import { SAMPLE_USERS } from '../data/seed';
 import {
   ArrowLeft, Mic, MicOff, Sparkles, Volume2, VolumeX, MapPin, X,
   Pause, Play, ShoppingBag, Plus, Hotel, Plane, Mountain, Utensils,
-  Users as UsersIcon, Bus, Trash2, PlayCircle, Subtitles, Captions
+  Users as UsersIcon, Bus, Trash2, PlayCircle, Subtitles, Captions,
+  MessageSquare, MessageSquareOff
 } from 'lucide-react';
 import { PATAGONIA_DEMO } from '../data/demoScript';
 import { VOICES, voiceForPersona, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
@@ -73,10 +74,16 @@ export default function VirtualTravel() {
   const [captionsOn, setCaptionsOn] = useState(() => {
     try { return localStorage.getItem('jetzy_captions') !== 'off'; } catch { return true; }
   });
+  const [messagesOn, setMessagesOn] = useState(() => {
+    try { return localStorage.getItem('jetzy_messages') !== 'off'; } catch { return true; }
+  });
   const captionTypewriterRef = useRef(null);
   useEffect(() => {
     try { localStorage.setItem('jetzy_captions', captionsOn ? 'on' : 'off'); } catch {}
   }, [captionsOn]);
+  useEffect(() => {
+    try { localStorage.setItem('jetzy_messages', messagesOn ? 'on' : 'off'); } catch {}
+  }, [messagesOn]);
 
   const [cart, setCart] = useState(() => {
     try {
@@ -993,6 +1000,15 @@ export default function VirtualTravel() {
           {muted ? <VolumeX size={14} className="text-white/60" /> : <Volume2 size={14} className="text-gold" />}
         </button>
 
+        {/* Messages bubble toggle */}
+        <button onClick={() => setMessagesOn(m => !m)}
+          className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${messagesOn ? 'bg-gold' : 'bg-black/40'}`}
+          aria-label="Toggle message bubble">
+          {messagesOn
+            ? <MessageSquare size={14} className="text-white" />
+            : <MessageSquareOff size={14} className="text-white/60" />}
+        </button>
+
         {/* CC / Captions toggle */}
         <button onClick={() => setCaptionsOn(c => !c)}
           className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${captionsOn ? 'bg-gold' : 'bg-black/40'}`}
@@ -1008,7 +1024,7 @@ export default function VirtualTravel() {
 
       <div className="flex-1 relative z-10 flex flex-col justify-end content-px pb-3 overflow-hidden">
         {/* Latest avatar message */}
-        {messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !transporting && (
+        {messagesOn && messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !transporting && (
           <div className="bg-black/70 backdrop-blur-md rounded-2xl p-5 border border-white/10 animate-fade-up mb-3 max-h-[50vh] overflow-y-auto">
             <div className="flex items-center gap-2 mb-2">
               <img src={persona.avatar} alt="" className="w-6 h-6 rounded-md object-cover" />
@@ -1043,7 +1059,7 @@ export default function VirtualTravel() {
         )}
 
         {/* User's last message */}
-        {messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+        {messagesOn && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
           <div className="flex justify-end mb-3 animate-fade-up">
             <div className={`backdrop-blur-md text-white px-4 py-2.5 rounded-2xl max-w-[80%] transition-all ${
               userSpeaking ? 'bg-gold shadow-2xl scale-[1.02] ring-2 ring-gold/40' : 'bg-gold/90'
