@@ -5,7 +5,7 @@ import { SAMPLE_USERS } from '../data/seed';
 import {
   ArrowLeft, Mic, MicOff, Sparkles, Volume2, VolumeX, MapPin, X,
   Pause, Play, ShoppingBag, Plus, Hotel, Plane, Mountain, Utensils,
-  Users as UsersIcon, Bus, Trash2, PlayCircle
+  Users as UsersIcon, Bus, Trash2, PlayCircle, Subtitles, Captions
 } from 'lucide-react';
 import { PATAGONIA_DEMO } from '../data/demoScript';
 import { VOICES, voiceForPersona, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
@@ -69,6 +69,14 @@ export default function VirtualTravel() {
   const [transporting, setTransporting] = useState(false);
   const [sceneLabel, setSceneLabel] = useState(null); // { dayLabel, dayNumber }
   const [missionOverlay, setMissionOverlay] = useState(null); // { title, subtitle }
+  const [caption, setCaption] = useState(null); // { speaker, text, kind: 'user'|'avatar', revealed }
+  const [captionsOn, setCaptionsOn] = useState(() => {
+    try { return localStorage.getItem('jetzy_captions') !== 'off'; } catch { return true; }
+  });
+  const captionTypewriterRef = useRef(null);
+  useEffect(() => {
+    try { localStorage.setItem('jetzy_captions', captionsOn ? 'on' : 'off'); } catch {}
+  }, [captionsOn]);
 
   const [cart, setCart] = useState(() => {
     try {
@@ -314,10 +322,48 @@ export default function VirtualTravel() {
     setDemoMode(false);
     setUserSpeaking(false);
     setMissionOverlay(null);
+    setCaption(null);
+    if (captionTypewriterRef.current) {
+      clearInterval(captionTypewriterRef.current);
+      captionTypewriterRef.current = null;
+    }
     stopEleven(elevenAudioRef);
     window.speechSynthesis?.cancel();
     setIsSpeaking(false);
   }, []);
+
+  // Typewriter reveal — synced approximately to expected speech duration
+  const showCaption = (speaker, text, kind, durationMs) => {
+    // Clear any prior typewriter
+    if (captionTypewriterRef.current) {
+      clearInterval(captionTypewriterRef.current);
+      captionTypewriterRef.current = null;
+    }
+    setCaption({ speaker, text, kind, revealed: '' });
+    if (!text) return;
+
+    // Estimate duration if not provided: ~110ms per char
+    const total = Math.max(durationMs || text.length * 110, 1000);
+    const stepMs = 35;
+    const charsPerStep = Math.max(1, Math.ceil(text.length / (total / stepMs)));
+    let i = 0;
+    captionTypewriterRef.current = setInterval(() => {
+      i = Math.min(i + charsPerStep, text.length);
+      setCaption(c => c && c.text === text ? { ...c, revealed: text.slice(0, i) } : c);
+      if (i >= text.length) {
+        clearInterval(captionTypewriterRef.current);
+        captionTypewriterRef.current = null;
+      }
+    }, stepMs);
+  };
+
+  const clearCaption = () => {
+    if (captionTypewriterRef.current) {
+      clearInterval(captionTypewriterRef.current);
+      captionTypewriterRef.current = null;
+    }
+    setCaption(null);
+  };
 
   // === Voice picker — strong gender contrast ===
   const [voicesReady, setVoicesReady] = useState(false);
@@ -505,14 +551,18 @@ export default function VirtualTravel() {
           persona: personaRef.current,
         }]);
         if (step.cartItems?.length) addToCart(step.cartItems);
-        await sleep(150); // tiny gap so UI updates before speech
+        await sleep(150);
+        showCaption(personaRef.current?.name || 'Aria', step.text, 'avatar');
         await speakAndWait(step.text, 'avatar');
+        clearCaption();
       }
 
       else if (step.type === 'user') {
         setMessages(prev => [...prev, { role: 'user', content: step.text }]);
         await sleep(150);
+        showCaption('Marco', step.text, 'user');
         await speakAndWait(step.text, 'user');
+        clearCaption();
       }
 
       else if (step.type === 'morph') {
@@ -943,6 +993,13 @@ export default function VirtualTravel() {
           {muted ? <VolumeX size={14} className="text-white/60" /> : <Volume2 size={14} className="text-gold" />}
         </button>
 
+        {/* CC / Captions toggle */}
+        <button onClick={() => setCaptionsOn(c => !c)}
+          className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition-all ${captionsOn ? 'bg-gold' : 'bg-black/40'}`}
+          aria-label="Toggle captions">
+          <Captions size={14} className={captionsOn ? 'text-white' : 'text-white/60'} />
+        </button>
+
         <button onClick={toggleAutoListen}
           className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center ${autoListen ? 'bg-gold' : 'bg-black/40'}`}>
           {autoListen ? <Pause size={14} className="text-white" /> : <Play size={14} className="text-white" />}
@@ -1043,6 +1100,29 @@ export default function VirtualTravel() {
           </div>
         )}
       </div>
+
+      {/* Cinematic caption strip (CC) */}
+      {captionsOn && caption && caption.text && (
+        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-30 max-w-3xl w-full px-5 pointer-events-none animate-fade-up">
+          <div className={`mx-auto rounded-2xl backdrop-blur-md border shadow-2xl px-5 py-3 ${
+            caption.kind === 'user'
+              ? 'bg-gold/85 border-gold/30 text-white'
+              : 'bg-black/80 border-white/15 text-white'
+          }`}>
+            <p className={`text-[10px] font-bold uppercase tracking-[0.2em] mb-1 ${
+              caption.kind === 'user' ? 'text-white/80' : 'text-gold'
+            }`}>
+              {caption.speaker}
+            </p>
+            <p className="text-base md:text-lg leading-snug font-medium">
+              {caption.revealed}
+              {caption.revealed.length < caption.text.length && (
+                <span className="inline-block w-1.5 h-4 bg-current animate-pulse ml-0.5 align-middle opacity-70" />
+              )}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Voice control bar */}
       <div className="relative z-10 pb-8 pt-3 px-5 bg-black/50 backdrop-blur-md border-t border-white/10">
