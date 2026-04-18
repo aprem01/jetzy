@@ -295,39 +295,61 @@ export default function VirtualTravel() {
     setIsSpeaking(false);
   }, []);
 
-  // Pre-warm voice list (needed on Chrome — voices load async)
+  // === Voice picker — strong gender contrast ===
+  const [voicesReady, setVoicesReady] = useState(false);
+  const [pickedVoices, setPickedVoices] = useState({ user: null, avatar: null });
+
+  // Wait for voices to load (Chrome loads async)
   useEffect(() => {
-    if (window.speechSynthesis) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-    }
+    if (!window.speechSynthesis) return;
+    const refresh = () => {
+      const v = window.speechSynthesis.getVoices();
+      if (v.length > 0) {
+        setVoicesReady(true);
+        setPickedVoices({
+          user: pickVoice('user'),
+          avatar: pickVoice('avatar'),
+        });
+      }
+    };
+    refresh();
+    window.speechSynthesis.onvoiceschanged = refresh;
   }, []);
 
-  const pickVoice = (kind) => {
-    const voices = window.speechSynthesis?.getVoices() || [];
-    if (kind === 'user') {
-      // Distinct male voice for Marco
-      return voices.find(v => v.name === 'Daniel') ||
-             voices.find(v => v.name === 'Alex') ||
-             voices.find(v => v.name.includes('Microsoft David')) ||
-             voices.find(v => v.name.includes('Google UK English Male')) ||
-             voices.find(v => v.name.includes('Male') && v.lang.startsWith('en')) ||
-             voices.find(v => v.lang === 'en-GB') ||
-             voices.find(v => v.lang.startsWith('en')) ||
-             voices[0];
-    }
-    // Avatar — prefer female-leaning English voices
-    return voices.find(v => v.name === 'Samantha') ||
-           voices.find(v => v.name === 'Karen') ||
-           voices.find(v => v.name.includes('Google US English')) ||
-           voices.find(v => v.name.includes('Microsoft Zira')) ||
-           voices.find(v => v.name.includes('Female') && v.lang.startsWith('en')) ||
-           voices.find(v => v.lang === 'en-US') ||
-           voices.find(v => v.lang.startsWith('en')) ||
-           voices[0];
-  };
+  const MALE_NAMES = ['daniel', 'alex', 'david', 'mark', 'james', 'matthew', 'fred', 'ralph', 'aaron', 'arthur', 'oliver', 'george', 'thomas', 'guy', 'ryan', 'gordon', 'rocko', 'reed', 'eddy', 'lee', 'rishi', 'edward', 'sean', 'jamie', 'tom', 'man'];
+  const FEMALE_NAMES = ['samantha', 'karen', 'zira', 'susan', 'kate', 'serena', 'allison', 'ava', 'victoria', 'tessa', 'fiona', 'moira', 'olivia', 'jenny', 'catherine', 'kathy', 'helena', 'flo', 'rocko', 'ariana', 'emma', 'sandy', 'shelley', 'grandma', 'woman'];
 
-  // Speak and resolve when finished
+  function pickVoice(kind) {
+    const voices = window.speechSynthesis?.getVoices() || [];
+    const en = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+    const isMale = (n) => MALE_NAMES.some(p => n.toLowerCase().includes(p)) || n.toLowerCase().includes('male') && !n.toLowerCase().includes('female');
+    const isFemale = (n) => FEMALE_NAMES.some(p => n.toLowerCase().includes(p)) || n.toLowerCase().includes('female');
+
+    if (kind === 'user') {
+      // Marco: explicit male voice. Prefer macOS/iOS Daniel, Alex, then Win/Chrome equivalents
+      return en.find(v => v.name === 'Daniel') ||
+             en.find(v => v.name === 'Alex') ||
+             en.find(v => v.name === 'Fred') ||
+             en.find(v => /Google UK English Male/i.test(v.name)) ||
+             en.find(v => /Microsoft.+(David|Mark|Guy|James)/i.test(v.name)) ||
+             en.find(v => isMale(v.name)) ||
+             en.find(v => v.lang === 'en-GB' && !isFemale(v.name)) ||
+             en[0] || voices[0];
+    }
+    // Avatar: explicit female voice. Prefer Samantha, Karen, Zira
+    return en.find(v => v.name === 'Samantha') ||
+           en.find(v => v.name === 'Karen') ||
+           en.find(v => v.name === 'Tessa') ||
+           en.find(v => v.name === 'Victoria') ||
+           en.find(v => v.name === 'Allison') ||
+           en.find(v => /Google US English/i.test(v.name)) ||
+           en.find(v => /Microsoft.+(Zira|Aria|Jenny|Jessa)/i.test(v.name)) ||
+           en.find(v => isFemale(v.name)) ||
+           en.find(v => v.lang === 'en-US' && !isMale(v.name)) ||
+           en[0] || voices[0];
+  }
+
+  // Speak and resolve when finished — much stronger pitch contrast
   const speakAndWait = (text, kind = 'avatar') => {
     return new Promise(resolve => {
       if (!window.speechSynthesis || muted) {
@@ -338,17 +360,19 @@ export default function VirtualTravel() {
       const u = new SpeechSynthesisUtterance(text);
 
       if (kind === 'user') {
-        u.rate = 1.0;
-        u.pitch = 0.9;
-        u.voice = pickVoice('user');
+        // Marco — DEEP & slightly faster (clearly different from avatar)
+        u.rate = 1.05;
+        u.pitch = 0.7;
+        u.voice = pickedVoices.user || pickVoice('user');
         u.onstart = () => setUserSpeaking(true);
         u.onend = () => { setUserSpeaking(false); resolve(); };
         u.onerror = () => { setUserSpeaking(false); resolve(); };
       } else {
+        // Avatar — HIGHER & slightly slower (clearly female-coded)
         const p = personaRef.current;
-        u.rate = p?.voiceRate || 0.95;
-        u.pitch = p?.voicePitch || 1.0;
-        u.voice = pickVoice('avatar');
+        u.rate = (p?.voiceRate || 0.95) * 0.97;
+        u.pitch = Math.max(1.15, (p?.voicePitch || 1.0) + 0.1);
+        u.voice = pickedVoices.avatar || pickVoice('avatar');
         u.onstart = () => setIsSpeaking(true);
         u.onend = () => { setIsSpeaking(false); resolve(); };
         u.onerror = () => { setIsSpeaking(false); resolve(); };
@@ -359,6 +383,27 @@ export default function VirtualTravel() {
       // Safety timeout — some browsers swallow onend
       setTimeout(() => resolve(), Math.max(text.length * 100, 5000));
     });
+  };
+
+  // Quick voice preview (used on entry screen)
+  const previewVoice = (kind) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(
+      kind === 'user'
+        ? "Hey, this is me — Marco. I'm planning a trip to Patagonia."
+        : "Hi Marco, I'm your travel companion. I'll take you anywhere."
+    );
+    if (kind === 'user') {
+      u.rate = 1.05;
+      u.pitch = 0.7;
+      u.voice = pickedVoices.user || pickVoice('user');
+    } else {
+      u.rate = 0.92;
+      u.pitch = 1.15;
+      u.voice = pickedVoices.avatar || pickVoice('avatar');
+    }
+    window.speechSynthesis.speak(u);
   };
 
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -647,10 +692,33 @@ export default function VirtualTravel() {
               <PlayCircle size={22} className="text-gold" />
               <div className="text-left">
                 <p className="font-bold text-sm">Watch the Auto Demo</p>
-                <p className="text-white/50 text-[11px]">Patagonia hiking trip — full end-to-end · 90 sec</p>
+                <p className="text-white/50 text-[11px]">10-day Argentina journey — both voices · 2 min</p>
               </div>
             </div>
           </button>
+
+          {/* Voice preview */}
+          {voicesReady && (
+            <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm mb-5">
+              <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider mb-2.5 flex items-center gap-1">
+                <Volume2 size={11} className="text-gold" /> Preview the demo voices
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={() => previewVoice('user')}
+                  className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
+                  <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Marco · You</p>
+                  <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">{pickedVoices.user?.name || 'default'}</p>
+                  <p className="text-[10px] text-gold mt-1 flex items-center gap-1"><Play size={9} /> Tap to hear</p>
+                </button>
+                <button onClick={() => previewVoice('avatar')}
+                  className="p-3 bg-cream rounded-xl text-left active:scale-95 transition-transform border border-gray-100">
+                  <p className="text-[10px] font-bold text-charcoal-light uppercase tracking-wider">Aria · Avatar</p>
+                  <p className="text-xs font-semibold text-charcoal mt-0.5 truncate">{pickedVoices.avatar?.name || 'default'}</p>
+                  <p className="text-[10px] text-gold mt-1 flex items-center gap-1"><Play size={9} /> Tap to hear</p>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* How it works */}
           <div className="p-5 bg-white rounded-3xl border border-gold/20 shadow-sm">
