@@ -8,9 +8,10 @@
 // more emotion, higher similarity = closer to original voice).
 
 export const VOICE_MARCO = {
-  id: 'nPczCjzI2devNBz1zQrb', // Brian — warm American male, conversational
-  name: 'Brian',
-  settings: { stability: 0.4, similarity: 0.9, style: 0.4, speakerBoost: true },
+  id: 'pqHfZKP75CvOlQylNhV4', // Bill — trustworthy, narrative, natural-sounding
+  name: 'Bill',
+  // Higher stability + lower style = less synthetic, more grounded delivery
+  settings: { stability: 0.55, similarity: 0.85, style: 0.25, speakerBoost: true },
 };
 
 export const VOICE_AVATAR_DEFAULT = {
