@@ -294,8 +294,9 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Catena Zapata · Tasting',
-    // Hand-picked: Kelly 66s slow-motion red wine pour into glass 1080p — premium look
-    video: 'https://videos.pexels.com/video-files/20243314/20243314-hd_1920_1080_24fps.mp4',
+    // Hand-picked: Los Muertos Crew 20s normal-speed wine pour 1080p
+    // (slow-mo previous one looked weird on iPhone)
+    video: 'https://videos.pexels.com/video-files/8849303/8849303-hd_1920_1080_24fps.mp4',
     image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
     pause: 300,
   },
