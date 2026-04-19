@@ -108,6 +108,63 @@ export default function VirtualTravel() {
   const demoModeRef = useRef(false);
   useEffect(() => { demoModeRef.current = demoMode; }, [demoMode]);
 
+  // Shotstack render
+  const [renderState, setRenderState] = useState('idle'); // idle, rendering, done, error
+  const [renderUrl, setRenderUrl] = useState(null);
+  const [renderProgress, setRenderProgress] = useState('');
+  const [renderId, setRenderId] = useState(null);
+
+  const startRender = async () => {
+    setRenderState('rendering');
+    setRenderUrl(null);
+    setRenderProgress('Starting render...');
+    try {
+      const r = await fetch('/api/render-demo', { method: 'POST' });
+      const data = await r.json();
+      if (!data?.id) {
+        setRenderState('error');
+        setRenderProgress(data?.error || 'Failed to start render');
+        return;
+      }
+      setRenderId(data.id);
+      pollRender(data.id);
+    } catch (e) {
+      setRenderState('error');
+      setRenderProgress(e.message);
+    }
+  };
+
+  const pollRender = async (id) => {
+    let tries = 0;
+    const maxTries = 120; // ~6 minutes
+    const tick = async () => {
+      tries++;
+      try {
+        const r = await fetch(`/api/render-status?id=${id}`);
+        const data = await r.json();
+        const status = data?.status || 'unknown';
+        setRenderProgress(`Status: ${status}${tries > 1 ? ` (${tries * 3}s)` : ''}`);
+        if (status === 'done' && data.url) {
+          setRenderState('done');
+          setRenderUrl(data.url);
+          setRenderProgress('Done!');
+          return;
+        }
+        if (status === 'failed') {
+          setRenderState('error');
+          setRenderProgress(data.error || 'Render failed');
+          return;
+        }
+        if (tries < maxTries) setTimeout(tick, 3000);
+        else { setRenderState('error'); setRenderProgress('Timeout — render still pending. Check Shotstack dashboard.'); }
+      } catch (e) {
+        if (tries < maxTries) setTimeout(tick, 3000);
+        else { setRenderState('error'); setRenderProgress(e.message); }
+      }
+    };
+    tick();
+  };
+
   const recognitionRef = useRef(null);
   const isSpeakingRef = useRef(false);
   const autoListenRef = useRef(true);
@@ -921,6 +978,66 @@ export default function VirtualTravel() {
               </div>
             </div>
           </button>
+
+          {/* Shotstack render — Generate shareable MP4 */}
+          <div className="mb-3">
+            {renderState === 'idle' && (
+              <button onClick={startRender}
+                className="w-full p-4 bg-white border-2 border-charcoal rounded-2xl shadow-md active:scale-[0.98] transition-transform">
+                <div className="flex items-center justify-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-charcoal flex items-center justify-center">
+                    <PlayCircle size={18} className="text-gold" />
+                  </div>
+                  <div className="text-left">
+                    <p className="font-bold text-sm text-charcoal">Generate Shareable Video</p>
+                    <p className="text-charcoal-light text-[11px]">Render an MP4 to share — takes 1-3 min</p>
+                  </div>
+                </div>
+              </button>
+            )}
+            {renderState === 'rendering' && (
+              <div className="w-full p-4 bg-white border border-gold/30 rounded-2xl shadow-md">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-9 h-9 rounded-xl gradient-gold flex items-center justify-center animate-pulse">
+                    <Sparkles size={18} className="text-white" />
+                  </div>
+                  <div className="text-left flex-1">
+                    <p className="font-bold text-sm text-charcoal">Rendering your video...</p>
+                    <p className="text-charcoal-light text-[11px]">{renderProgress}</p>
+                  </div>
+                </div>
+                <div className="w-full h-1.5 bg-cream rounded-full overflow-hidden">
+                  <div className="h-full gradient-gold animate-pulse" style={{ width: '60%' }} />
+                </div>
+                <p className="text-[10px] text-charcoal-light mt-1.5 text-center">First render usually takes 90-180 seconds</p>
+              </div>
+            )}
+            {renderState === 'done' && renderUrl && (
+              <div className="w-full p-4 bg-white border-2 border-green-500 rounded-2xl shadow-md animate-fade-up">
+                <p className="text-[10px] font-bold text-green-600 uppercase tracking-wider mb-2 text-center">✓ Video Ready</p>
+                <video controls src={renderUrl} className="w-full rounded-xl mb-2" preload="metadata" />
+                <div className="flex gap-2">
+                  <a href={renderUrl} target="_blank" rel="noreferrer" download
+                    className="flex-1 py-2.5 gradient-gold rounded-xl text-white text-xs font-bold text-center active:scale-95 transition-transform">
+                    Download MP4
+                  </a>
+                  <button onClick={() => { navigator.clipboard?.writeText(renderUrl); }}
+                    className="flex-1 py-2.5 bg-charcoal rounded-xl text-white text-xs font-bold active:scale-95 transition-transform">
+                    Copy Link
+                  </button>
+                </div>
+                <button onClick={() => { setRenderState('idle'); setRenderUrl(null); }}
+                  className="w-full mt-2 py-1.5 text-[10px] text-charcoal-light">Render again</button>
+              </div>
+            )}
+            {renderState === 'error' && (
+              <div className="w-full p-4 bg-red-50 border border-red-200 rounded-2xl">
+                <p className="text-xs font-bold text-red-700 mb-1">Render failed</p>
+                <p className="text-[11px] text-red-600">{renderProgress}</p>
+                <button onClick={() => setRenderState('idle')} className="mt-2 text-xs text-charcoal-light underline">Try again</button>
+              </div>
+            )}
+          </div>
 
           {/* Voice preview — ElevenLabs */}
           <div className="p-4 bg-white rounded-2xl border border-gold/30 shadow-sm mb-5">
