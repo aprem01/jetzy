@@ -65,7 +65,8 @@ const SCENES = [
   {
     type: 'video',
     duration: 5,
-    src: 'https://videos.pexels.com/video-files/32881620/14014157_1920_1080_25fps.mp4',
+    // Using older URL format that Shotstack can fetch (32881620 path is blocked)
+    src: 'https://videos.pexels.com/video-files/8318417/8318417-hd_1920_1080_25fps.mp4',
     caption: 'Day 7 — Perito Moreno glacier. Big Ice trek.',
   },
   // Mendoza
