@@ -31,7 +31,8 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Welcome',
-    queries: ['Mount Kilimanjaro Tanzania', 'Serengeti national park safari'],
+    // Hand-picked: Alex Levis aerial Kilimanjaro 50s 1080p — single video, no rotation
+    video: 'https://videos.pexels.com/video-files/35646306/15106052_1920_1080_30fps.mp4',
     image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600&h=1000&fit=crop',
     pause: 200,
   },
@@ -112,7 +113,8 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Don Julio · Palermo',
-    queries: ['argentine asado grill', 'steak being cooked slow grill'],
+    // Hand-picked: Calvin Lee 31s person grilling steak 1080p (real grilling, not just close-up)
+    video: 'https://videos.pexels.com/video-files/7174763/7174763-hd_1920_1080_30fps.mp4',
     image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=1600&h=1000&fit=crop',
     dayLabel: 'Day 1 — Don Julio',
     dayNumber: 1,
@@ -292,7 +294,8 @@ export const PATAGONIA_DEMO = [
   {
     type: 'background',
     location: 'Catena Zapata · Tasting',
-    queries: ['red wine pour glass slow motion', 'wine cellar barrels candle'],
+    // Hand-picked: Kelly 66s slow-motion red wine pour into glass 1080p — premium look
+    video: 'https://videos.pexels.com/video-files/20243314/20243314-hd_1920_1080_24fps.mp4',
     image: 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1600&h=1000&fit=crop',
     pause: 300,
   },
