@@ -44,6 +44,7 @@ export const TOURS = [
         duration: 5.712,
         camera: { lng: -58.4239, lat: -34.5895, height: 4_500, pitch: -0.35 },
         marker: { name: 'Mio Hotel · Palermo', lat: -34.5895, lng: -58.4239 },
+        autoStreetView: { delayMs: 2200 },
         cart: [
           { name: 'Mio Hotel · Palermo', kind: 'hotel', price: 280, day: 1 },
         ],
@@ -68,6 +69,7 @@ export const TOURS = [
         duration: 1.579,
         camera: { lng: -58.4338, lat: -34.5867, height: 1_500, pitch: -0.3 },
         marker: { name: 'Don Julio Steakhouse', lat: -34.5867, lng: -58.4338 },
+        autoStreetView: { delayMs: 400 },
         cart: [
           { name: "Dinner · Don Julio", kind: 'meal', price: 95, day: 1 },
         ],
@@ -92,6 +94,7 @@ export const TOURS = [
         duration: 6.269,
         camera: { lng: -72.8869, lat: -49.3315, height: 35_000, pitch: -0.5 },
         marker: { name: 'Senderos Hostería · El Chaltén', lat: -49.3315, lng: -72.8869 },
+        autoStreetView: { delayMs: 2800 },
         cart: [
           { name: 'Senderos Hostería · 4 nights', kind: 'hotel', price: 760, day: 3 },
         ],
@@ -172,6 +175,7 @@ export const TOURS = [
         duration: 5.433,
         camera: { lng: -68.8447, lat: -33.0048, height: 8_000, pitch: -0.35 },
         marker: { name: 'Cavas Wine Lodge · Mendoza', lat: -33.0048, lng: -68.8447 },
+        autoStreetView: { delayMs: 2200 },
         cart: [
           { name: 'Cavas Wine Lodge · 1 night', kind: 'hotel', price: 420, day: 8 },
           { name: 'Catena Zapata tasting', kind: 'experience', price: 180, day: 8 },

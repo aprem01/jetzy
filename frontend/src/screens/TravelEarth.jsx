@@ -431,19 +431,22 @@ export default function TravelEarth() {
     setCurrentSpeaker('aria');
     setAriaVideo(null);
     setShowBooked(false);
+    setStreetView(null);
     stopBackgroundMusic();
   }, []);
 
-  const playStep = useCallback((step) => {
+  const playStep = useCallback((step, { isFirst = false } = {}) => {
     return new Promise((resolve) => {
       if (tourAbortRef.current) return resolve();
 
-      // Camera fly first (non-blocking — runs in parallel with audio/video).
+      // Camera fly. The first step gets a longer, more cinematic settle so the
+      // viewer has time to register the new location before Aria starts talking.
+      const flyDuration = isFirst ? 4.5 : 3;
       if (step.camera) {
         flyTo(step.camera.lng, step.camera.lat, {
           height: step.camera.height,
           pitch: step.camera.pitch,
-          duration: 3,
+          duration: flyDuration,
         });
       }
 
@@ -473,12 +476,31 @@ export default function TravelEarth() {
       setAriaLine(step.text);
       setIsSpeaking(true);
 
+      // Auto-open Street View at venue stops so the viewer is taken inside
+      // the actual restaurant / hotel during the narration. Closes when the
+      // step finishes so we transition cleanly back to the globe view.
+      let streetViewTimer = null;
+      if (step.autoStreetView && step.marker?.lat && step.marker?.lng) {
+        const delay = step.autoStreetView.delayMs ?? 1500;
+        streetViewTimer = setTimeout(() => {
+          if (tourAbortRef.current) return;
+          setStreetView({
+            lat: step.marker.lat,
+            lng: step.marker.lng,
+            name: step.marker.name,
+          });
+        }, delay);
+      }
+
       // Prefer the Hedra-rendered talking video (audio baked in). For Marco
       // lines or any step missing a video, fall back to the audio-only path.
       const useVideo = !!step.video;
       setAriaVideo(useVideo ? step.video : null);
 
       const finish = () => {
+        if (streetViewTimer) clearTimeout(streetViewTimer);
+        // Close any auto-opened Street View as we move to the next step.
+        if (step.autoStreetView) setStreetView(null);
         if (tourAudioRef.current) tourAudioRef.current = null;
         setIsSpeaking(false);
         setTimeout(resolve, 250);
@@ -546,10 +568,24 @@ export default function TravelEarth() {
     // Kick off the cinematic ambient track. Silently skips if no asset.
     startBackgroundMusic();
 
+    // Pre-flight: fly camera to the FIRST step's location and let it settle
+    // before we start playing audio. Without this beat the camera and Aria
+    // both arrive at once and the opener feels rushed / misaligned.
+    const first = t.steps[0];
+    if (first?.camera) {
+      flyTo(first.camera.lng, first.camera.lat, {
+        height: first.camera.height,
+        pitch: first.camera.pitch,
+        duration: 4.5,
+      });
+      // Wait the bulk of the fly so the user sees the destination land.
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+
     for (let i = 0; i < t.steps.length; i++) {
       if (tourAbortRef.current) break;
       setTourStepIndex(i);
-      await playStep(t.steps[i]);
+      await playStep(t.steps[i], { isFirst: i === 0 });
     }
 
     if (!tourAbortRef.current) {
@@ -1124,49 +1160,70 @@ export default function TravelEarth() {
         </div>
       )}
 
-      {/* === STREET VIEW MODAL === */}
-      {streetView && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col">
-          {/* header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/50 flex items-center justify-center">
-                <Compass size={16} className="text-[#C9A84C]" />
-              </div>
-              <div>
-                <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-0.5">
-                  STREET VIEW
-                </div>
-                <div className="font-display text-base text-white leading-tight">
-                  {streetView.name || 'You are here'}
-                </div>
-              </div>
-            </div>
-            <button
-              onClick={() => setStreetView(null)}
-              className="w-10 h-10 rounded-full bg-black/60 border border-white/10 hover:bg-red-500/30 hover:border-red-400/60 text-white flex items-center justify-center transition-colors"
-              aria-label="Close Street View"
+      {/* === STREET VIEW MODAL ===
+           In tour mode: centered window (75% screen), HUD stays visible, lower z.
+           Manual: full-screen takeover. */}
+      {streetView && (() => {
+        const inTour = !!tour;
+        return (
+          <div
+            className={
+              inTour
+                ? 'absolute inset-0 z-20 flex items-center justify-center px-6 pointer-events-none'
+                : 'fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col'
+            }
+          >
+            <div
+              className={
+                inTour
+                  ? 'pointer-events-auto w-[min(900px,80vw)] h-[min(560px,68vh)] rounded-2xl overflow-hidden border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)] flex flex-col bg-black'
+                  : 'flex flex-col w-full h-full'
+              }
             >
-              <X size={18} />
-            </button>
-          </div>
-          {/* iframe */}
-          <div className="flex-1 relative">
-            <iframe
-              key={`${streetView.lat}-${streetView.lng}`}
-              title="Street View"
-              src={`https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_MAPS_KEY}&location=${streetView.lat},${streetView.lng}&heading=210&pitch=0&fov=80`}
-              className="w-full h-full border-0"
-              allow="accelerometer; gyroscope; fullscreen"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-            {/* small footer hint */}
-            <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full backdrop-blur-md bg-black/60 border border-white/10 text-xs text-white/70">
-              Drag to look around · arrows to walk
+              {/* header */}
+              <div className="flex items-center justify-between px-5 py-3 bg-black/85 border-b border-white/10">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/50 flex items-center justify-center">
+                    <Compass size={14} className="text-[#C9A84C]" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-0.5">
+                      STREET VIEW
+                    </div>
+                    <div className="font-display text-sm text-white leading-tight">
+                      {streetView.name || 'You are here'}
+                    </div>
+                  </div>
+                </div>
+                {!inTour && (
+                  <button
+                    onClick={() => setStreetView(null)}
+                    className="w-9 h-9 rounded-full bg-black/60 border border-white/10 hover:bg-red-500/30 hover:border-red-400/60 text-white flex items-center justify-center transition-colors"
+                    aria-label="Close Street View"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              {/* iframe */}
+              <div className="flex-1 relative">
+                <iframe
+                  key={`${streetView.lat}-${streetView.lng}`}
+                  title="Street View"
+                  src={`https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_MAPS_KEY}&location=${streetView.lat},${streetView.lng}&heading=210&pitch=0&fov=80`}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; gyroscope; fullscreen"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+                {/* footer hint */}
+                <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full backdrop-blur-md bg-black/60 border border-white/10 text-[11px] text-white/70">
+                  {inTour ? 'You are inside · Aria continues' : 'Drag to look around · arrows to walk'}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* === DEBUG HUD (always-on screen log so we can debug without DevTools) === */}
       <div className="absolute top-20 right-4 z-40 max-w-[min(440px,90vw)]">
