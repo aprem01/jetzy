@@ -91,6 +91,7 @@ export default function TravelEarth() {
   const [tourStepIndex, setTourStepIndex] = useState(-1);
   const [activeSubSpotlight, setActiveSubSpotlight] = useState(0); // for steps with spotlights[]
   const tourAudioRef = useRef(null);
+  const tourSharedAudioRef = useRef(null); // single Audio element reused across all tour steps (iOS limit workaround)
   const tourAbortRef = useRef(false);
   const subSpotlightTimersRef = useRef([]);
 
@@ -669,40 +670,36 @@ export default function TravelEarth() {
           }
         }
 
-        // Play the audio / video — finish() resolves the step
+        // Audio/video playback — uses the SHARED Audio element (primed in
+        // startTour) for all audio fallbacks, never creates new ones, so we
+        // don't trip iOS Safari's ~6-Audio-element limit.
+        const playSharedAudio = (src) => {
+          const a = tourSharedAudioRef.current;
+          if (!a) return;
+          tourAudioRef.current = a;
+          a.onended = finish;
+          a.onerror = finish;
+          a.src = src;
+          a.currentTime = 0;
+          a.muted = false;
+          a.play().catch(() => finish());
+        };
+
         if (useVideo) {
           setTimeout(() => {
             if (tourAbortRef.current) return resolve();
             const v = ariaVideoRef.current;
-            if (!v) {
-              const audio = new Audio(step.audio);
-              tourAudioRef.current = audio;
-              audio.onended = finish;
-              audio.onerror = finish;
-              audio.play().catch(finish);
-              return;
-            }
+            if (!v) { playSharedAudio(step.audio); return; }
             v.currentTime = 0;
             v.muted = false;
             v.onended = finish;
             v.onerror = finish;
-            v.play().catch(() => {
-              const audio = new Audio(step.audio);
-              tourAudioRef.current = audio;
-              audio.onended = finish;
-              audio.onerror = finish;
-              audio.play().catch(finish);
-            });
+            v.play().catch(() => playSharedAudio(step.audio));
           }, 80);
         } else {
-          const audio = new Audio(step.audio);
-          audio.preload = 'auto';
-          tourAudioRef.current = audio;
-          audio.onended = finish;
-          audio.onerror = finish;
           setTimeout(() => {
             if (tourAbortRef.current) return resolve();
-            audio.play().catch(() => finish());
+            playSharedAudio(step.audio);
           }, 200);
         }
       }, settleMs);
@@ -720,32 +717,42 @@ export default function TravelEarth() {
     }
 
     // === iOS AUTOPLAY UNLOCK ===
-    // iOS Safari blocks audio/video playback initiated from setTimeout —
-    // it must originate from a user gesture. Workaround: synchronously
-    // (inside this click handler) "prime" every audio + video file the
-    // tour will play. We start each one paused-then-immediately-paused so
-    // iOS marks them as "user-initiated" — subsequent .play() calls from
-    // setTimeout are then allowed.
+    // iOS Safari has TWO problems for our use case:
+    //   1. play() must originate from a user gesture, not setTimeout
+    //   2. Hard limit of ~6 Audio elements per page (creating more silently
+    //      fails after the limit), and gesture-priming is element-specific
+    //      so a primed element can't authorize a different one later
+    //
+    // Fix: the SAME single Audio element gets reused across all tour steps
+    // by mutating its `src`. We prime it once here (inside the gesture) by
+    // setting src to the first step and calling play()+pause(). Any future
+    // play() on this element from any context is then allowed.
+    if (!tourSharedAudioRef.current) {
+      tourSharedAudioRef.current = new Audio();
+      tourSharedAudioRef.current.preload = 'auto';
+    }
     try {
-      t.steps.forEach((step) => {
-        if (step.audio) {
-          const a = new Audio(step.audio);
-          a.preload = 'auto';
-          // Triggering play() then pause() inside a gesture is enough to
-          // mark the element as "user-activated" on iOS.
-          a.play().then(() => a.pause()).catch(() => {});
-        }
-        if (step.video) {
-          // Video priming via a temporary off-screen element. The actual
-          // <video> in the DOM will benefit from the same gesture context.
-          const v = document.createElement('video');
-          v.src = step.video;
-          v.preload = 'auto';
-          v.playsInline = true;
-          v.muted = true;
-          v.play().then(() => v.pause()).catch(() => {});
-        }
-      });
+      const sharedAudio = tourSharedAudioRef.current;
+      const firstStepAudio = t.steps.find((s) => s.audio)?.audio;
+      if (firstStepAudio) {
+        sharedAudio.src = firstStepAudio;
+        sharedAudio.muted = true;
+        sharedAudio.play().then(() => {
+          sharedAudio.pause();
+          sharedAudio.muted = false;
+          sharedAudio.currentTime = 0;
+        }).catch(() => {});
+      }
+      // Prime the in-DOM <video> element too — it's the same element each
+      // step (we just change its src), so a single gesture-prime unlocks it.
+      const v = ariaVideoRef.current;
+      if (v) {
+        v.muted = true;
+        v.play().then(() => {
+          v.pause();
+          v.muted = false;
+        }).catch(() => {});
+      }
     } catch {}
 
     // Stop ANY in-flight audio first — live-concierge ElevenLabs, prior tour
