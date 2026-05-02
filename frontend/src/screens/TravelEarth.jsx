@@ -644,11 +644,14 @@ export default function TravelEarth() {
           });
         }
 
-        // Auto-open the Step Inside fullscreen carousel 1.8s after spotlight
+        // Auto-open the Step Inside carousel 1.8s after spotlight reveals.
+        // Skipped on mobile (<640px) because the modal would cover the photo-
+        // real Google globe — on phones the spotlight + camera fly carry it.
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
         const sp0 = Array.isArray(step.spotlights) && step.spotlights.length > 0
           ? step.spotlights[0]
           : step.spotlight;
-        if (sp0 && step.duration > 3) {
+        if (!isMobile && sp0 && step.duration > 3) {
           const insidePhotos = [
             ...(sp0.image ? [sp0.image] : []),
             ...(Array.isArray(sp0.interior) ? sp0.interior : []),
