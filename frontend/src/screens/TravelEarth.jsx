@@ -719,6 +719,35 @@ export default function TravelEarth() {
       audioUnlockedRef.current = true;
     }
 
+    // === iOS AUTOPLAY UNLOCK ===
+    // iOS Safari blocks audio/video playback initiated from setTimeout —
+    // it must originate from a user gesture. Workaround: synchronously
+    // (inside this click handler) "prime" every audio + video file the
+    // tour will play. We start each one paused-then-immediately-paused so
+    // iOS marks them as "user-initiated" — subsequent .play() calls from
+    // setTimeout are then allowed.
+    try {
+      t.steps.forEach((step) => {
+        if (step.audio) {
+          const a = new Audio(step.audio);
+          a.preload = 'auto';
+          // Triggering play() then pause() inside a gesture is enough to
+          // mark the element as "user-activated" on iOS.
+          a.play().then(() => a.pause()).catch(() => {});
+        }
+        if (step.video) {
+          // Video priming via a temporary off-screen element. The actual
+          // <video> in the DOM will benefit from the same gesture context.
+          const v = document.createElement('video');
+          v.src = step.video;
+          v.preload = 'auto';
+          v.playsInline = true;
+          v.muted = true;
+          v.play().then(() => v.pause()).catch(() => {});
+        }
+      });
+    } catch {}
+
     // Stop ANY in-flight audio first — live-concierge ElevenLabs, prior tour
     // audio/video, leftover live-scene timers — so we don't get voice overlap.
     try { stopEleven(); } catch {}
@@ -839,7 +868,7 @@ export default function TravelEarth() {
         : 'Ready';
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden">
+    <div className="fixed inset-0 bg-black overflow-hidden" style={{ height: '100dvh' }}>
       {/* Cesium globe — full screen behind everything */}
       <div className="absolute inset-0">
         <Viewer
@@ -1129,7 +1158,7 @@ export default function TravelEarth() {
             key={rotating ? `${tourStepIndex}-${activeSubSpotlight}` : tourStepIndex}
             className="absolute top-20 right-3 sm:right-6 z-30 w-[min(420px,calc(100vw-1.5rem))] animate-fade-up rounded-2xl overflow-y-auto overscroll-contain backdrop-blur-xl bg-black/85 border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
             style={{
-              maxHeight: 'calc(100vh - 7rem)',
+              maxHeight: 'calc(100dvh - 8rem)',
               overflowY: 'scroll',
               touchAction: 'pan-y',
               WebkitOverflowScrolling: 'touch',
