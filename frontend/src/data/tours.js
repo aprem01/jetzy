@@ -54,6 +54,7 @@ export const TOURS = [
   // ─── ARGENTINA ─────────────────────────────────────────────────────────
   {
     id: T.ARGENTINA,
+    featured: true,
     title: 'Argentina · 8 Days',
     subtitle: 'Buenos Aires · El Chaltén · Mendoza',
     estSeconds: 60,
@@ -89,8 +90,8 @@ export const TOURS = [
         spotlight: {
           name: 'Faena Hotel',
           subtitle: 'Philippe Starck · Puerto Madero · Buenos Aires',
-          image: '/venue-photos/faena-hotel.jpg',
-          interior: ['/venue-photos/inside/faena-inside-1.jpg', '/venue-photos/inside/faena-inside-2.jpg'],
+          image: '/venue-photos/luxury/faena-hero.jpg',
+          interior: ['/venue-photos/luxury/faena-inside.jpg', '/venue-photos/luxury/faena-inside.jpg'],
           tag: 'STAY · DAY 1',
           details: [
             { label: 'Address', value: 'Martha Salotti 445, Puerto Madero' },
@@ -126,8 +127,8 @@ export const TOURS = [
         spotlight: {
           name: 'Don Julio',
           subtitle: "World's 50 Best #14 · Argentine parrilla",
-          image: '/venue-photos/don-julio.jpg',
-          interior: ['/venue-photos/inside/don-julio-inside-1.jpg'],
+          image: '/venue-photos/luxury/don-julio-hero.jpg',
+          interior: ['/venue-photos/luxury/don-julio-inside.jpg'],
           tag: 'EAT · DAY 1 · DINNER',
           details: [
             { label: 'Address', value: 'Guatemala 4699, Palermo' },
@@ -163,8 +164,8 @@ export const TOURS = [
         spotlight: {
           name: 'Eolo · Patagonia\'s Spirit',
           subtitle: 'Nat Geo Unique Lodge · Relais & Châteaux',
-          image: '/venue-photos/eolo-lodge.jpg',
-          interior: ['/venue-photos/inside/eolo-inside-1.jpg'],
+          image: '/venue-photos/luxury/eolo-hero.jpg',
+          interior: ['/venue-photos/luxury/eolo-inside.jpg'],
           tag: 'STAY · DAY 3-6',
           details: [
             { label: 'Location',  value: '17 km off RP-11, El Calafate' },
@@ -198,8 +199,8 @@ export const TOURS = [
         spotlight: {
           name: 'Fitz Roy · Sunrise',
           subtitle: "Laguna de los Tres at first light · the Patagonia logo",
-          image: '/venue-photos/fitz-roy.jpg',
-          interior: ['/venue-photos/inside/fitz-roy-inside-1.jpg'],
+          image: '/venue-photos/luxury/fitz-roy-hero.jpg',
+          interior: ['/venue-photos/luxury/fitz-roy-inside.jpg'],
           tag: 'DO · DAY 4',
           details: [
             { label: 'Guide',    value: 'Lucas · 12 yrs · Spanish + English' },
@@ -240,8 +241,8 @@ export const TOURS = [
         spotlight: {
           name: 'Perito Moreno · Big Ice',
           subtitle: 'Hielo y Aventura · IFMGA-certified glacier trek',
-          image: '/venue-photos/perito-moreno.jpg',
-          interior: ['/venue-photos/inside/perito-moreno-inside-1.jpg'],
+          image: '/venue-photos/luxury/perito-hero.jpg',
+          interior: ['/venue-photos/luxury/perito-inside.jpg'],
           tag: 'DO · DAY 7',
           details: [
             { label: 'Operator', value: 'Hielo y Aventura · since 1989' },
@@ -283,8 +284,8 @@ export const TOURS = [
             startMs: 0,
             name: 'Cavas Wine Lodge',
             subtitle: 'Standalone Cavas with plunge pool · Mendoza',
-            image: '/venue-photos/cavas-mendoza.jpg',
-            interior: ['/venue-photos/inside/cavas-inside-1.jpg'],
+            image: '/venue-photos/luxury/cavas-hero.jpg',
+            interior: ['/venue-photos/luxury/cavas-inside.jpg'],
             tag: 'STAY · DAY 8',
             details: [
               { label: 'Address', value: 'Costaflores, Alto Agrelo' },
@@ -298,7 +299,8 @@ export const TOURS = [
             startMs: 2700,
             name: "Francis Mallmann · 1884",
             subtitle: '7-course menu cooked over open fire',
-            image: '/venue-photos/mallmann-1884.jpg',
+            image: '/venue-photos/luxury/mallmann-hero.jpg',
+            interior: ['/venue-photos/luxury/mallmann-inside.jpg'],
             tag: 'EAT · DAY 8 · DINNER',
             details: [
               { label: 'Chef',     value: 'Francis Mallmann · Chef\'s Table' },
@@ -312,8 +314,8 @@ export const TOURS = [
             startMs: 5400,
             name: 'Catena Zapata · Pyramid',
             subtitle: 'Iconic Mayan-temple winery · Adrianna Vineyard',
-            image: '/venue-photos/catena-zapata.jpg',
-            interior: ['/venue-photos/inside/catena-inside-1.jpg'],
+            image: '/venue-photos/luxury/catena-hero.jpg',
+            interior: ['/venue-photos/luxury/catena-inside.jpg'],
             tag: 'DO · DAY 9',
             details: [
               { label: 'Estate',   value: 'Bodega Catena Zapata · since 1902' },

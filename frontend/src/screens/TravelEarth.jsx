@@ -146,6 +146,26 @@ export default function TravelEarth() {
     return () => cancelAnimationFrame(raf);
   }, [cartTotal]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Dramatic 1.8s climb-from-zero on the Booked end card total.
+  useEffect(() => {
+    if (!showBooked) return;
+    setDisplayedTotal(0);
+    const target = cartTotal;
+    const duration = 1800;
+    const t0 = performance.now();
+    let raf;
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / duration);
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplayedTotal(Math.round(target * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    // small delay so the user sees the "Booked." headline land first
+    const startDelay = setTimeout(() => { raf = requestAnimationFrame(tick); }, 600);
+    return () => { clearTimeout(startDelay); cancelAnimationFrame(raf); };
+  }, [showBooked]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
@@ -310,7 +330,9 @@ export default function TravelEarth() {
     }
   }, []);
 
-  // Fly the camera to a coordinate.
+  // Fly the camera with cinematic easing (slow start, slow end). Cesium's
+  // default linear easing makes camera moves feel mechanical; QUARTIC_IN_OUT
+  // gives a more deliberate, "movie cinematographer" feel.
   const flyTo = useCallback((lng, lat, opts = {}) => {
     const v = viewerRef.current?.cesiumElement;
     if (!v) return;
@@ -320,6 +342,7 @@ export default function TravelEarth() {
         destination: Cesium.Cartesian3.fromDegrees(lng, lat, height),
         duration,
         orientation: { heading, pitch, roll: 0 },
+        easingFunction: Cesium.EasingFunction?.QUARTIC_IN_OUT,
       });
       if (!silent) playWhoosh();
     } catch (e) {
@@ -539,20 +562,22 @@ export default function TravelEarth() {
     return new Promise((resolve) => {
       if (tourAbortRef.current) return resolve();
 
-      // Camera fly. Each step can declare its own fly duration so we land
-      // before Aria finishes the line; the first step gets a longer settle
-      // so the destination has time to register before narration begins.
+      // Cinematic pacing — slowed for the polished demo. Bumped from 2.6s
+      // base / 4.5s first-step to 4s base / 6s first-step. Investor needs a
+      // beat to feel the destination before anything appears on screen.
+      const flyDur = step.camera?.duration ?? (isFirst ? 6.0 : 4.0);
       if (step.camera) {
-        const dur = step.camera.duration ?? (isFirst ? 4.5 : 2.6);
         flyTo(step.camera.lng, step.camera.lat, {
           height: step.camera.height,
           pitch: step.camera.pitch,
           heading: step.camera.heading ?? 0,
-          duration: dur,
+          duration: flyDur,
         });
       }
 
-      // Marker + cart mutations on step start (so user sees them appear live).
+      // Marker drops immediately (subtle), but cart + spotlight + audio all
+      // wait for a "settle" beat after the camera lands so the photo + place
+      // can breathe for ~1.2s before the UI starts assembling.
       if (step.marker) {
         const m = step.marker;
         setMarkers((prev) =>
@@ -560,133 +585,131 @@ export default function TravelEarth() {
         );
         setCurrentLocation({ name: m.name, lat: m.lat, lng: m.lng });
       }
-      if (Array.isArray(step.cart) && step.cart.length > 0) {
-        setCart((prev) => {
-          const have = new Set(prev.map((i) => i.name?.toLowerCase()));
-          const fresh = step.cart.filter(
-            (i) => i?.name && !have.has(i.name.toLowerCase()),
-          );
-          if (fresh.length > 0) {
-            // Slight delay so the chime lands after the camera whoosh.
-            setTimeout(() => playChime(), 350);
-          }
-          return [...prev, ...fresh];
-        });
-      }
 
-      setCurrentSpeaker(step.speaker || 'aria');
-      setAriaLine(step.text);
-      setIsSpeaking(true);
-
-      // Reset rotating sub-spotlights to index 0 and schedule transitions for
-      // each one based on its startMs so the right venue card is on screen at
-      // the moment Aria names it in the audio.
+      // Reset rotating sub-spotlights to index 0
       setActiveSubSpotlight(0);
       subSpotlightTimersRef.current.forEach((t) => clearTimeout(t));
       subSpotlightTimersRef.current = [];
-      if (Array.isArray(step.spotlights) && step.spotlights.length > 1) {
-        step.spotlights.forEach((sp, i) => {
-          if (i === 0) return;
-          const t = setTimeout(() => {
-            if (tourAbortRef.current) return;
-            setActiveSubSpotlight(i);
-          }, sp.startMs ?? 0);
-          subSpotlightTimersRef.current.push(t);
-        });
-      }
 
-      // Auto-open the "Step Inside" interior gallery a beat after the
-      // spotlight appears, if the spotlight has interior photos. Plays in
-      // an inset window so the Aria avatar + caption stay visible — viewer
-      // is taken inside the venue without clicking anything.
-      const sp0 = Array.isArray(step.spotlights) && step.spotlights.length > 0
-        ? step.spotlights[0]
-        : step.spotlight;
-      if (sp0 && Array.isArray(sp0.interior) && sp0.interior.length > 0 && step.duration > 3) {
-        const insideTimer = setTimeout(() => {
-          if (tourAbortRef.current) return;
-          const photos = [...(sp0.image ? [sp0.image] : []), ...sp0.interior];
-          openInside({
-            name: sp0.name,
-            photos,
-            streetView: step.marker?.lat && step.marker?.lng
-              ? { lat: step.marker.lat, lng: step.marker.lng, heading: 210 }
-              : null,
-            auto: true,
-          });
-        }, 1400);
-        subSpotlightTimersRef.current.push(insideTimer);
-      }
-
-      // We used to auto-open a Google Maps embed (Street View / Place Detail)
-      // here. Investors found the iframe generic and uninspiring. Now the
-      // venue spotlight card itself is the showcase — full-bleed hero photo
-      // with a slow Ken Burns zoom. The Google Maps embed is still available
-      // on demand via the manual "View on Google Maps" button.
-      let streetViewTimer = null;
-
-      // Prefer the Hedra-rendered talking video (audio baked in). For Marco
-      // lines or any step missing a video, fall back to the audio-only path.
       const useVideo = !!step.video;
-      setAriaVideo(useVideo ? step.video : null);
+
+      // Settle hold: camera flies for `flyDur` seconds, then we wait ~65% of
+      // that for the destination to land before the spotlight + cart + audio
+      // all fire together. First step gets +1s extra for hero impact.
+      const settleMs = Math.round(flyDur * 1000 * 0.65) + (isFirst ? 1000 : 0);
 
       const finish = () => {
-        if (streetViewTimer) clearTimeout(streetViewTimer);
         subSpotlightTimersRef.current.forEach((t) => clearTimeout(t));
         subSpotlightTimersRef.current = [];
-        // Close any auto-opened overlays as we move to the next step.
         if (step.autoStreetView) setStreetView(null);
-        // Auto-close the Step Inside if the prior step opened it.
         setInsideExperience((curr) => (curr?.auto ? null : curr));
         if (tourAudioRef.current) tourAudioRef.current = null;
         setIsSpeaking(false);
-        setTimeout(resolve, 250);
+        // Breath between steps.
+        setTimeout(resolve, 600);
       };
 
-      if (useVideo) {
-        // Wait one tick for React to mount the <video> element with the new src,
-        // then trigger play. The element's onEnded handler resolves the step.
-        setTimeout(() => {
-          if (tourAbortRef.current) return resolve();
-          const v = ariaVideoRef.current;
-          if (!v) {
-            // Element didn't render in time — fall back to audio.
-            const audio = new Audio(step.audio);
-            tourAudioRef.current = audio;
-            audio.onended = finish;
-            audio.onerror = finish;
-            audio.play().catch(finish);
-            return;
+      // Schedule everything at the settle point: cart, spotlight, video/audio,
+      // and the auto Step Inside modal.
+      const settleTimer = setTimeout(() => {
+        if (tourAbortRef.current) return;
+
+        // Cart items + chime
+        if (Array.isArray(step.cart) && step.cart.length > 0) {
+          setCart((prev) => {
+            const have = new Set(prev.map((i) => i.name?.toLowerCase()));
+            const fresh = step.cart.filter(
+              (i) => i?.name && !have.has(i.name.toLowerCase()),
+            );
+            if (fresh.length > 0) setTimeout(() => playChime(), 250);
+            return [...prev, ...fresh];
+          });
+        }
+
+        // Spotlight reveal
+        setCurrentSpeaker(step.speaker || 'aria');
+        setAriaLine(step.text);
+        setIsSpeaking(true);
+        setAriaVideo(useVideo ? step.video : null);
+
+        // Rotating sub-spotlights (Mendoza step) — schedule relative to NOW
+        if (Array.isArray(step.spotlights) && step.spotlights.length > 1) {
+          step.spotlights.forEach((sp, i) => {
+            if (i === 0) return;
+            const t = setTimeout(() => {
+              if (tourAbortRef.current) return;
+              setActiveSubSpotlight(i);
+            }, sp.startMs ?? 0);
+            subSpotlightTimersRef.current.push(t);
+          });
+        }
+
+        // Auto-open the Step Inside fullscreen carousel 1.8s after spotlight
+        const sp0 = Array.isArray(step.spotlights) && step.spotlights.length > 0
+          ? step.spotlights[0]
+          : step.spotlight;
+        if (sp0 && step.duration > 3) {
+          const insidePhotos = [
+            ...(sp0.image ? [sp0.image] : []),
+            ...(Array.isArray(sp0.interior) ? sp0.interior : []),
+          ];
+          if (insidePhotos.length > 0) {
+            const insideTimer = setTimeout(() => {
+              if (tourAbortRef.current) return;
+              openInside({
+                name: sp0.name,
+                photos: insidePhotos,
+                streetView: step.marker?.lat && step.marker?.lng
+                  ? { lat: step.marker.lat, lng: step.marker.lng, heading: 210 }
+                  : null,
+                placeQuery: step.placeQuery || sp0.placeQuery || sp0.name,
+                auto: true,
+              });
+            }, 1800);
+            subSpotlightTimersRef.current.push(insideTimer);
           }
-          v.currentTime = 0;
-          v.muted = false;
-          v.onended = finish;
-          v.onerror = finish;
-          v.play().catch((e) => {
-            console.warn('aria video play failed, falling back to audio:', e?.message);
-            const audio = new Audio(step.audio);
-            tourAudioRef.current = audio;
-            audio.onended = finish;
-            audio.onerror = finish;
-            audio.play().catch(finish);
-          });
-        }, 80);
-      } else {
-        const audio = new Audio(step.audio);
-        audio.preload = 'auto';
-        tourAudioRef.current = audio;
-        audio.onended = finish;
-        audio.onerror = finish;
-        setTimeout(() => {
-          if (tourAbortRef.current) return resolve();
-          audio.play().catch((e) => {
-            console.warn('tour audio play failed:', e);
-            finish();
-          });
-        }, 200);
-      }
+        }
+
+        // Play the audio / video — finish() resolves the step
+        if (useVideo) {
+          setTimeout(() => {
+            if (tourAbortRef.current) return resolve();
+            const v = ariaVideoRef.current;
+            if (!v) {
+              const audio = new Audio(step.audio);
+              tourAudioRef.current = audio;
+              audio.onended = finish;
+              audio.onerror = finish;
+              audio.play().catch(finish);
+              return;
+            }
+            v.currentTime = 0;
+            v.muted = false;
+            v.onended = finish;
+            v.onerror = finish;
+            v.play().catch(() => {
+              const audio = new Audio(step.audio);
+              tourAudioRef.current = audio;
+              audio.onended = finish;
+              audio.onerror = finish;
+              audio.play().catch(finish);
+            });
+          }, 80);
+        } else {
+          const audio = new Audio(step.audio);
+          audio.preload = 'auto';
+          tourAudioRef.current = audio;
+          audio.onended = finish;
+          audio.onerror = finish;
+          setTimeout(() => {
+            if (tourAbortRef.current) return resolve();
+            audio.play().catch(() => finish());
+          }, 200);
+        }
+      }, settleMs);
+      subSpotlightTimersRef.current.push(settleTimer);
     });
-  }, [flyTo]);
+  }, [flyTo, openInside]);
 
   const startTour = useCallback(async (tourId) => {
     const t = TOURS.find((x) => x.id === tourId);
@@ -1017,7 +1040,7 @@ export default function TravelEarth() {
       {!hasStarted && (
         <div className="absolute bottom-44 right-6 z-30 flex flex-col items-end gap-3 max-w-[min(420px,85vw)]">
           {/* Featured Tour cards — color accent per destination */}
-          {TOURS.map((t) => {
+          {TOURS.filter((t) => t.featured).map((t) => {
             const accentMap = {
               gold:  { ring: '#C9A84C', text: 'text-[#C9A84C]', bg: 'bg-[#C9A84C]', border: 'border-[#C9A84C]/40 hover:border-[#C9A84C]' },
               pink:  { ring: '#F08DA5', text: 'text-pink-300',  bg: 'bg-pink-300',  border: 'border-pink-400/40 hover:border-pink-300' },
@@ -1165,7 +1188,7 @@ export default function TravelEarth() {
                 </div>
               )}
               {/* Cinematic hero image with Ken Burns slow zoom + default fallback */}
-              <div className="relative h-56 sm:h-72 overflow-hidden bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
+              <div className="relative h-44 sm:h-56 overflow-hidden bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
                 {s.image ? (
                   <img
                     src={s.image}
@@ -1186,16 +1209,16 @@ export default function TravelEarth() {
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
                 {s.tag && (
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C9A84C] text-black text-[10px] font-bold tracking-[0.18em] shadow-lg">
+                  <div className="absolute top-3.5 left-3.5 px-3 py-1.5 rounded-full bg-[#C9A84C] text-black text-[10px] font-bold tracking-[0.28em] shadow-xl uppercase">
                     {s.tag}
                   </div>
                 )}
-                <div className="absolute bottom-4 left-5 right-5">
-                  <div className="font-display text-2xl sm:text-3xl text-white leading-tight drop-shadow-2xl tracking-tight">
+                <div className="absolute bottom-5 left-5 right-5">
+                  <div className="font-display text-3xl sm:text-4xl text-white leading-[1.05] drop-shadow-2xl tracking-tight">
                     {s.name}
                   </div>
                   {s.subtitle && (
-                    <div className="text-xs sm:text-sm text-white/90 mt-1.5 drop-shadow-lg leading-snug">
+                    <div className="text-sm sm:text-base text-white/95 mt-2 drop-shadow-lg leading-snug font-light">
                       {s.subtitle}
                     </div>
                   )}
@@ -1243,14 +1266,15 @@ export default function TravelEarth() {
                 </div>
               )}
 
-              {/* Per-stay itinerary timeline — what's planned hour-by-hour */}
+              {/* Per-stay itinerary timeline — capped to 3 items so the
+                  card always fits without needing to scroll. */}
               {Array.isArray(s.itinerary) && s.itinerary.length > 0 && (
                 <div className="px-4 pt-1 pb-3 border-t border-white/10">
                   <div className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/85 uppercase mb-2 mt-2">
                     While you're here
                   </div>
                   <ol className="space-y-1.5">
-                    {s.itinerary.map((it, i) => (
+                    {s.itinerary.slice(0, 3).map((it, i) => (
                       <li key={i} className="flex items-start gap-3 text-xs">
                         <span className="text-[10px] font-bold tracking-wide text-[#C9A84C]/90 whitespace-nowrap min-w-[88px]">
                           {it.time}
@@ -1264,14 +1288,14 @@ export default function TravelEarth() {
                 </div>
               )}
 
-              {/* Famous adjacent picks — eat / drink / do */}
+              {/* Famous adjacent picks — capped to 2 so card stays compact. */}
               {Array.isArray(picks) && picks.length > 0 && (
                 <div className="px-4 pt-1 pb-3 border-t border-white/10">
                   <div className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/85 uppercase mb-2 mt-2">
                     Curated picks here
                   </div>
                   <ul className="space-y-2">
-                    {picks.map((p) => {
+                    {picks.slice(0, 2).map((p) => {
                       const k = kindStyle(p.kind);
                       return (
                         <li key={p.name} className="flex items-start gap-2.5">
@@ -1483,7 +1507,7 @@ export default function TravelEarth() {
                 <li
                   key={item.name}
                   className="flex items-center gap-3 text-sm animate-fade-up"
-                  style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
+                  style={{ animationDelay: `${300 + i * 320}ms`, animationFillMode: 'both' }}
                 >
                   <div className="w-6 h-6 rounded-full bg-emerald-500/25 border border-emerald-400/50 flex items-center justify-center shrink-0">
                     <Check size={12} strokeWidth={3} className="text-emerald-300" />
@@ -1539,6 +1563,7 @@ export default function TravelEarth() {
         const photo = photos[insidePhotoIndex] || photos[0];
         const hasPhotos = photos.length > 0;
         const hasSV = !!exp.streetView;
+        const hasMap = !!(exp.placeQuery || exp.streetView);
         // Auto-trigger from a tour step: render as a centered inset window
         // so the avatar, caption, and HUD stay visible during the demo.
         // Manual click: full-screen takeover.
@@ -1571,9 +1596,10 @@ export default function TravelEarth() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {/* Mode toggle when both options available */}
-                {hasPhotos && hasSV && (
-                  <div className="flex rounded-full bg-black/60 border border-white/15 p-0.5 mr-2">
+                {/* Mode toggle: PHOTOS | MAP | STREET — only show modes that
+                    have data so we never expose a broken tab. */}
+                <div className="flex rounded-full bg-black/60 border border-white/15 p-0.5 mr-2">
+                  {hasPhotos && (
                     <button
                       onClick={() => setInsideMode('photos')}
                       className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.18em] transition-all ${
@@ -1582,6 +1608,18 @@ export default function TravelEarth() {
                     >
                       PHOTOS
                     </button>
+                  )}
+                  {hasMap && (
+                    <button
+                      onClick={() => setInsideMode('map')}
+                      className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.18em] transition-all ${
+                        insideMode === 'map' ? 'bg-[#C9A84C] text-black' : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      MAP
+                    </button>
+                  )}
+                  {hasSV && (
                     <button
                       onClick={() => setInsideMode('streetview')}
                       className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.18em] transition-all ${
@@ -1590,8 +1628,8 @@ export default function TravelEarth() {
                     >
                       STREET
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
                 <button
                   onClick={closeInside}
                   className="w-10 h-10 rounded-full bg-black/60 border border-white/15 hover:bg-red-500/30 hover:border-red-400/60 text-white flex items-center justify-center transition-colors"
