@@ -6,7 +6,7 @@ import {
   ArrowLeft, Mic, MicOff, Sparkles, Volume2, VolumeX, MapPin, X,
   Pause, Play, ShoppingBag, Plus, Hotel, Plane, Mountain, Utensils,
   Users as UsersIcon, Bus, Trash2, PlayCircle, Subtitles, Captions,
-  MessageSquare, MessageSquareOff, Video, VideoOff
+  MessageSquare, MessageSquareOff, Video, VideoOff, Globe
 } from 'lucide-react';
 import { PATAGONIA_DEMO } from '../data/demoScript';
 import { VOICES, voiceForPersona, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
@@ -965,6 +965,24 @@ export default function VirtualTravel() {
             <Mic size={32} className="mx-auto mb-2" />
             <p className="font-display text-xl font-bold">Start the Conversation</p>
             <p className="text-white/80 text-sm mt-1">Just speak. Your companion will listen.</p>
+          </button>
+
+          {/* Travel Earth launcher */}
+          <button onClick={() => navigate('/travel-earth')}
+            className="w-full p-4 bg-gradient-to-br from-navy via-charcoal to-navy rounded-2xl shadow-2xl active:scale-[0.98] transition-transform mb-3 border-2 border-gold/40 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gold/10 rounded-full -translate-y-12 translate-x-12" />
+            <div className="relative flex items-center justify-center gap-3">
+              <div className="w-11 h-11 rounded-2xl gradient-gold flex items-center justify-center shadow-xl">
+                <Globe size={22} className="text-white" />
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-2">
+                  <p className="font-bold text-base text-white">Travel Earth</p>
+                  <span className="text-[9px] font-bold bg-gold text-charcoal px-1.5 py-0.5 rounded-full uppercase">NEW</span>
+                </div>
+                <p className="text-white/60 text-[11px]">Talk to Aria · Fly the Earth · Plan in 3D</p>
+              </div>
+            </div>
           </button>
 
           {/* Auto-demo button */}
