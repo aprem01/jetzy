@@ -1106,7 +1106,46 @@ export default function TravelEarth() {
         return (
           <div
             key={rotating ? `${tourStepIndex}-${activeSubSpotlight}` : tourStepIndex}
-            className="absolute top-20 right-3 sm:right-6 z-30 w-[min(560px,calc(100vw-1.5rem))] max-h-[calc(100vh-22rem)] sm:max-h-[calc(100vh-9rem)] overflow-y-auto animate-fade-up"
+            className="absolute top-20 right-3 sm:right-6 z-30 w-[min(560px,calc(100vw-1.5rem))] max-h-[calc(100vh-13rem)] sm:max-h-[calc(100vh-9rem)] overflow-y-auto overscroll-contain animate-fade-up"
+            style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch', isolation: 'isolate' }}
+            onTouchStart={(e) => {
+              e.stopPropagation();
+              // Cesium's camera controller captures global pointer events for
+              // pan/pinch — disable inputs while a finger is on the spotlight
+              // so iOS/Android can do native vertical scroll inside the card.
+              const v = viewerRef.current?.cesiumElement;
+              if (v?.scene?.screenSpaceCameraController) {
+                v.scene.screenSpaceCameraController.enableInputs = false;
+              }
+            }}
+            onTouchEnd={(e) => {
+              e.stopPropagation();
+              const v = viewerRef.current?.cesiumElement;
+              if (v?.scene?.screenSpaceCameraController) {
+                v.scene.screenSpaceCameraController.enableInputs = true;
+              }
+            }}
+            onTouchCancel={() => {
+              const v = viewerRef.current?.cesiumElement;
+              if (v?.scene?.screenSpaceCameraController) {
+                v.scene.screenSpaceCameraController.enableInputs = true;
+              }
+            }}
+            onWheel={(e) => e.stopPropagation()}
+            onMouseEnter={() => {
+              // Disable Cesium scroll-zoom when the cursor is over the card
+              // so a desktop wheel scrolls the card content, not the globe.
+              const v = viewerRef.current?.cesiumElement;
+              if (v?.scene?.screenSpaceCameraController) {
+                v.scene.screenSpaceCameraController.enableZoom = false;
+              }
+            }}
+            onMouseLeave={() => {
+              const v = viewerRef.current?.cesiumElement;
+              if (v?.scene?.screenSpaceCameraController) {
+                v.scene.screenSpaceCameraController.enableZoom = true;
+              }
+            }}
           >
             <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
               {/* Sub-spotlight progress dots when rotating */}
@@ -1510,7 +1549,7 @@ export default function TravelEarth() {
           ? 'absolute inset-0 z-30 flex items-center sm:items-start justify-center pt-2 sm:pt-20 px-2 sm:px-4 pointer-events-none'
           : 'fixed inset-0 z-50 bg-black flex flex-col animate-fade-in';
         const innerClass = auto
-          ? 'relative w-[min(900px,96vw)] h-[min(560px,55vh)] sm:h-[min(560px,62vh)] rounded-2xl overflow-hidden bg-black border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)] pointer-events-auto'
+          ? 'relative w-[min(900px,96vw)] h-[min(560px,50vh)] sm:h-[min(560px,62vh)] rounded-2xl overflow-hidden bg-black border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)] pointer-events-auto'
           : 'relative w-full h-full bg-black flex flex-col';
         return (
           <div className={wrapperClass}>
