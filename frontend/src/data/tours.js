@@ -25,17 +25,18 @@ export const TOURS = [
         speaker: 'aria',
         text: "Hey Marco. You did Kilimanjaro in February. What's next?",
         duration: 3.738,
-        // Cinematic Kilimanjaro hero: low altitude (8 km), shallow pitch so
-        // the snow-capped peak rises above the savanna instead of looking
-        // like a flat tile from 80 km up.
-        camera: { lng: 37.3556, lat: -3.0674, height: 8_000, pitch: -0.18 },
+        // Cinematic Kilimanjaro: stand southwest of the peak at ~6km altitude
+        // and look northeast (heading 0.7 rad ≈ 40°) at a shallow pitch so
+        // the snow-capped summit rises iconic against the sky.
+        camera: { lng: 37.21, lat: -3.20, height: 6_000, pitch: -0.05, heading: 0.7, duration: 3.0 },
       },
       {
         audio: '/demo-audio/02-marco-pick.mp3',
         speaker: 'marco',
         text: "Argentina. Eight days, mid October.",
         duration: 2.902,
-        camera: { lng: -65.0, lat: -38.0, height: 4_500_000, pitch: -0.85 },
+        // Pull WAY back to reveal all of Argentina + Patagonia for context.
+        camera: { lng: -65.0, lat: -38.0, height: 4_500_000, pitch: -0.95, duration: 2.4 },
       },
       {
         audio: '/demo-audio/03-aria-day1.mp3',
@@ -43,7 +44,9 @@ export const TOURS = [
         speaker: 'aria',
         text: "Buenos Aires, day one. Faena Hotel for arrival. Don Julio for steak — World's Fifty Best. Florería Atlántico for the nightcap.",
         duration: 9.119,
-        camera: { lng: -58.3690, lat: -34.6118, height: 5_500, pitch: -0.35 },
+        // Drop into Puerto Madero — low altitude (700m), tilted up so we see
+        // the Faena tower against the river skyline, not a top-down map.
+        camera: { lng: -58.3690, lat: -34.6125, height: 700, pitch: -0.35, heading: 0, duration: 4.0 },
         marker: { name: 'Faena Hotel · Puerto Madero', lat: -34.6118, lng: -58.3690 },
         cart: [
           { name: 'Faena Hotel · 1 night', kind: 'hotel', price: 540, day: 1 },
@@ -73,12 +76,14 @@ export const TOURS = [
         speaker: 'aria',
         text: "The entraña is unmissable.",
         duration: 1.831,
-        camera: { lng: -58.4338, lat: -34.5867, height: 1_200, pitch: -0.25 },
+        // Snap right down onto the corner of Guatemala 4699 — low + steep so
+        // the Don Julio storefront pops in the frame.
+        camera: { lng: -58.4338, lat: -34.5870, height: 350, pitch: -0.45, heading: 0, duration: 1.2 },
         marker: { name: 'Don Julio · Palermo', lat: -34.5867, lng: -58.4338 },
         cart: [
           { name: "Dinner · Don Julio (entraña)", kind: 'meal', price: 110, day: 1 },
         ],
-        autoStreetView: { delayMs: 250 },
+        autoStreetView: { delayMs: 200 },
         spotlight: {
           name: 'Don Julio',
           subtitle: "World's 50 Best #14 · Argentine parrilla",
@@ -103,12 +108,15 @@ export const TOURS = [
         speaker: 'aria',
         text: "Day three — south to El Chaltén. Eolo Lodge, four nights. National Geographic Unique Lodge of the World.",
         duration: 6.977,
-        camera: { lng: -72.8869, lat: -49.3315, height: 35_000, pitch: -0.5 },
-        marker: { name: 'Eolo Lodge · Patagonia', lat: -50.4536, lng: -72.7194 },
+        // Eolo Lodge actual location — RP-11 between El Calafate and El
+        // Chaltén. Camera sweeps in over the Patagonian steppe with the
+        // Andes line on the horizon (look west, low pitch).
+        camera: { lng: -72.65, lat: -50.42, height: 4_500, pitch: -0.10, heading: -1.4, duration: 4.5 },
+        marker: { name: 'Eolo · Patagonia\'s Spirit', lat: -50.4250, lng: -72.6730 },
         cart: [
           { name: 'Eolo Lodge · 4 nights all-inclusive', kind: 'hotel', price: 2400, day: 3 },
         ],
-        autoStreetView: { delayMs: 3500 },
+        autoStreetView: { delayMs: 4200 },
         spotlight: {
           name: 'Eolo · Patagonia\'s Spirit',
           subtitle: 'Nat Geo Unique Lodge · Relais & Châteaux',
@@ -133,7 +141,10 @@ export const TOURS = [
         speaker: 'aria',
         text: "Sunrise on Fitz Roy. The same trail Yvon Chouinard pioneered.",
         duration: 4.522,
-        camera: { lng: -73.0428, lat: -49.2719, height: 6_000, pitch: -0.25 },
+        // Stand 6 km east of Fitz Roy summit at peak height (3.4 km), look
+        // west (heading -π/2 ≈ -1.57) at near-level pitch — gives the iconic
+        // granite spires silhouette that Chouinard put on every Patagonia tag.
+        camera: { lng: -72.97, lat: -49.272, height: 3_400, pitch: -0.05, heading: -1.5708, duration: 3.0 },
         marker: { name: 'Fitz Roy · Laguna de los Tres', lat: -49.2719, lng: -73.0428 },
         cart: [
           { name: 'Fitz Roy guided sunrise · private', kind: 'experience', price: 320, day: 4 },
@@ -161,7 +172,9 @@ export const TOURS = [
         speaker: 'marco',
         text: "Perito Moreno?",
         duration: 1.283,
-        camera: { lng: -73.0428, lat: -49.2719, height: 6_000, pitch: -0.25 },
+        // Hold the Fitz Roy frame so Marco's interjection feels like a beat,
+        // not a cut. Same camera as the previous step.
+        camera: { lng: -72.97, lat: -49.272, height: 3_400, pitch: -0.05, heading: -1.5708, duration: 0.5 },
       },
       {
         audio: '/demo-audio/08-aria-perito.mp3',
@@ -169,7 +182,10 @@ export const TOURS = [
         speaker: 'aria',
         text: "Adding it — day seven. Big Ice trek. Two hours walking on a glacier the size of Buenos Aires.",
         duration: 6.246,
-        camera: { lng: -73.0388, lat: -50.4972, height: 7_000, pitch: -0.3 },
+        // Position east of the glacier face, look west across the ice tongue
+        // so the wall of ice fills the frame. Glacier face is ~5 km wide at
+        // its terminus into Lago Argentino.
+        camera: { lng: -72.97, lat: -50.4980, height: 1_400, pitch: -0.05, heading: -1.5708, duration: 4.0 },
         marker: { name: 'Perito Moreno · Big Ice', lat: -50.4972, lng: -73.0388 },
         cart: [
           { name: 'Perito Moreno · Big Ice + park entry', kind: 'experience', price: 280, day: 7 },
@@ -198,7 +214,9 @@ export const TOURS = [
         speaker: 'aria',
         text: "Mendoza to wind down. Cavas Wine Lodge. Dinner at Francis Mallmann's 1884. Catena Zapata in the morning.",
         duration: 8.153,
-        camera: { lng: -68.8447, lat: -33.0048, height: 6_500, pitch: -0.35 },
+        // Sweep over the Uco Valley vineyards, low altitude, looking west
+        // toward the Andes line — wine country meets cordillera in one frame.
+        camera: { lng: -68.78, lat: -33.0048, height: 2_200, pitch: -0.10, heading: -1.5708, duration: 5.0 },
         marker: { name: 'Cavas Wine Lodge · Mendoza', lat: -33.0048, lng: -68.8447 },
         cart: [
           { name: 'Cavas Wine Lodge · 1 night', kind: 'hotel', price: 580, day: 8 },
@@ -230,14 +248,15 @@ export const TOURS = [
         speaker: 'aria',
         text: "Eight days. Six iconic names. Twenty-eight hundred. Booked?",
         duration: 3.869,
-        camera: { lng: -68.0, lat: -42.0, height: 3_500_000, pitch: -0.85 },
+        // Hero pull-back showing the entire trip arc from BA down to Patagonia.
+        camera: { lng: -65, lat: -38, height: 3_800_000, pitch: -0.95, duration: 3.0 },
       },
       {
         audio: '/demo-audio/11-marco-yes.mp3',
         speaker: 'marco',
         text: "Booked.",
         duration: 0.891,
-        camera: { lng: -68.0, lat: -42.0, height: 3_500_000, pitch: -0.85 },
+        camera: { lng: -65, lat: -38, height: 3_800_000, pitch: -0.95, duration: 0.4 },
       },
     ],
   },

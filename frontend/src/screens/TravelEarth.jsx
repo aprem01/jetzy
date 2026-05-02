@@ -443,14 +443,16 @@ export default function TravelEarth() {
     return new Promise((resolve) => {
       if (tourAbortRef.current) return resolve();
 
-      // Camera fly. The first step gets a longer, more cinematic settle so the
-      // viewer has time to register the new location before Aria starts talking.
-      const flyDuration = isFirst ? 4.5 : 3;
+      // Camera fly. Each step can declare its own fly duration so we land
+      // before Aria finishes the line; the first step gets a longer settle
+      // so the destination has time to register before narration begins.
       if (step.camera) {
+        const dur = step.camera.duration ?? (isFirst ? 4.5 : 2.6);
         flyTo(step.camera.lng, step.camera.lat, {
           height: step.camera.height,
           pitch: step.camera.pitch,
-          duration: flyDuration,
+          heading: step.camera.heading ?? 0,
+          duration: dur,
         });
       }
 
