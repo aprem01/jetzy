@@ -1,0 +1,101 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Marco, you're back. Where to?",
+    "scene": "open",
+    "file": "/demo-audio-jp/01-aria-open.mp3",
+    "duration": 2.119
+  },
+  {
+    "id": "02-marco-pick",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Tokyo. Spring. Ten days.",
+    "scene": "tokyo",
+    "file": "/demo-audio-jp/02-marco-pick.mp3",
+    "duration": 2.902
+  },
+  {
+    "id": "03-aria-day1",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Tokyo, day one. Park Hyatt for arrival — Lost in Translation views. Sukiyabashi Jiro for dinner.",
+    "scene": "park_hyatt",
+    "file": "/demo-audio-jp/03-aria-day1.mp3",
+    "duration": 7.683
+  },
+  {
+    "id": "04-aria-jiro",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Three Michelin stars. Twenty pieces. Twenty minutes.",
+    "scene": "jiro",
+    "file": "/demo-audio-jp/04-aria-jiro.mp3",
+    "duration": 3.608
+  },
+  {
+    "id": "05-aria-hakone",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day three — Hakone. Gora Kadan ryokan. Onsen with Fuji on the horizon.",
+    "scene": "hakone",
+    "file": "/demo-audio-jp/05-aria-hakone.mp3",
+    "duration": 5.306
+  },
+  {
+    "id": "06-aria-kyoto",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day five — Kyoto. Aman Kyoto, four nights in a hidden forest.",
+    "scene": "aman_kyoto",
+    "file": "/demo-audio-jp/06-aria-kyoto.mp3",
+    "duration": 4.652
+  },
+  {
+    "id": "07-marco-cherry",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Cherry blossoms?",
+    "scene": "aman_kyoto",
+    "file": "/demo-audio-jp/07-marco-cherry.mp3",
+    "duration": 1.361
+  },
+  {
+    "id": "08-aria-fushimi",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Sunrise at Fushimi Inari. Ten thousand torii gates before the crowds. Hanami in Maruyama Park after.",
+    "scene": "fushimi",
+    "file": "/demo-audio-jp/08-aria-fushimi.mp3",
+    "duration": 7.082
+  },
+  {
+    "id": "09-aria-osaka",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day nine — Osaka. Dotonbori street food crawl with Den's chef as guide.",
+    "scene": "osaka",
+    "file": "/demo-audio-jp/09-aria-osaka.mp3",
+    "duration": 4.992
+  },
+  {
+    "id": "10-aria-close",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Ten days. Eight icons. Forty-two hundred. Booked?",
+    "scene": "close",
+    "file": "/demo-audio-jp/10-aria-close.mp3",
+    "duration": 4.235
+  },
+  {
+    "id": "11-marco-yes",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Booked.",
+    "scene": "close",
+    "file": "/demo-audio-jp/11-marco-yes.mp3",
+    "duration": 0.682
+  }
+]

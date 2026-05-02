@@ -1,0 +1,74 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "text": "Marco, you're back. Where to?",
+    "scene": "open",
+    "duration": 2.119,
+    "audioFile": "/demo-audio-jp/01-aria-open.mp3",
+    "videoFile": "/demo-aria-jp/01-aria-open.mp4"
+  },
+  {
+    "id": "03-aria-day1",
+    "speaker": "aria",
+    "text": "Tokyo, day one. Park Hyatt for arrival — Lost in Translation views. Sukiyabashi Jiro for dinner.",
+    "scene": "park_hyatt",
+    "duration": 7.683,
+    "audioFile": "/demo-audio-jp/03-aria-day1.mp3",
+    "videoFile": "/demo-aria-jp/03-aria-day1.mp4"
+  },
+  {
+    "id": "04-aria-jiro",
+    "speaker": "aria",
+    "text": "Three Michelin stars. Twenty pieces. Twenty minutes.",
+    "scene": "jiro",
+    "duration": 3.608,
+    "audioFile": "/demo-audio-jp/04-aria-jiro.mp3",
+    "videoFile": "/demo-aria-jp/04-aria-jiro.mp4"
+  },
+  {
+    "id": "05-aria-hakone",
+    "speaker": "aria",
+    "text": "Day three — Hakone. Gora Kadan ryokan. Onsen with Fuji on the horizon.",
+    "scene": "hakone",
+    "duration": 5.306,
+    "audioFile": "/demo-audio-jp/05-aria-hakone.mp3",
+    "videoFile": "/demo-aria-jp/05-aria-hakone.mp4"
+  },
+  {
+    "id": "06-aria-kyoto",
+    "speaker": "aria",
+    "text": "Day five — Kyoto. Aman Kyoto, four nights in a hidden forest.",
+    "scene": "aman_kyoto",
+    "duration": 4.652,
+    "audioFile": "/demo-audio-jp/06-aria-kyoto.mp3",
+    "videoFile": "/demo-aria-jp/06-aria-kyoto.mp4"
+  },
+  {
+    "id": "08-aria-fushimi",
+    "speaker": "aria",
+    "text": "Sunrise at Fushimi Inari. Ten thousand torii gates before the crowds. Hanami in Maruyama Park after.",
+    "scene": "fushimi",
+    "duration": 7.082,
+    "audioFile": "/demo-audio-jp/08-aria-fushimi.mp3",
+    "videoFile": "/demo-aria-jp/08-aria-fushimi.mp4"
+  },
+  {
+    "id": "09-aria-osaka",
+    "speaker": "aria",
+    "text": "Day nine — Osaka. Dotonbori street food crawl with Den's chef as guide.",
+    "scene": "osaka",
+    "duration": 4.992,
+    "audioFile": "/demo-audio-jp/09-aria-osaka.mp3",
+    "videoFile": "/demo-aria-jp/09-aria-osaka.mp4"
+  },
+  {
+    "id": "10-aria-close",
+    "speaker": "aria",
+    "text": "Ten days. Eight icons. Forty-two hundred. Booked?",
+    "scene": "close",
+    "duration": 4.235,
+    "audioFile": "/demo-audio-jp/10-aria-close.mp3",
+    "videoFile": "/demo-aria-jp/10-aria-close.mp4"
+  }
+]

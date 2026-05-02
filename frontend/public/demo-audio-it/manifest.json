@@ -1,0 +1,92 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Marco. You and Sofia, anniversary trip. What's the move?",
+    "scene": "open",
+    "file": "/demo-audio-it/01-aria-open.mp3",
+    "duration": 3.686
+  },
+  {
+    "id": "02-marco-pick",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Italy. Seven days. Make it special.",
+    "scene": "open",
+    "file": "/demo-audio-it/02-marco-pick.mp3",
+    "duration": 3.399
+  },
+  {
+    "id": "03-aria-day1",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day one — Rome. Hotel de Russie, garden suite. Dinner at Pierluigi in Piazza de' Ricci.",
+    "scene": "rome",
+    "file": "/demo-audio-it/03-aria-day1.mp3",
+    "duration": 7.082
+  },
+  {
+    "id": "04-aria-amalfi",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day two — south to the Amalfi coast. Le Sirenuse in Positano. Three nights with the cliff view.",
+    "scene": "positano",
+    "file": "/demo-audio-it/04-aria-amalfi.mp3",
+    "duration": 6.533
+  },
+  {
+    "id": "05-aria-capri",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day four — Capri by boat. Lunch at La Fontelina. Cocktails at Anema e Core.",
+    "scene": "capri",
+    "file": "/demo-audio-it/05-aria-capri.mp3",
+    "duration": 5.645
+  },
+  {
+    "id": "06-marco-tuscany",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Tuscany?",
+    "scene": "tuscany",
+    "file": "/demo-audio-it/06-marco-tuscany.mp3",
+    "duration": 0.995
+  },
+  {
+    "id": "07-aria-tuscany",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day five — Borgo Santo Pietro near Siena. Truffle hunt at sunrise. Castello Banfi tasting.",
+    "scene": "tuscany",
+    "file": "/demo-audio-it/07-aria-tuscany.mp3",
+    "duration": 6.429
+  },
+  {
+    "id": "08-aria-como",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day seven — Lake Como. Villa d'Este, last night. Private boat at sunset.",
+    "scene": "como",
+    "file": "/demo-audio-it/08-aria-como.mp3",
+    "duration": 4.522
+  },
+  {
+    "id": "09-aria-close",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Seven days. Five legendary stays. Forty-eight hundred. Booked?",
+    "scene": "close",
+    "file": "/demo-audio-it/09-aria-close.mp3",
+    "duration": 5.593
+  },
+  {
+    "id": "10-marco-yes",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Booked.",
+    "scene": "close",
+    "file": "/demo-audio-it/10-marco-yes.mp3",
+    "duration": 0.708
+  }
+]

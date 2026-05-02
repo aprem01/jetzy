@@ -501,21 +501,12 @@ export default function TravelEarth() {
         });
       }
 
-      // Auto-open Street View at venue stops so the viewer is taken inside
-      // the actual restaurant / hotel during the narration. Closes when the
-      // step finishes so we transition cleanly back to the globe view.
+      // We used to auto-open a Google Maps embed (Street View / Place Detail)
+      // here. Investors found the iframe generic and uninspiring. Now the
+      // venue spotlight card itself is the showcase — full-bleed hero photo
+      // with a slow Ken Burns zoom. The Google Maps embed is still available
+      // on demand via the manual "View on Google Maps" button.
       let streetViewTimer = null;
-      if (step.autoStreetView && step.marker?.lat && step.marker?.lng) {
-        const delay = step.autoStreetView.delayMs ?? 1500;
-        streetViewTimer = setTimeout(() => {
-          if (tourAbortRef.current) return;
-          setStreetView({
-            lat: step.marker.lat,
-            lng: step.marker.lng,
-            name: step.marker.name,
-          });
-        }, delay);
-      }
 
       // Prefer the Hedra-rendered talking video (audio baked in). For Marco
       // lines or any step missing a video, fall back to the audio-only path.
@@ -771,12 +762,13 @@ export default function TravelEarth() {
                 lat: currentLocation.lat,
                 lng: currentLocation.lng,
                 name: currentLocation.name,
+                placeQuery: currentLocation.name,
               })}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-[#C9A84C]/15 border border-[#C9A84C]/50 hover:bg-[#C9A84C]/30 hover:border-[#C9A84C] text-[#C9A84C] text-xs font-medium transition-all"
-              aria-label="Look around in Street View"
+              aria-label="View location details"
             >
               <Eye size={12} />
-              <span className="hidden sm:inline">Look around</span>
+              <span className="hidden sm:inline">View details</span>
             </button>
           )}
         </div>
@@ -881,20 +873,27 @@ export default function TravelEarth() {
       {/* === SUGGESTIONS + TOUR LAUNCHER (above mic, only on first load) === */}
       {!hasStarted && (
         <div className="absolute bottom-44 right-6 z-30 flex flex-col items-end gap-3 max-w-[min(420px,85vw)]">
-          {/* Featured Tour card */}
-          {TOURS.map((t) => (
+          {/* Featured Tour cards — color accent per destination */}
+          {TOURS.map((t) => {
+            const accentMap = {
+              gold: { ring: '#C9A84C', text: 'text-[#C9A84C]', bg: 'bg-[#C9A84C]', border: 'border-[#C9A84C]/40 hover:border-[#C9A84C]' },
+              pink: { ring: '#F08DA5', text: 'text-pink-300', bg: 'bg-pink-300', border: 'border-pink-400/40 hover:border-pink-300' },
+              rose: { ring: '#E2746B', text: 'text-rose-300', bg: 'bg-rose-300', border: 'border-rose-400/40 hover:border-rose-300' },
+            };
+            const a = accentMap[t.accent] || accentMap.gold;
+            return (
             <button
               key={t.id}
               onClick={() => startTour(t.id)}
-              className="group w-full text-left px-5 py-4 rounded-2xl backdrop-blur-xl bg-gradient-to-br from-[#1B2B4B]/85 to-black/85 border border-[#C9A84C]/40 hover:border-[#C9A84C] hover:from-[#1B2B4B]/95 hover:to-black/95 shadow-2xl transition-all"
+              className={`group w-full text-left px-5 py-4 rounded-2xl backdrop-blur-xl bg-gradient-to-br from-[#1B2B4B]/85 to-black/85 border ${a.border} hover:from-[#1B2B4B]/95 hover:to-black/95 shadow-2xl transition-all`}
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#C9A84C] text-black flex items-center justify-center shadow-lg shrink-0">
+                <div className={`w-10 h-10 rounded-full ${a.bg} text-black flex items-center justify-center shadow-lg shrink-0`}>
                   <Play size={16} className="ml-0.5" fill="currentColor" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-0.5">
-                    FEATURED TOUR · {t.estSeconds}s
+                  <div className={`text-[10px] font-bold tracking-[0.22em] ${a.text} mb-0.5`}>
+                    FEATURED · {t.estSeconds}s
                   </div>
                   <div className="font-display text-base text-white leading-tight">
                     {t.title}
@@ -905,7 +904,8 @@ export default function TravelEarth() {
                 </div>
               </div>
             </button>
-          ))}
+            );
+          })}
 
           {/* Quick suggestions */}
           {SUGGESTIONS.map((s) => (
@@ -946,9 +946,9 @@ export default function TravelEarth() {
         return (
           <div
             key={rotating ? `${tourStepIndex}-${activeSubSpotlight}` : tourStepIndex}
-            className="absolute top-32 right-6 z-30 w-[min(420px,92vw)] max-h-[calc(100vh-12rem)] overflow-y-auto animate-fade-up"
+            className="absolute top-24 right-6 z-30 w-[min(560px,92vw)] max-h-[calc(100vh-9rem)] overflow-y-auto animate-fade-up"
           >
-            <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+            <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
               {/* Sub-spotlight progress dots when rotating */}
               {rotating && (
                 <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/15">
@@ -964,29 +964,29 @@ export default function TravelEarth() {
                   ))}
                 </div>
               )}
-              {/* hero image */}
-              <div className="relative h-44 bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
+              {/* Cinematic hero image with Ken Burns slow zoom */}
+              <div className="relative h-72 overflow-hidden bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
                 {s.image && (
                   <img
                     src={s.image}
                     alt={s.name}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover animate-ken-burns"
                     loading="eager"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
                 {s.tag && (
-                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C9A84C] text-black text-[10px] font-bold tracking-[0.18em]">
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C9A84C] text-black text-[10px] font-bold tracking-[0.18em] shadow-lg">
                     {s.tag}
                   </div>
                 )}
-                <div className="absolute bottom-3 left-4 right-4">
-                  <div className="font-display text-2xl text-white leading-tight drop-shadow-lg">
+                <div className="absolute bottom-4 left-5 right-5">
+                  <div className="font-display text-3xl text-white leading-tight drop-shadow-2xl tracking-tight">
                     {s.name}
                   </div>
                   {s.subtitle && (
-                    <div className="text-xs text-white/85 mt-1 drop-shadow">
+                    <div className="text-sm text-white/90 mt-1.5 drop-shadow-lg leading-snug">
                       {s.subtitle}
                     </div>
                   )}
@@ -1007,6 +1007,33 @@ export default function TravelEarth() {
                   ))}
                 </div>
               )}
+              {/* Social: Jetzy travelers who recently went here */}
+              {Array.isArray(s.travelers) && s.travelers.length > 0 && (
+                <div className="px-4 pt-2 pb-2 border-t border-white/10 flex items-center gap-3">
+                  <div className="flex -space-x-2">
+                    {s.travelers.map((t) => (
+                      <img
+                        key={t.name}
+                        src={t.avatar}
+                        alt={t.name}
+                        className="w-7 h-7 rounded-full border-2 border-black object-cover"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    ))}
+                  </div>
+                  <div className="text-[10px] text-white/70 leading-tight">
+                    <span className="text-white font-semibold">
+                      {s.travelers.length}+ Jetzy travelers
+                    </span>{' '}
+                    here recently
+                    <div className="text-[9px] text-white/40 truncate">
+                      {s.travelers.slice(0, 2).map((t) => t.name).join(' · ')}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Famous adjacent picks — eat / drink / do */}
               {Array.isArray(picks) && picks.length > 0 && (
                 <div className="px-4 pt-1 pb-3 border-t border-white/10">
@@ -1041,11 +1068,15 @@ export default function TravelEarth() {
               {/* CTA */}
               {m?.lat && m?.lng && (
                 <button
-                  onClick={() => setStreetView({ lat: m.lat, lng: m.lng, name: s.name })}
+                  onClick={() => setStreetView({
+                    lat: m.lat, lng: m.lng,
+                    name: s.name,
+                    placeQuery: s.placeQuery || step.placeQuery || s.name,
+                  })}
                   className="w-full py-3 bg-[#C9A84C]/15 hover:bg-[#C9A84C]/30 border-t border-[#C9A84C]/30 flex items-center justify-center gap-2 text-[#C9A84C] text-sm font-medium transition-colors"
                 >
-                  <Eye size={14} />
-                  Step inside · Street View
+                  <MapPin size={14} />
+                  See on Google Maps
                 </button>
               )}
             </div>
@@ -1248,11 +1279,24 @@ export default function TravelEarth() {
         </div>
       )}
 
-      {/* === STREET VIEW MODAL ===
-           In tour mode: centered window (75% screen), HUD stays visible, lower z.
+      {/* === PLACE DETAIL MODAL ===
+           Uses Google Maps Embed "place" mode — shows the actual venue card
+           with name, photos, reviews, hours, and a real satellite + Street
+           View toggle inside the embed. Works for every location regardless
+           of Street View coverage (Eolo's middle-of-steppe, etc).
+           In tour mode: centered window, HUD stays visible.
            Manual: full-screen takeover. */}
       {streetView && (() => {
         const inTour = !!tour;
+        // Prefer a textual query so Google's embed shows the rich place card
+        // with photos + reviews. Falls back to lat/lng with a satellite view.
+        const q = streetView.placeQuery
+          ? encodeURIComponent(streetView.placeQuery)
+          : `${streetView.lat},${streetView.lng}`;
+        const mode = streetView.placeQuery ? 'place' : 'view';
+        const src = mode === 'place'
+          ? `https://www.google.com/maps/embed/v1/place?key=${GOOGLE_MAPS_KEY}&q=${q}&zoom=17`
+          : `https://www.google.com/maps/embed/v1/view?key=${GOOGLE_MAPS_KEY}&center=${q}&zoom=17&maptype=satellite`;
         return (
           <div
             className={
@@ -1272,11 +1316,11 @@ export default function TravelEarth() {
               <div className="flex items-center justify-between px-5 py-3 bg-black/85 border-b border-white/10">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/50 flex items-center justify-center">
-                    <Compass size={14} className="text-[#C9A84C]" />
+                    <MapPin size={14} className="text-[#C9A84C]" />
                   </div>
                   <div>
                     <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-0.5">
-                      STREET VIEW
+                      {mode === 'place' ? 'PLACE DETAIL' : 'LOCATION'}
                     </div>
                     <div className="font-display text-sm text-white leading-tight">
                       {streetView.name || 'You are here'}
@@ -1287,7 +1331,7 @@ export default function TravelEarth() {
                   <button
                     onClick={() => setStreetView(null)}
                     className="w-9 h-9 rounded-full bg-black/60 border border-white/10 hover:bg-red-500/30 hover:border-red-400/60 text-white flex items-center justify-center transition-colors"
-                    aria-label="Close Street View"
+                    aria-label="Close"
                   >
                     <X size={16} />
                   </button>
@@ -1296,16 +1340,16 @@ export default function TravelEarth() {
               {/* iframe */}
               <div className="flex-1 relative">
                 <iframe
-                  key={`${streetView.lat}-${streetView.lng}`}
-                  title="Street View"
-                  src={`https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_MAPS_KEY}&location=${streetView.lat},${streetView.lng}&heading=210&pitch=0&fov=80`}
+                  key={src}
+                  title="Place Detail"
+                  src={src}
                   className="w-full h-full border-0"
                   allow="accelerometer; gyroscope; fullscreen"
                   referrerPolicy="no-referrer-when-downgrade"
                 />
                 {/* footer hint */}
                 <div className="pointer-events-none absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-full backdrop-blur-md bg-black/60 border border-white/10 text-[11px] text-white/70">
-                  {inTour ? 'You are inside · Aria continues' : 'Drag to look around · arrows to walk'}
+                  {inTour ? 'On Google Maps · Aria continues' : 'Tap pin → photos · reviews · hours'}
                 </div>
               </div>
             </div>

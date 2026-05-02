@@ -1,23 +1,49 @@
 // Pre-scripted "Tour Mode" experiences for Travel Earth.
 //
-// Each tour is a sequence of steps. A step has:
-//   - audio (always) + optional video (Hedra Aria-talking clip)
-//   - camera target (lat/lng/height/pitch)
-//   - caption text (matches the audio)
-//   - optional marker + cart items + spotlight + autoStreetView
-//
-// Spotlights now include a `picks` array — the list of FAMOUS adjacent venues
-// the traveler should hit at this stop (eat / drink / do / stay), each with
-// a tag explaining why it's iconic. This is what makes the demo feel like
-// expert curation rather than a generic itinerary.
+// Each tour is a sequence of steps with audio, video, camera framing, and
+// rich spotlights that pop up on the right side of the globe as Aria
+// narrates. Spotlights can include curated picks (famous adjacent venues),
+// rotating sub-spotlights when a single line names multiple places, and
+// "travelers" — other Jetzy users who recently did this stop, surfacing
+// the social/community angle that's core to the Jetzy brand.
+
+const T = {
+  ARGENTINA: 'patagonia-8days',
+  JAPAN: 'japan-10days',
+  ITALY: 'italy-romantic-7days',
+};
+
+// === SOCIAL: SAMPLE JETZY TRAVELERS ===
+// Mocked but plausible — surfaces the "global social network of travelers"
+// angle from jetzyapp.com. Each spotlight pulls 2-3 travelers who match
+// the venue/region. Avatars use Unsplash face photos.
+const TRAVELERS = {
+  // Argentina
+  liam:    { name: 'Liam · NYC',       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face', when: '2 wks ago' },
+  amelia:  { name: 'Amelia · London',  avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face', when: '1 mo ago' },
+  noah:    { name: 'Noah · Berlin',    avatar: 'https://images.unsplash.com/photo-1463453091185-61582044d556?w=120&h=120&fit=crop&crop=face', when: '3 wks ago' },
+  zara:    { name: 'Zara · Dubai',     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=120&h=120&fit=crop&crop=face', when: '5 days ago' },
+  diego:   { name: 'Diego · Madrid',   avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face', when: '6 wks ago' },
+  // Japan
+  yuki:    { name: 'Yuki · Tokyo',     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120&h=120&fit=crop&crop=face', when: '1 wk ago' },
+  marcus:  { name: 'Marcus · LA',      avatar: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=120&h=120&fit=crop&crop=face', when: '2 mo ago' },
+  priya:   { name: 'Priya · SF',       avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&h=120&fit=crop&crop=face', when: '3 wks ago' },
+  // Italy
+  isabella:{ name: 'Isabella · Milan', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=120&h=120&fit=crop&crop=face', when: '4 days ago' },
+  thomas:  { name: 'Thomas · Paris',   avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=120&h=120&fit=crop&crop=face', when: '2 wks ago' },
+  sofia:   { name: 'Sofia · Rome',     avatar: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=120&h=120&fit=crop&crop=face', when: '1 mo ago' },
+  ethan:   { name: 'Ethan · Sydney',   avatar: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=120&h=120&fit=crop&crop=face', when: '3 wks ago' },
+};
 
 export const TOURS = [
+  // ─── ARGENTINA ─────────────────────────────────────────────────────────
   {
-    id: 'patagonia-8days',
+    id: T.ARGENTINA,
     title: 'Argentina · 8 Days',
     subtitle: 'Buenos Aires · El Chaltén · Mendoza',
     estSeconds: 60,
     cover: '/cover-patagonia.jpg',
+    accent: 'gold',
     steps: [
       {
         audio: '/demo-audio/01-aria-open.mp3',
@@ -25,9 +51,6 @@ export const TOURS = [
         speaker: 'aria',
         text: "Hey Marco. You did Kilimanjaro in February. What's next?",
         duration: 3.738,
-        // Cinematic Kilimanjaro: stand southwest of the peak at ~6km altitude
-        // and look northeast (heading 0.7 rad ≈ 40°) at a shallow pitch so
-        // the snow-capped summit rises iconic against the sky.
         camera: { lng: 37.21, lat: -3.20, height: 6_000, pitch: -0.05, heading: 0.7, duration: 3.0 },
       },
       {
@@ -35,7 +58,6 @@ export const TOURS = [
         speaker: 'marco',
         text: "Argentina. Eight days, mid October.",
         duration: 2.902,
-        // Pull WAY back to reveal all of Argentina + Patagonia for context.
         camera: { lng: -65.0, lat: -38.0, height: 4_500_000, pitch: -0.95, duration: 2.4 },
       },
       {
@@ -44,13 +66,10 @@ export const TOURS = [
         speaker: 'aria',
         text: "Buenos Aires, day one. Faena Hotel for arrival. Don Julio for steak — World's Fifty Best. Florería Atlántico for the nightcap.",
         duration: 9.119,
-        // Drop into Puerto Madero — low altitude (700m), tilted up so we see
-        // the Faena tower against the river skyline, not a top-down map.
         camera: { lng: -58.3690, lat: -34.6125, height: 700, pitch: -0.35, heading: 0, duration: 4.0 },
         marker: { name: 'Faena Hotel · Puerto Madero', lat: -34.6118, lng: -58.3690 },
-        cart: [
-          { name: 'Faena Hotel · 1 night', kind: 'hotel', price: 540, day: 1 },
-        ],
+        placeQuery: 'Faena Hotel Buenos Aires',
+        cart: [{ name: 'Faena Hotel · 1 night', kind: 'hotel', price: 540, day: 1 }],
         autoStreetView: { delayMs: 3000 },
         spotlight: {
           name: 'Faena Hotel',
@@ -68,6 +87,7 @@ export const TOURS = [
             { kind: 'DRINK',name: 'Florería Atlántico', note: "World's 50 Best Bars · speakeasy under a flower shop" },
             { kind: 'DO',   name: 'El Ateneo',          note: 'Bookstore inside an Edwardian opera house' },
           ],
+          travelers: [TRAVELERS.amelia, TRAVELERS.diego],
         },
       },
       {
@@ -76,13 +96,10 @@ export const TOURS = [
         speaker: 'aria',
         text: "The entraña is unmissable.",
         duration: 1.831,
-        // Snap right down onto the corner of Guatemala 4699 — low + steep so
-        // the Don Julio storefront pops in the frame.
         camera: { lng: -58.4338, lat: -34.5870, height: 350, pitch: -0.45, heading: 0, duration: 1.2 },
         marker: { name: 'Don Julio · Palermo', lat: -34.5867, lng: -58.4338 },
-        cart: [
-          { name: "Dinner · Don Julio (entraña)", kind: 'meal', price: 110, day: 1 },
-        ],
+        placeQuery: 'Don Julio Parrilla Buenos Aires',
+        cart: [{ name: "Dinner · Don Julio (entraña)", kind: 'meal', price: 110, day: 1 }],
         autoStreetView: { delayMs: 200 },
         spotlight: {
           name: 'Don Julio',
@@ -100,6 +117,7 @@ export const TOURS = [
             { kind: 'EAT',  name: 'Mishiguene',   note: "World's 50 Best Latin America · Jewish-Argentine" },
             { kind: 'DRINK',name: 'CoChinChina',  note: "World's 50 Best Bars · Asian-tropical mixology" },
           ],
+          travelers: [TRAVELERS.liam, TRAVELERS.zara, TRAVELERS.amelia],
         },
       },
       {
@@ -108,14 +126,10 @@ export const TOURS = [
         speaker: 'aria',
         text: "Day three — south to El Chaltén. Eolo Lodge, four nights. National Geographic Unique Lodge of the World.",
         duration: 6.977,
-        // Eolo Lodge actual location — RP-11 between El Calafate and El
-        // Chaltén. Camera sweeps in over the Patagonian steppe with the
-        // Andes line on the horizon (look west, low pitch).
         camera: { lng: -72.65, lat: -50.42, height: 4_500, pitch: -0.10, heading: -1.4, duration: 4.5 },
         marker: { name: 'Eolo · Patagonia\'s Spirit', lat: -50.4250, lng: -72.6730 },
-        cart: [
-          { name: 'Eolo Lodge · 4 nights all-inclusive', kind: 'hotel', price: 2400, day: 3 },
-        ],
+        placeQuery: 'Eolo Patagonia Spirit Lodge',
+        cart: [{ name: 'Eolo Lodge · 4 nights all-inclusive', kind: 'hotel', price: 2400, day: 3 }],
         autoStreetView: { delayMs: 4200 },
         spotlight: {
           name: 'Eolo · Patagonia\'s Spirit',
@@ -133,6 +147,7 @@ export const TOURS = [
             { kind: 'EAT',  name: 'La Tablita',         note: 'El Calafate institution · Patagonian lamb on the cross' },
             { kind: 'DO',   name: 'Laguna Capri trek',  note: 'Half-day with Fitz Roy front-row at the end' },
           ],
+          travelers: [TRAVELERS.noah, TRAVELERS.diego],
         },
       },
       {
@@ -141,21 +156,16 @@ export const TOURS = [
         speaker: 'aria',
         text: "Sunrise on Fitz Roy. The same trail Yvon Chouinard pioneered.",
         duration: 4.522,
-        // Stand 6 km east of Fitz Roy summit at peak height (3.4 km), look
-        // west (heading -π/2 ≈ -1.57) at near-level pitch — gives the iconic
-        // granite spires silhouette that Chouinard put on every Patagonia tag.
         camera: { lng: -72.97, lat: -49.272, height: 3_400, pitch: -0.05, heading: -1.5708, duration: 3.0 },
         marker: { name: 'Fitz Roy · Laguna de los Tres', lat: -49.2719, lng: -73.0428 },
-        cart: [
-          { name: 'Fitz Roy guided sunrise · private', kind: 'experience', price: 320, day: 4 },
-        ],
+        cart: [{ name: 'Fitz Roy guided sunrise · private', kind: 'experience', price: 320, day: 4 }],
         spotlight: {
           name: 'Fitz Roy · Sunrise',
           subtitle: "Laguna de los Tres at first light · the Patagonia logo",
           image: '/venue-photos/fitz-roy.jpg',
           tag: 'DO · DAY 4',
           details: [
-            { label: 'Guide',    value: 'Lucas · 12 yrs · spoke Spanish + English' },
+            { label: 'Guide',    value: 'Lucas · 12 yrs · Spanish + English' },
             { label: 'Pickup',   value: '4:30 AM at Eolo' },
             { label: 'Distance', value: '20 km · 1,200 m gain' },
             { label: 'Rate',    value: 'USD 320 (private)' },
@@ -165,6 +175,7 @@ export const TOURS = [
             { kind: 'DO',   name: 'Mirador Los Cóndores', note: 'Easy 1-hr loop · condors at sunset' },
             { kind: 'EAT',  name: 'Maffia',            note: 'House-made pasta after the long hike' },
           ],
+          travelers: [TRAVELERS.amelia, TRAVELERS.liam, TRAVELERS.noah],
         },
       },
       {
@@ -172,8 +183,6 @@ export const TOURS = [
         speaker: 'marco',
         text: "Perito Moreno?",
         duration: 1.283,
-        // Hold the Fitz Roy frame so Marco's interjection feels like a beat,
-        // not a cut. Same camera as the previous step.
         camera: { lng: -72.97, lat: -49.272, height: 3_400, pitch: -0.05, heading: -1.5708, duration: 0.5 },
       },
       {
@@ -182,14 +191,9 @@ export const TOURS = [
         speaker: 'aria',
         text: "Adding it — day seven. Big Ice trek. Two hours walking on a glacier the size of Buenos Aires.",
         duration: 6.246,
-        // Position east of the glacier face, look west across the ice tongue
-        // so the wall of ice fills the frame. Glacier face is ~5 km wide at
-        // its terminus into Lago Argentino.
         camera: { lng: -72.97, lat: -50.4980, height: 1_400, pitch: -0.05, heading: -1.5708, duration: 4.0 },
         marker: { name: 'Perito Moreno · Big Ice', lat: -50.4972, lng: -73.0388 },
-        cart: [
-          { name: 'Perito Moreno · Big Ice + park entry', kind: 'experience', price: 280, day: 7 },
-        ],
+        cart: [{ name: 'Perito Moreno · Big Ice + park entry', kind: 'experience', price: 280, day: 7 }],
         spotlight: {
           name: 'Perito Moreno · Big Ice',
           subtitle: 'Hielo y Aventura · IFMGA-certified glacier trek',
@@ -204,8 +208,9 @@ export const TOURS = [
           picks: [
             { kind: 'DO',   name: 'Catwalks lookout', note: 'Watch ice calve into Lago Argentino · free' },
             { kind: 'EAT',  name: 'La Zaina',         note: 'Lamb empanadas · El Calafate locals favorite' },
-            { kind: 'DO',   name: 'Glaciarium museum', note: '20-min · explains what you just walked on' },
+            { kind: 'DO',   name: 'Glaciarium museum', note: '20 min · explains what you just walked on' },
           ],
+          travelers: [TRAVELERS.zara, TRAVELERS.diego],
         },
       },
       {
@@ -216,15 +221,13 @@ export const TOURS = [
         duration: 8.153,
         camera: { lng: -68.78, lat: -33.0048, height: 2_200, pitch: -0.10, heading: -1.5708, duration: 5.0 },
         marker: { name: 'Cavas Wine Lodge · Mendoza', lat: -33.0048, lng: -68.8447 },
+        placeQuery: 'Cavas Wine Lodge Mendoza',
         cart: [
           { name: 'Cavas Wine Lodge · 1 night', kind: 'hotel', price: 580, day: 8 },
           { name: "Dinner · Francis Mallmann's 1884", kind: 'meal', price: 220, day: 8 },
           { name: 'Catena Zapata · private tasting', kind: 'experience', price: 220, day: 9 },
         ],
         autoStreetView: { delayMs: 6000 },
-        // Three-stage rotating spotlight that tracks Aria's narration in
-        // real time: she names Cavas → 1884 → Catena, the card swaps with
-        // her so the viewer sees the venue she's saying right now.
         spotlights: [
           {
             startMs: 0,
@@ -238,6 +241,7 @@ export const TOURS = [
               { label: 'Includes',value: 'Sunset on the rooftop' },
               { label: 'Rate',    value: 'USD 580' },
             ],
+            travelers: [TRAVELERS.amelia, TRAVELERS.liam],
           },
           {
             startMs: 2700,
@@ -251,6 +255,7 @@ export const TOURS = [
               { label: 'Menu',     value: '7 courses · open-fire cooking' },
               { label: 'Rate',     value: 'USD 220 pp' },
             ],
+            travelers: [TRAVELERS.diego, TRAVELERS.noah, TRAVELERS.zara],
           },
           {
             startMs: 5400,
@@ -264,9 +269,9 @@ export const TOURS = [
               { label: 'Tour',     value: 'Pyramid winery + cellar' },
               { label: 'Rate',     value: 'USD 220 pp' },
             ],
+            travelers: [TRAVELERS.amelia, TRAVELERS.liam],
           },
         ],
-        // Picks shown across all three sub-spotlights (curated overflow).
         picks: [
           { kind: 'EAT',  name: 'Casa El Enemigo',   note: 'Adrianna Catena & Aleardo Ferrer · 7-course tasting' },
           { kind: 'DRINK',name: 'Bodega Salentein',  note: 'Greek-temple winery in the Uco Valley' },
@@ -279,7 +284,6 @@ export const TOURS = [
         speaker: 'aria',
         text: "Eight days. Six iconic names. Twenty-eight hundred. Booked?",
         duration: 3.869,
-        // Hero pull-back showing the entire trip arc from BA down to Patagonia.
         camera: { lng: -65, lat: -38, height: 3_800_000, pitch: -0.95, duration: 3.0 },
       },
       {
@@ -288,6 +292,466 @@ export const TOURS = [
         text: "Booked.",
         duration: 0.891,
         camera: { lng: -65, lat: -38, height: 3_800_000, pitch: -0.95, duration: 0.4 },
+      },
+    ],
+  },
+
+  // ─── JAPAN ─────────────────────────────────────────────────────────────
+  {
+    id: T.JAPAN,
+    title: 'Japan · 10 Days',
+    subtitle: 'Tokyo · Hakone · Kyoto · Osaka',
+    estSeconds: 55,
+    cover: '/cover-japan.jpg',
+    accent: 'pink',
+    steps: [
+      {
+        audio: '/demo-audio-jp/01-aria-open.mp3',
+        video: '/demo-aria-jp/01-aria-open.mp4',
+        speaker: 'aria',
+        text: "Marco, you're back. Where to?",
+        duration: 2.12,
+        camera: { lng: 139.7, lat: 35.68, height: 2_500_000, pitch: -0.95, duration: 2.0 },
+      },
+      {
+        audio: '/demo-audio-jp/02-marco-pick.mp3',
+        speaker: 'marco',
+        text: "Tokyo. Spring. Ten days.",
+        duration: 2.902,
+        camera: { lng: 138.5, lat: 36.0, height: 1_800_000, pitch: -0.95, duration: 2.4 },
+      },
+      {
+        audio: '/demo-audio-jp/03-aria-day1.mp3',
+        video: '/demo-aria-jp/03-aria-day1.mp4',
+        speaker: 'aria',
+        text: "Tokyo, day one. Park Hyatt for arrival — Lost in Translation views. Sukiyabashi Jiro for dinner.",
+        duration: 7.68,
+        // Park Hyatt Tokyo, Shinjuku — drop low to see the tower
+        camera: { lng: 139.6905, lat: 35.6868, height: 1_200, pitch: -0.30, heading: 0.3, duration: 4.0 },
+        marker: { name: 'Park Hyatt Tokyo · Shinjuku', lat: 35.6868, lng: 139.6905 },
+        placeQuery: 'Park Hyatt Tokyo',
+        cart: [{ name: 'Park Hyatt Tokyo · 2 nights', kind: 'hotel', price: 1100, day: 1 }],
+        autoStreetView: { delayMs: 3500 },
+        spotlight: {
+          name: 'Park Hyatt Tokyo',
+          subtitle: 'Lost in Translation · Shinjuku Park Tower 41-52F',
+          image: '/venue-photos/jp/park-hyatt-tokyo.jpg',
+          tag: 'STAY · DAY 1-2',
+          details: [
+            { label: 'Address', value: '3-7-1-2 Nishi Shinjuku, Tokyo' },
+            { label: 'Stay',    value: '2 nights · Park Suite · Mt Fuji view' },
+            { label: 'Includes',value: 'New York Bar nightcap · pool · spa' },
+            { label: 'Rate',    value: 'USD 1,100' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'Sukiyabashi Jiro', note: '3 Michelin stars · Jiro Dreams of Sushi' },
+            { kind: 'EAT',  name: 'Den',              note: "World's 50 Best #20 · modern kaiseki" },
+            { kind: 'DRINK',name: 'New York Bar',     note: 'Hotel rooftop · Lost in Translation bar' },
+          ],
+          travelers: [TRAVELERS.marcus, TRAVELERS.priya, TRAVELERS.yuki],
+        },
+      },
+      {
+        audio: '/demo-audio-jp/04-aria-jiro.mp3',
+        video: '/demo-aria-jp/04-aria-jiro.mp4',
+        speaker: 'aria',
+        text: "Three Michelin stars. Twenty pieces. Twenty minutes.",
+        duration: 3.61,
+        camera: { lng: 139.7613, lat: 35.6731, height: 350, pitch: -0.4, heading: 0, duration: 1.8 },
+        marker: { name: 'Sukiyabashi Jiro · Ginza', lat: 35.6731, lng: 139.7613 },
+        placeQuery: 'Sukiyabashi Jiro Honten',
+        cart: [{ name: 'Sukiyabashi Jiro · omakase', kind: 'meal', price: 350, day: 1 }],
+        autoStreetView: { delayMs: 600 },
+        spotlight: {
+          name: 'Sukiyabashi Jiro',
+          subtitle: 'Jiro Ono · Ginza · Tsukamoto Sogyo Building B1',
+          image: '/venue-photos/jp/sukiyabashi-jiro.jpg',
+          tag: 'EAT · DAY 1 · DINNER',
+          details: [
+            { label: 'Chef',    value: 'Jiro Ono · 99 yrs old · 3★ since 2007' },
+            { label: 'Course',  value: '20 pieces of nigiri · 20 minutes' },
+            { label: 'Booking', value: 'Concierge-only · 6:00 pm seat' },
+            { label: 'Rate',    value: 'USD 350 pp' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'Sushi Saito',     note: '3★ · Roppongi · the Tokyo connoisseurs choice' },
+            { kind: 'EAT',  name: 'Narisawa',        note: "World's 50 Best · innovative kaiseki" },
+            { kind: 'DRINK',name: 'Bar High Five',   note: "World's 50 Best Bars · Ginza classic cocktails" },
+          ],
+          travelers: [TRAVELERS.priya, TRAVELERS.marcus],
+        },
+      },
+      {
+        audio: '/demo-audio-jp/05-aria-hakone.mp3',
+        video: '/demo-aria-jp/05-aria-hakone.mp4',
+        speaker: 'aria',
+        text: "Day three — Hakone. Gora Kadan ryokan. Onsen with Fuji on the horizon.",
+        duration: 5.31,
+        // Mt Fuji from a position over Hakone, looking northwest
+        camera: { lng: 138.95, lat: 35.20, height: 8_000, pitch: -0.10, heading: -0.6, duration: 3.5 },
+        marker: { name: 'Gora Kadan · Hakone', lat: 35.2474, lng: 139.0349 },
+        placeQuery: 'Gora Kadan Hakone',
+        cart: [{ name: 'Gora Kadan ryokan · 2 nights', kind: 'hotel', price: 1400, day: 3 }],
+        autoStreetView: { delayMs: 3000 },
+        spotlight: {
+          name: 'Gora Kadan · Hakone',
+          subtitle: 'Imperial-family-villa-turned-ryokan · Relais & Châteaux',
+          image: '/venue-photos/jp/hakone-fuji.jpg',
+          tag: 'STAY · DAY 3-4',
+          details: [
+            { label: 'Setting', value: 'Hakone hot-spring valley · Mt Fuji view' },
+            { label: 'Stay',    value: '2 nights · Tatami suite + private onsen' },
+            { label: 'Meals',   value: 'Kaiseki dinner + Japanese breakfast' },
+            { label: 'Rate',    value: 'USD 1,400' },
+          ],
+          picks: [
+            { kind: 'DO',   name: 'Hakone Open-Air Museum', note: 'Picasso pavilion in a sculpture garden' },
+            { kind: 'DO',   name: 'Lake Ashi cruise',       note: 'Pirate ship across the caldera lake · Fuji backdrop' },
+            { kind: 'DO',   name: 'Owakudani black eggs',   note: 'Sulphur-cooked eggs · adds 7 yrs to your life (legend)' },
+          ],
+          travelers: [TRAVELERS.yuki, TRAVELERS.marcus],
+        },
+      },
+      {
+        audio: '/demo-audio-jp/06-aria-kyoto.mp3',
+        video: '/demo-aria-jp/06-aria-kyoto.mp4',
+        speaker: 'aria',
+        text: "Day five — Kyoto. Aman Kyoto, four nights in a hidden forest.",
+        duration: 4.65,
+        camera: { lng: 135.7280, lat: 35.05, height: 2_500, pitch: -0.20, heading: 0.3, duration: 3.0 },
+        marker: { name: 'Aman Kyoto · Takagamine', lat: 35.0710, lng: 135.7308 },
+        placeQuery: 'Aman Kyoto',
+        cart: [{ name: 'Aman Kyoto · 4 nights', kind: 'hotel', price: 4800, day: 5 }],
+        autoStreetView: { delayMs: 2500 },
+        spotlight: {
+          name: 'Aman Kyoto',
+          subtitle: 'Hidden forest sanctuary · Takagamine north of Kyoto',
+          image: '/venue-photos/jp/aman-kyoto.jpg',
+          tag: 'STAY · DAY 5-8',
+          details: [
+            { label: 'Setting', value: '32-hectare hidden garden, abandoned obi land' },
+            { label: 'Stay',    value: '4 nights · Pavilion suite · forest view' },
+            { label: 'Includes',value: 'Daily kaiseki · onsen · meditation' },
+            { label: 'Rate',    value: 'USD 4,800 (couple)' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'Kikunoi',           note: '3★ · Kyoto kaiseki institution' },
+            { kind: 'DO',   name: 'Arashiyama bamboo', note: 'Sunrise walk · Kyoto bamboo forest' },
+            { kind: 'DO',   name: 'Kinkaku-ji',        note: '20 min from Aman · the Golden Pavilion' },
+          ],
+          travelers: [TRAVELERS.priya, TRAVELERS.yuki, TRAVELERS.marcus],
+        },
+      },
+      {
+        audio: '/demo-audio-jp/07-marco-cherry.mp3',
+        speaker: 'marco',
+        text: "Cherry blossoms?",
+        duration: 1.36,
+        camera: { lng: 135.7280, lat: 35.05, height: 2_500, pitch: -0.20, heading: 0.3, duration: 0.5 },
+      },
+      {
+        audio: '/demo-audio-jp/08-aria-fushimi.mp3',
+        video: '/demo-aria-jp/08-aria-fushimi.mp4',
+        speaker: 'aria',
+        text: "Sunrise at Fushimi Inari. Ten thousand torii gates before the crowds. Hanami in Maruyama Park after.",
+        duration: 7.08,
+        camera: { lng: 135.7727, lat: 34.9671, height: 800, pitch: -0.30, heading: 0.4, duration: 4.0 },
+        marker: { name: 'Fushimi Inari Taisha · Kyoto', lat: 34.9671, lng: 135.7727 },
+        placeQuery: 'Fushimi Inari Taisha',
+        cart: [
+          { name: 'Fushimi Inari sunrise tour', kind: 'experience', price: 180, day: 6 },
+          { name: 'Maruyama Park hanami picnic', kind: 'experience', price: 120, day: 6 },
+        ],
+        autoStreetView: { delayMs: 4000 },
+        spotlights: [
+          {
+            startMs: 0,
+            name: 'Fushimi Inari · Sunrise',
+            subtitle: 'Ten thousand vermillion torii up Mt Inari',
+            image: '/venue-photos/jp/fushimi-inari.jpg',
+            tag: 'DO · DAY 6 · 5 AM',
+            details: [
+              { label: 'Pickup',   value: '4:30 AM from Aman' },
+              { label: 'Trail',    value: '4 km loop · 233 m gain' },
+              { label: 'Why dawn', value: 'Tunnels are empty before 7 AM' },
+              { label: 'Rate',    value: 'USD 180 (private)' },
+            ],
+            travelers: [TRAVELERS.marcus, TRAVELERS.yuki],
+          },
+          {
+            startMs: 4000,
+            name: 'Maruyama Park · Hanami',
+            subtitle: 'Kyoto\'s most famous cherry-blossom park',
+            image: '/venue-photos/jp/maruyama-sakura.jpg',
+            tag: 'DO · DAY 6 · LUNCH',
+            details: [
+              { label: 'When',    value: 'Late March - early April peak' },
+              { label: 'Includes',value: 'Bento + sake · prepared by Aman chef' },
+              { label: 'Centerpiece', value: 'Weeping cherry tree · 70 yrs old' },
+              { label: 'Rate',    value: 'USD 120 pp' },
+            ],
+            travelers: [TRAVELERS.priya, TRAVELERS.yuki, TRAVELERS.marcus],
+          },
+        ],
+        picks: [
+          { kind: 'DO',   name: 'Gion geisha district', note: 'Walk Hanami-koji at dusk · spot maiko' },
+          { kind: 'EAT',  name: 'Hyotei',              note: '450-year-old kaiseki house · Nanzen-ji area' },
+          { kind: 'DO',   name: 'Philosophers Path',   note: '2 km canal lined with cherries' },
+        ],
+      },
+      {
+        audio: '/demo-audio-jp/09-aria-osaka.mp3',
+        video: '/demo-aria-jp/09-aria-osaka.mp4',
+        speaker: 'aria',
+        text: "Day nine — Osaka. Dotonbori street food crawl with Den's chef as guide.",
+        duration: 4.99,
+        camera: { lng: 135.5023, lat: 34.6687, height: 700, pitch: -0.30, heading: 0.0, duration: 3.0 },
+        marker: { name: 'Dotonbori · Osaka', lat: 34.6687, lng: 135.5023 },
+        placeQuery: 'Dotonbori Osaka',
+        cart: [{ name: 'Dotonbori private food crawl', kind: 'experience', price: 280, day: 9 }],
+        autoStreetView: { delayMs: 3000 },
+        spotlight: {
+          name: 'Dotonbori · Street Food Crawl',
+          subtitle: "Private guide: Zaiyu Hasegawa, Den (World's 50 Best)",
+          image: '/venue-photos/jp/dotonbori.jpg',
+          tag: 'EAT · DAY 9 · DINNER',
+          details: [
+            { label: 'Guide',  value: 'Chef Zaiyu Hasegawa · Den Tokyo · 3 hrs' },
+            { label: 'Stops',  value: 'Takoyaki · okonomiyaki · kushikatsu · ramen' },
+            { label: 'Finish', value: 'Glico Man neon photo · river cruise' },
+            { label: 'Rate',   value: 'USD 280 pp' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'Ichiran ramen',  note: 'Solo-booth tonkotsu · open 24/7' },
+            { kind: 'DRINK',name: 'Bar Augusta Tarlogie', note: "World's 50 Best Bars · Osaka whisky" },
+            { kind: 'DO',   name: 'Osaka Castle',   note: 'Sakura-season morning visit · 20 min from Dotonbori' },
+          ],
+          travelers: [TRAVELERS.yuki, TRAVELERS.marcus, TRAVELERS.priya],
+        },
+      },
+      {
+        audio: '/demo-audio-jp/10-aria-close.mp3',
+        video: '/demo-aria-jp/10-aria-close.mp4',
+        speaker: 'aria',
+        text: "Ten days. Eight icons. Forty-two hundred. Booked?",
+        duration: 4.23,
+        camera: { lng: 138.0, lat: 35.5, height: 2_200_000, pitch: -0.95, duration: 3.0 },
+      },
+      {
+        audio: '/demo-audio-jp/11-marco-yes.mp3',
+        speaker: 'marco',
+        text: "Booked.",
+        duration: 0.68,
+        camera: { lng: 138.0, lat: 35.5, height: 2_200_000, pitch: -0.95, duration: 0.4 },
+      },
+    ],
+  },
+
+  // ─── ROMANTIC ITALY ───────────────────────────────────────────────────
+  {
+    id: T.ITALY,
+    title: 'Romantic Italy · 7 Days',
+    subtitle: 'Rome · Amalfi · Capri · Tuscany · Lake Como',
+    estSeconds: 50,
+    cover: '/cover-italy.jpg',
+    accent: 'rose',
+    steps: [
+      {
+        audio: '/demo-audio-it/01-aria-open.mp3',
+        video: '/demo-aria-it/01-aria-open.mp4',
+        speaker: 'aria',
+        text: "Marco. You and Sofia, anniversary trip. What's the move?",
+        duration: 3.69,
+        camera: { lng: 12.5, lat: 42.0, height: 2_200_000, pitch: -0.95, duration: 3.0 },
+      },
+      {
+        audio: '/demo-audio-it/02-marco-pick.mp3',
+        speaker: 'marco',
+        text: "Italy. Seven days. Make it special.",
+        duration: 3.40,
+        camera: { lng: 12.5, lat: 42.5, height: 1_400_000, pitch: -0.95, duration: 2.8 },
+      },
+      {
+        audio: '/demo-audio-it/03-aria-day1.mp3',
+        video: '/demo-aria-it/03-aria-day1.mp4',
+        speaker: 'aria',
+        text: "Day one — Rome. Hotel de Russie, garden suite. Dinner at Pierluigi in Piazza de' Ricci.",
+        duration: 7.08,
+        camera: { lng: 12.4769, lat: 41.9094, height: 600, pitch: -0.30, heading: 0.0, duration: 4.0 },
+        marker: { name: 'Hotel de Russie · Rome', lat: 41.9094, lng: 12.4769 },
+        placeQuery: 'Hotel de Russie Rocco Forte Rome',
+        cart: [{ name: 'Hotel de Russie · 1 night', kind: 'hotel', price: 720, day: 1 }],
+        autoStreetView: { delayMs: 3500 },
+        spotlight: {
+          name: 'Hotel de Russie',
+          subtitle: 'Rocco Forte · Via del Babuino, between Spagna and Popolo',
+          image: '/venue-photos/it/hotel-de-russie.jpg',
+          tag: 'STAY · DAY 1',
+          details: [
+            { label: 'Address', value: 'Via del Babuino 9, 00187 Roma' },
+            { label: 'Stay',    value: '1 night · Garden suite' },
+            { label: 'Includes',value: 'Garden breakfast · spa access' },
+            { label: 'Rate',    value: 'USD 720' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'Pierluigi',        note: 'Trastevere institution · Roman seafood' },
+            { kind: 'DRINK',name: 'Stravinskij Bar',  note: 'Hotel garden bar · Negroni in the courtyard' },
+            { kind: 'DO',   name: 'Galleria Borghese', note: 'Bernini sculptures · book 2 wks ahead' },
+          ],
+          travelers: [TRAVELERS.thomas, TRAVELERS.sofia],
+        },
+      },
+      {
+        audio: '/demo-audio-it/04-aria-amalfi.mp3',
+        video: '/demo-aria-it/04-aria-amalfi.mp4',
+        speaker: 'aria',
+        text: "Day two — south to the Amalfi coast. Le Sirenuse in Positano. Three nights with the cliff view.",
+        duration: 6.53,
+        camera: { lng: 14.4849, lat: 40.6291, height: 800, pitch: -0.20, heading: -0.5, duration: 4.0 },
+        marker: { name: 'Le Sirenuse · Positano', lat: 40.6280, lng: 14.4853 },
+        placeQuery: 'Le Sirenuse Hotel Positano',
+        cart: [{ name: 'Le Sirenuse · 3 nights', kind: 'hotel', price: 2400, day: 2 }],
+        autoStreetView: { delayMs: 3500 },
+        spotlight: {
+          name: 'Le Sirenuse',
+          subtitle: '#1 hotel in Italy (T+L) · pink villa above the sea',
+          image: '/venue-photos/it/le-sirenuse.jpg',
+          tag: 'STAY · DAY 2-4',
+          details: [
+            { label: 'Address',  value: 'Via Cristoforo Colombo 30, Positano' },
+            { label: 'Stay',     value: '3 nights · Sea-view suite + balcony' },
+            { label: 'Includes', value: 'Champagne breakfast · pool · La Sponda dinner' },
+            { label: 'Rate',     value: 'USD 2,400' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'La Sponda',          note: '1★ · 400 candles, sea-view, in-house' },
+            { kind: 'DRINK',name: 'Franco\'s Bar',       note: 'Hotel terrace bar · sunset over Positano' },
+            { kind: 'DO',   name: 'Path of the Gods',   note: '8 km clifftop hike from Bomerano to Nocelle' },
+          ],
+          travelers: [TRAVELERS.isabella, TRAVELERS.thomas, TRAVELERS.amelia],
+        },
+      },
+      {
+        audio: '/demo-audio-it/05-aria-capri.mp3',
+        video: '/demo-aria-it/05-aria-capri.mp4',
+        speaker: 'aria',
+        text: "Day four — Capri by boat. Lunch at La Fontelina. Cocktails at Anema e Core.",
+        duration: 5.65,
+        camera: { lng: 14.2429, lat: 40.5470, height: 1_500, pitch: -0.20, heading: 0.0, duration: 3.5 },
+        marker: { name: 'La Fontelina · Capri', lat: 40.5430, lng: 14.2480 },
+        placeQuery: 'La Fontelina Capri',
+        cart: [
+          { name: 'Capri private boat day', kind: 'experience', price: 480, day: 4 },
+          { name: 'Lunch · La Fontelina', kind: 'meal', price: 180, day: 4 },
+        ],
+        autoStreetView: { delayMs: 3000 },
+        spotlight: {
+          name: 'Capri by Boat',
+          subtitle: 'Private gozzo · La Fontelina lunch · Anema e Core nightcap',
+          image: '/venue-photos/it/capri.jpg',
+          tag: 'DO · DAY 4',
+          details: [
+            { label: 'Boat',    value: 'Private gozzo with skipper · 8 hrs' },
+            { label: 'Lunch',   value: 'La Fontelina · seaside under the Faraglioni' },
+            { label: 'Night',   value: 'Anema e Core · Capri tarantella tavern' },
+            { label: 'Rate',   value: 'USD 660 (couple)' },
+          ],
+          picks: [
+            { kind: 'DO',   name: 'Blue Grotto',       note: 'Sea cave · early-morning before crowds' },
+            { kind: 'EAT',  name: 'Da Paolino',        note: 'Lemon-tree restaurant · the famous one' },
+            { kind: 'DO',   name: 'Monte Solaro chair', note: 'Chairlift to Capri\'s highest point' },
+          ],
+          travelers: [TRAVELERS.isabella, TRAVELERS.sofia],
+        },
+      },
+      {
+        audio: '/demo-audio-it/06-marco-tuscany.mp3',
+        speaker: 'marco',
+        text: "Tuscany?",
+        duration: 1.00,
+        camera: { lng: 14.2429, lat: 40.5470, height: 1_500, pitch: -0.20, heading: 0.0, duration: 0.4 },
+      },
+      {
+        audio: '/demo-audio-it/07-aria-tuscany.mp3',
+        video: '/demo-aria-it/07-aria-tuscany.mp4',
+        speaker: 'aria',
+        text: "Day five — Borgo Santo Pietro near Siena. Truffle hunt at sunrise. Castello Banfi tasting.",
+        duration: 6.43,
+        camera: { lng: 11.2500, lat: 43.1500, height: 5_000, pitch: -0.15, heading: -1.0, duration: 4.0 },
+        marker: { name: 'Borgo Santo Pietro · Tuscany', lat: 43.1542, lng: 11.2256 },
+        placeQuery: 'Borgo Santo Pietro Chiusdino',
+        cart: [
+          { name: 'Borgo Santo Pietro · 2 nights', kind: 'hotel', price: 1800, day: 5 },
+          { name: 'Truffle hunt · sunrise', kind: 'experience', price: 220, day: 5 },
+          { name: 'Castello Banfi tasting', kind: 'experience', price: 180, day: 5 },
+        ],
+        autoStreetView: { delayMs: 3500 },
+        spotlight: {
+          name: 'Borgo Santo Pietro',
+          subtitle: '13th-c. pilgrim villa · 200 acres · Relais & Châteaux',
+          image: '/venue-photos/it/borgo-tuscany.jpg',
+          tag: 'STAY · DAY 5-6',
+          details: [
+            { label: 'Address',  value: 'Loc. Palazzetto, Chiusdino, Siena' },
+            { label: 'Stay',     value: '2 nights · Garden cottage · vineyard view' },
+            { label: 'Sunrise',  value: 'Truffle hunt with the dogs + farm breakfast' },
+            { label: 'Rate',     value: 'USD 2,200 (couple, all in)' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'Meo Modo',           note: '1★ · in-house · garden-to-table' },
+            { kind: 'DRINK',name: 'Castello Banfi',     note: 'Brunello tasting in a 12th-c. castle' },
+            { kind: 'DO',   name: 'Siena Palio horse race', note: 'July 2 / Aug 16 only · book a balcony' },
+          ],
+          travelers: [TRAVELERS.thomas, TRAVELERS.ethan, TRAVELERS.sofia],
+        },
+      },
+      {
+        audio: '/demo-audio-it/08-aria-como.mp3',
+        video: '/demo-aria-it/08-aria-como.mp4',
+        speaker: 'aria',
+        text: "Day seven — Lake Como. Villa d'Este, last night. Private boat at sunset.",
+        duration: 4.52,
+        camera: { lng: 9.0840, lat: 45.8470, height: 1_500, pitch: -0.20, heading: 0.5, duration: 3.5 },
+        marker: { name: "Villa d'Este · Cernobbio", lat: 45.8470, lng: 9.0840 },
+        placeQuery: "Villa d'Este Lake Como Cernobbio",
+        cart: [
+          { name: "Villa d'Este · 1 night", kind: 'hotel', price: 1800, day: 7 },
+          { name: 'Private sunset boat', kind: 'experience', price: 380, day: 7 },
+        ],
+        autoStreetView: { delayMs: 2500 },
+        spotlight: {
+          name: "Villa d'Este",
+          subtitle: '16th-c. cardinal\'s villa on Lake Como · Leading Hotels',
+          image: '/venue-photos/it/villa-deste.jpg',
+          tag: 'STAY · DAY 7',
+          details: [
+            { label: 'Address',  value: 'Via Regina 40, Cernobbio' },
+            { label: 'Stay',     value: '1 night · Lake-view garden suite' },
+            { label: 'Boat',     value: 'Private Riva · 2 hrs at sunset' },
+            { label: 'Rate',     value: 'USD 2,180 (couple)' },
+          ],
+          picks: [
+            { kind: 'EAT',  name: 'Veranda · Villa d\'Este', note: '1★ in-house · lake terrace dining' },
+            { kind: 'DO',   name: 'Bellagio',                note: 'Gem of the lake · 25 min by Riva' },
+            { kind: 'DO',   name: 'Greenway del Lago',       note: '10 km lakeside walk · Colonno to Cadenabbia' },
+          ],
+          travelers: [TRAVELERS.isabella, TRAVELERS.thomas, TRAVELERS.amelia],
+        },
+      },
+      {
+        audio: '/demo-audio-it/09-aria-close.mp3',
+        video: '/demo-aria-it/09-aria-close.mp4',
+        speaker: 'aria',
+        text: "Seven days. Five legendary stays. Forty-eight hundred. Booked?",
+        duration: 5.59,
+        camera: { lng: 12.5, lat: 43.0, height: 1_800_000, pitch: -0.95, duration: 3.5 },
+      },
+      {
+        audio: '/demo-audio-it/10-marco-yes.mp3',
+        speaker: 'marco',
+        text: "Booked.",
+        duration: 0.71,
+        camera: { lng: 12.5, lat: 43.0, height: 1_800_000, pitch: -0.95, duration: 0.4 },
       },
     ],
   },

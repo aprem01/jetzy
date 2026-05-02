@@ -1,0 +1,65 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "text": "Marco. You and Sofia, anniversary trip. What's the move?",
+    "scene": "open",
+    "duration": 3.686,
+    "audioFile": "/demo-audio-it/01-aria-open.mp3",
+    "videoFile": "/demo-aria-it/01-aria-open.mp4"
+  },
+  {
+    "id": "03-aria-day1",
+    "speaker": "aria",
+    "text": "Day one — Rome. Hotel de Russie, garden suite. Dinner at Pierluigi in Piazza de' Ricci.",
+    "scene": "rome",
+    "duration": 7.082,
+    "audioFile": "/demo-audio-it/03-aria-day1.mp3",
+    "videoFile": "/demo-aria-it/03-aria-day1.mp4"
+  },
+  {
+    "id": "04-aria-amalfi",
+    "speaker": "aria",
+    "text": "Day two — south to the Amalfi coast. Le Sirenuse in Positano. Three nights with the cliff view.",
+    "scene": "positano",
+    "duration": 6.533,
+    "audioFile": "/demo-audio-it/04-aria-amalfi.mp3",
+    "videoFile": "/demo-aria-it/04-aria-amalfi.mp4"
+  },
+  {
+    "id": "05-aria-capri",
+    "speaker": "aria",
+    "text": "Day four — Capri by boat. Lunch at La Fontelina. Cocktails at Anema e Core.",
+    "scene": "capri",
+    "duration": 5.645,
+    "audioFile": "/demo-audio-it/05-aria-capri.mp3",
+    "videoFile": "/demo-aria-it/05-aria-capri.mp4"
+  },
+  {
+    "id": "07-aria-tuscany",
+    "speaker": "aria",
+    "text": "Day five — Borgo Santo Pietro near Siena. Truffle hunt at sunrise. Castello Banfi tasting.",
+    "scene": "tuscany",
+    "duration": 6.429,
+    "audioFile": "/demo-audio-it/07-aria-tuscany.mp3",
+    "videoFile": "/demo-aria-it/07-aria-tuscany.mp4"
+  },
+  {
+    "id": "08-aria-como",
+    "speaker": "aria",
+    "text": "Day seven — Lake Como. Villa d'Este, last night. Private boat at sunset.",
+    "scene": "como",
+    "duration": 4.522,
+    "audioFile": "/demo-audio-it/08-aria-como.mp3",
+    "videoFile": "/demo-aria-it/08-aria-como.mp4"
+  },
+  {
+    "id": "09-aria-close",
+    "speaker": "aria",
+    "text": "Seven days. Five legendary stays. Forty-eight hundred. Booked?",
+    "scene": "close",
+    "duration": 5.593,
+    "audioFile": "/demo-audio-it/09-aria-close.mp3",
+    "videoFile": "/demo-aria-it/09-aria-close.mp4"
+  }
+]
