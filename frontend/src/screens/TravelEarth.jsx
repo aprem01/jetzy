@@ -1126,7 +1126,9 @@ export default function TravelEarth() {
 
       {/* === VENUE SPOTLIGHT ===
            Used by BOTH tour mode and live concierge. Tour mode reads from
-           tour.steps[tourStepIndex]; live mode reads from liveScenes[liveSceneIndex]. */}
+           tour.steps[tourStepIndex]; live mode reads from liveScenes[liveSceneIndex].
+           Hidden on phones (<640px) — globe + voice + caption carry mobile. */}
+      <div className="hidden sm:block">
       {(() => {
         const inTour = !!tour;
         const liveScene = !inTour && liveScenes.length > 0 ? liveScenes[Math.min(liveSceneIndex, liveScenes.length - 1)] : null;
@@ -1394,6 +1396,7 @@ export default function TravelEarth() {
           </div>
         );
       })()}
+      </div>
 
       {/* === TOUR HUD (when a tour is playing) === */}
       {tour && (
