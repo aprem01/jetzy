@@ -25,5 +25,50 @@
     "duration": 1.831,
     "audioFile": "/demo-audio/04-aria-don-julio.mp3",
     "videoFile": "/demo-aria/04-aria-don-julio.mp4"
+  },
+  {
+    "id": "05-aria-day3",
+    "speaker": "aria",
+    "text": "Day three — south to El Chaltén. Eolo Lodge, four nights. National Geographic Unique Lodge of the World.",
+    "scene": "el_chalten",
+    "duration": 6.977,
+    "audioFile": "/demo-audio/05-aria-day3.mp3",
+    "videoFile": "/demo-aria/05-aria-day3.mp4"
+  },
+  {
+    "id": "06-aria-day4",
+    "speaker": "aria",
+    "text": "Sunrise on Fitz Roy. The same trail Yvon Chouinard pioneered.",
+    "scene": "fitz_roy",
+    "duration": 4.522,
+    "audioFile": "/demo-audio/06-aria-day4.mp3",
+    "videoFile": "/demo-aria/06-aria-day4.mp4"
+  },
+  {
+    "id": "08-aria-perito",
+    "speaker": "aria",
+    "text": "Adding it — day seven. Big Ice trek. Two hours walking on a glacier the size of Buenos Aires.",
+    "scene": "perito_moreno",
+    "duration": 6.246,
+    "audioFile": "/demo-audio/08-aria-perito.mp3",
+    "videoFile": "/demo-aria/08-aria-perito.mp4"
+  },
+  {
+    "id": "09-aria-mendoza",
+    "speaker": "aria",
+    "text": "Mendoza to wind down. Cavas Wine Lodge. Dinner at Francis Mallmann's 1884. Catena Zapata in the morning.",
+    "scene": "mendoza",
+    "duration": 8.153,
+    "audioFile": "/demo-audio/09-aria-mendoza.mp3",
+    "videoFile": "/demo-aria/09-aria-mendoza.mp4"
+  },
+  {
+    "id": "10-aria-close",
+    "speaker": "aria",
+    "text": "Eight days. Six iconic names. Twenty-eight hundred. Booked?",
+    "scene": "wine_pour",
+    "duration": 3.869,
+    "audioFile": "/demo-audio/10-aria-close.mp3",
+    "videoFile": "/demo-aria/10-aria-close.mp4"
   }
 ]

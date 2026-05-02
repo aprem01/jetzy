@@ -25,7 +25,10 @@ export const TOURS = [
         speaker: 'aria',
         text: "Hey Marco. You did Kilimanjaro in February. What's next?",
         duration: 3.738,
-        camera: { lng: 37.3556, lat: -3.0674, height: 80_000, pitch: -0.4 },
+        // Cinematic Kilimanjaro hero: low altitude (8 km), shallow pitch so
+        // the snow-capped peak rises above the savanna instead of looking
+        // like a flat tile from 80 km up.
+        camera: { lng: 37.3556, lat: -3.0674, height: 8_000, pitch: -0.18 },
       },
       {
         audio: '/demo-audio/02-marco-pick.mp3',
@@ -49,7 +52,7 @@ export const TOURS = [
         spotlight: {
           name: 'Faena Hotel',
           subtitle: 'Philippe Starck · Puerto Madero · Buenos Aires',
-          image: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?w=900&q=80',
+          image: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=900&h=500&fit=crop&q=80',
           tag: 'STAY · DAY 1',
           details: [
             { label: 'Address', value: 'Martha Salotti 445, Puerto Madero' },
@@ -79,7 +82,7 @@ export const TOURS = [
         spotlight: {
           name: 'Don Julio',
           subtitle: "World's 50 Best #14 · Argentine parrilla",
-          image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=900&q=80',
+          image: 'https://images.unsplash.com/photo-1558030006-450675393462?w=900&h=500&fit=crop&q=80',
           tag: 'EAT · DAY 1 · DINNER',
           details: [
             { label: 'Address', value: 'Guatemala 4699, Palermo' },
@@ -109,7 +112,7 @@ export const TOURS = [
         spotlight: {
           name: 'Eolo · Patagonia\'s Spirit',
           subtitle: 'Nat Geo Unique Lodge · Relais & Châteaux',
-          image: 'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=900&q=80',
+          image: 'https://images.unsplash.com/photo-1610641818989-c2051b5e2cfd?w=900&h=500&fit=crop&q=80',
           tag: 'STAY · DAY 3-6',
           details: [
             { label: 'Location',  value: '17 km off RP-11, El Calafate' },
@@ -138,7 +141,7 @@ export const TOURS = [
         spotlight: {
           name: 'Fitz Roy · Sunrise',
           subtitle: "Laguna de los Tres at first light · the Patagonia logo",
-          image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=900&q=80',
+          image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=900&h=500&fit=crop&q=80',
           tag: 'DO · DAY 4',
           details: [
             { label: 'Guide',    value: 'Lucas · 12 yrs · spoke Spanish + English' },
@@ -174,7 +177,7 @@ export const TOURS = [
         spotlight: {
           name: 'Perito Moreno · Big Ice',
           subtitle: 'Hielo y Aventura · IFMGA-certified glacier trek',
-          image: 'https://images.unsplash.com/photo-1517783999520-f068d7431a60?w=900&q=80',
+          image: 'https://images.unsplash.com/photo-1535941339077-2dd1c7963098?w=900&h=500&fit=crop&q=80',
           tag: 'DO · DAY 7',
           details: [
             { label: 'Operator', value: 'Hielo y Aventura · since 1989' },
@@ -206,7 +209,7 @@ export const TOURS = [
         spotlight: {
           name: 'Mendoza · Wind Down',
           subtitle: 'Cavas Wine Lodge + Mallmann + Catena',
-          image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80',
+          image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&h=500&fit=crop&q=80',
           tag: 'STAY + EAT · DAY 8',
           details: [
             { label: 'Stay',     value: 'Cavas Wine Lodge · standalone Cava + plunge' },

@@ -27,9 +27,13 @@ const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const ARIA_AVATAR = '/aria-character.png';
 
-const HOME_LAT = 39.95;
-const HOME_LNG = -75.16;
-const HOME_HEIGHT = 2_000_000;
+// Initial hero view — pulled back over South America so the user sees the
+// continent the demo is about to traverse. Tilted slightly so the horizon
+// curves nicely, giving an Earth-from-orbit feel.
+const HOME_LAT = -25;
+const HOME_LNG = -65;
+const HOME_HEIGHT = 9_500_000;
+const HOME_PITCH = -1.0; // ~57° down — sees curvature, sees the continent
 
 const PERSONA = {
   id: 'default',
@@ -203,9 +207,9 @@ export default function TravelEarth() {
 
         v.camera.setView({
           destination: Cesium.Cartesian3.fromDegrees(HOME_LNG, HOME_LAT, HOME_HEIGHT),
-          orientation: { heading: 0, pitch: -Cesium.Math.PI_OVER_TWO + 0.2, roll: 0 },
+          orientation: { heading: 0, pitch: HOME_PITCH, roll: 0 },
         });
-        console.info('[init] scene configured + camera over Philadelphia');
+        console.info('[init] scene configured + hero view over South America');
 
         const c = v.canvas;
         console.info('[init] canvas =', c?.width, 'x', c?.height);
@@ -918,13 +922,14 @@ export default function TravelEarth() {
           <div className="absolute top-32 right-6 z-30 w-[min(420px,92vw)] max-h-[calc(100vh-12rem)] overflow-y-auto animate-fade-up">
             <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
               {/* hero image */}
-              <div className="relative h-44 bg-[#1B2B4B]">
+              <div className="relative h-44 bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
                 {s.image && (
                   <img
                     src={s.image}
                     alt={s.name}
                     className="w-full h-full object-cover"
                     loading="eager"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
