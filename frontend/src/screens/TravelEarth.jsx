@@ -747,42 +747,36 @@ export default function TravelEarth() {
       audioUnlockedRef.current = true;
     }
 
-    // === iOS AUTOPLAY UNLOCK ===
-    // iOS Safari has TWO problems for our use case:
-    //   1. play() must originate from a user gesture, not setTimeout
-    //   2. Hard limit of ~6 Audio elements per page (creating more silently
-    //      fails after the limit), and gesture-priming is element-specific
-    //      so a primed element can't authorize a different one later
-    //
-    // Fix: the SAME single Audio element gets reused across all tour steps
-    // by mutating its `src`. We prime it once here (inside the gesture) by
-    // setting src to the first step and calling play()+pause(). Any future
-    // play() on this element from any context is then allowed.
+    // === iOS AUTOPLAY UNLOCK (silent prime) ===
+    // iOS Safari needs a play() inside the user gesture to unlock the audio
+    // element for later src-mutation playback. We prime with a silent
+    // data-URI so the user never hears the prime — earlier we primed with
+    // the first step's audio file, and on some iOS versions iOS ignored
+    // the muted flag and the line played audibly, then later the real
+    // video played the SAME line (audio baked in) → user heard each first-
+    // step line twice. Silent data URI eliminates that risk entirely.
     if (!tourSharedAudioRef.current) {
       tourSharedAudioRef.current = new Audio();
       tourSharedAudioRef.current.preload = 'auto';
     }
     try {
       const sharedAudio = tourSharedAudioRef.current;
-      const firstStepAudio = t.steps.find((s) => s.audio)?.audio;
-      if (firstStepAudio) {
-        sharedAudio.src = firstStepAudio;
-        sharedAudio.muted = true;
-        sharedAudio.play().then(() => {
-          sharedAudio.pause();
-          sharedAudio.muted = false;
-          sharedAudio.currentTime = 0;
-        }).catch(() => {});
-      }
-      // Prime the in-DOM <video> element too — it's the same element each
-      // step (we just change its src), so a single gesture-prime unlocks it.
+      // 0.1s of silence as a tiny base64 mp3 (works as a no-op iOS unlock).
+      sharedAudio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQwAADB8AhBQAAACGAExAAACABAAQGAAAALwYAAAEXkAAAEDQYAAJfTQwiCQjAYDBwGAYBcCAfDgFAEDA8DAQA4FA8GgYDg+DAYDgwDAcEgUEgcEhMHAQGgkCgQDg=';
+      sharedAudio.volume = 0;
+      sharedAudio.play().then(() => {
+        sharedAudio.pause();
+        sharedAudio.volume = 1;
+        sharedAudio.currentTime = 0;
+      }).catch(() => { sharedAudio.volume = 1; });
+      // Prime the in-DOM <video> too (same element gets mutated per step).
       const v = ariaVideoRef.current;
       if (v) {
         v.muted = true;
         v.play().then(() => {
           v.pause();
           v.muted = false;
-        }).catch(() => {});
+        }).catch(() => { v.muted = false; });
       }
     } catch {}
 
