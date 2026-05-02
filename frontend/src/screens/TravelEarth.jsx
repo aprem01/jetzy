@@ -17,7 +17,7 @@ import { useApp } from '../context/AppContext';
 import { SAMPLE_USERS } from '../data/seed';
 import { VOICES, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
 import { TOURS } from '../data/tours';
-import { playWhoosh, playChime, startBackgroundMusic, stopBackgroundMusic } from '../lib/sounds';
+import { playWhoosh, playChime } from '../lib/sounds';
 
 // Cesium Ion not required — we use Google Photorealistic 3D Tiles when a
 // GOOGLE_MAPS_API_KEY is present and fall back to OSM tiles otherwise.
@@ -555,7 +555,6 @@ export default function TravelEarth() {
     setAriaVideo(null);
     setShowBooked(false);
     setStreetView(null);
-    stopBackgroundMusic();
   }, []);
 
   const playStep = useCallback((step, { isFirst = false } = {}) => {
@@ -742,8 +741,8 @@ export default function TravelEarth() {
     setTour(t);
     setTourStepIndex(0);
 
-    // Kick off the cinematic ambient track. Silently skips if no asset.
-    startBackgroundMusic();
+    // (background music disabled per investor-demo preference — Aria's
+    // voice carries the emotion; cleaner mix when recording the screen)
 
     // Pre-flight: fly camera to the FIRST step's location and let it settle
     // before we start playing audio. Without this beat the camera and Aria
@@ -772,9 +771,8 @@ export default function TravelEarth() {
       setAriaLine(null);
       setCurrentSpeaker('aria');
       setShowBooked(true);
-      // Final celebratory chime, then fade out the music.
+      // Final celebratory chime to mark the booking.
       setTimeout(() => playChime({ volume: 0.25 }), 400);
-      stopBackgroundMusic({ fadeMs: 1500 });
     }
     setTour(null);
     setTourStepIndex(-1);
