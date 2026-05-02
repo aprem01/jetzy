@@ -11,10 +11,12 @@ import { Viewer, Entity } from 'resium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import {
   Mic, MicOff, X, Send, ShoppingBag, Sparkles, MapPin, ArrowLeft,
+  Play, SkipForward,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { SAMPLE_USERS } from '../data/seed';
 import { VOICES, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
+import { TOURS } from '../data/tours';
 
 // Cesium Ion not required — we use Google Photorealistic 3D Tiles when a
 // GOOGLE_MAPS_API_KEY is present and fall back to OSM tiles otherwise.
@@ -67,7 +69,14 @@ export default function TravelEarth() {
   const [inputText, setInputText] = useState('');
   const [cart, setCart] = useState([]);
   const [ariaLine, setAriaLine] = useState(null); // current dialogue bubble text
+  const [currentSpeaker, setCurrentSpeaker] = useState('aria'); // 'aria' | 'marco'
   const [hasStarted, setHasStarted] = useState(false);
+
+  // Tour mode
+  const [tour, setTour] = useState(null); // active tour object or null
+  const [tourStepIndex, setTourStepIndex] = useState(-1);
+  const tourAudioRef = useRef(null);
+  const tourAbortRef = useRef(false);
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
@@ -178,14 +187,15 @@ export default function TravelEarth() {
   }, []);
 
   // Fly the camera to a coordinate.
-  const flyTo = useCallback((lng, lat) => {
+  const flyTo = useCallback((lng, lat, opts = {}) => {
     const v = viewerRef.current?.cesiumElement;
     if (!v) return;
+    const { height = 5000, pitch = -0.5, duration = 4, heading = 0 } = opts;
     try {
       v.camera.flyTo({
-        destination: Cesium.Cartesian3.fromDegrees(lng, lat, 5000),
-        duration: 4,
-        orientation: { heading: 0, pitch: -0.5, roll: 0 },
+        destination: Cesium.Cartesian3.fromDegrees(lng, lat, height),
+        duration,
+        orientation: { heading, pitch, roll: 0 },
       });
     } catch (e) {
       console.warn('flyTo failed:', e);
@@ -285,6 +295,121 @@ export default function TravelEarth() {
     }
   }, [user, geocode, flyTo, speak]);
 
+  // === TOUR MODE ===
+  // Plays through a sequence of pre-baked Aria audio clips. For each step we
+  // fly the camera, show the caption, optionally drop a marker + cart item,
+  // play the audio, and advance when it ends. Designed to look like a real
+  // narrated story while showcasing the Google Photorealistic 3D Tiles.
+  const stopTour = useCallback(() => {
+    tourAbortRef.current = true;
+    try {
+      const a = tourAudioRef.current;
+      if (a) { a.pause(); a.currentTime = 0; }
+    } catch {}
+    tourAudioRef.current = null;
+    setTour(null);
+    setTourStepIndex(-1);
+    setIsSpeaking(false);
+    setAriaLine(null);
+    setCurrentSpeaker('aria');
+  }, []);
+
+  const playStep = useCallback((step) => {
+    return new Promise((resolve) => {
+      if (tourAbortRef.current) return resolve();
+
+      // Camera fly first (non-blocking — runs in parallel with audio).
+      if (step.camera) {
+        flyTo(step.camera.lng, step.camera.lat, {
+          height: step.camera.height,
+          pitch: step.camera.pitch,
+          duration: 3,
+        });
+      }
+
+      // Marker + cart mutations on step start (so user sees them appear live).
+      if (step.marker) {
+        const m = step.marker;
+        setMarkers((prev) =>
+          prev.some((p) => p.name === m.name) ? prev : [...prev, m],
+        );
+        setCurrentLocation({ name: m.name, lat: m.lat, lng: m.lng });
+      }
+      if (Array.isArray(step.cart) && step.cart.length > 0) {
+        setCart((prev) => {
+          const have = new Set(prev.map((i) => i.name?.toLowerCase()));
+          const fresh = step.cart.filter(
+            (i) => i?.name && !have.has(i.name.toLowerCase()),
+          );
+          return [...prev, ...fresh];
+        });
+      }
+
+      setCurrentSpeaker(step.speaker || 'aria');
+      setAriaLine(step.text);
+      setIsSpeaking(true);
+
+      const audio = new Audio(step.audio);
+      audio.preload = 'auto';
+      tourAudioRef.current = audio;
+
+      const finish = () => {
+        if (tourAudioRef.current === audio) tourAudioRef.current = null;
+        setIsSpeaking(false);
+        // small breath between lines
+        setTimeout(resolve, 250);
+      };
+      audio.onended = finish;
+      audio.onerror = finish;
+
+      // Wait briefly so the camera fly has time to start before audio.
+      setTimeout(() => {
+        if (tourAbortRef.current) return resolve();
+        audio.play().catch((e) => {
+          console.warn('tour audio play failed:', e);
+          finish();
+        });
+      }, 200);
+    });
+  }, [flyTo]);
+
+  const startTour = useCallback(async (tourId) => {
+    const t = TOURS.find((x) => x.id === tourId);
+    if (!t) return;
+
+    if (!audioUnlockedRef.current) {
+      try { unlockAudio(); } catch {}
+      audioUnlockedRef.current = true;
+    }
+
+    tourAbortRef.current = false;
+    setHasStarted(true);
+    setTour(t);
+    setTourStepIndex(0);
+
+    for (let i = 0; i < t.steps.length; i++) {
+      if (tourAbortRef.current) break;
+      setTourStepIndex(i);
+      await playStep(t.steps[i]);
+    }
+
+    if (!tourAbortRef.current) {
+      // Tour completed — leave markers/cart visible, clear speaking state.
+      setIsSpeaking(false);
+      setAriaLine(`Eight days planned. Your itinerary is ready.`);
+      setCurrentSpeaker('aria');
+    }
+    setTour(null);
+    setTourStepIndex(-1);
+  }, [playStep]);
+
+  const skipStep = useCallback(() => {
+    try {
+      const a = tourAudioRef.current;
+      if (a) { a.pause(); a.currentTime = a.duration || 0; a.dispatchEvent(new Event('ended')); }
+    } catch {}
+  }, []);
+
   // Mic button handler — also unlocks audio on first user gesture.
   const onMicPress = () => {
     if (!audioUnlockedRef.current) {
@@ -326,6 +451,7 @@ export default function TravelEarth() {
   const onExit = () => {
     try { stopEleven(); } catch {}
     try { recognitionRef.current?.abort(); } catch {}
+    try { stopTour(); } catch {}
     navigate(-1);
   };
 
@@ -432,12 +558,12 @@ export default function TravelEarth() {
         </div>
       </div>
 
-      {/* === ARIA AVATAR (bottom-left) === */}
+      {/* === AVATAR (bottom-left) — Aria normally; faded when Marco speaks === */}
       <div className="absolute bottom-8 left-6 z-30 flex items-end gap-4 max-w-[min(560px,55vw)]">
         <div className="flex flex-col items-center">
           <div className="relative">
             {/* Pulse ring while speaking */}
-            {isSpeaking && (
+            {isSpeaking && currentSpeaker === 'aria' && (
               <>
                 <span className="absolute inset-0 rounded-full ring-2 ring-[#C9A84C]/60 animate-ping" />
                 <span className="absolute -inset-2 rounded-full ring-1 ring-[#C9A84C]/30 animate-pulse" />
@@ -445,10 +571,10 @@ export default function TravelEarth() {
             )}
             <div
               className={`w-24 h-24 rounded-full overflow-hidden border-2 ${
-                isSpeaking
+                isSpeaking && currentSpeaker === 'aria'
                   ? 'border-[#C9A84C] shadow-[0_0_30px_rgba(201,168,76,0.55)]'
                   : 'border-[#C9A84C]/70 shadow-[0_0_20px_rgba(201,168,76,0.25)]'
-              } transition-all`}
+              } ${currentSpeaker === 'marco' ? 'opacity-50' : 'opacity-100'} transition-all`}
             >
               <img
                 src={ARIA_AVATAR}
@@ -459,7 +585,7 @@ export default function TravelEarth() {
           </div>
           <div className="mt-2 text-center">
             <div className="font-display text-sm text-white tracking-wide">
-              Aria
+              {currentSpeaker === 'marco' ? 'Marco' : 'Aria'}
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-[#C9A84C]/90">
               {status}
@@ -471,7 +597,7 @@ export default function TravelEarth() {
         {ariaLine && (
           <div className="relative mb-8 px-5 py-4 rounded-2xl rounded-bl-sm backdrop-blur-xl bg-black/60 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)] max-w-md">
             <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-1.5">
-              ARIA
+              {currentSpeaker === 'marco' ? 'MARCO' : 'ARIA'}
             </div>
             <p className="text-lg leading-snug text-white font-light">
               {ariaLine}
@@ -485,7 +611,7 @@ export default function TravelEarth() {
         <div className="pointer-events-none absolute bottom-40 left-1/2 -translate-x-1/2 z-20 max-w-[min(720px,80vw)]">
           <div className="px-6 py-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-white/10 shadow-2xl">
             <div className="text-[10px] font-bold tracking-[0.25em] text-[#C9A84C] mb-1.5">
-              ARIA
+              {currentSpeaker === 'marco' ? 'MARCO' : 'ARIA'}
             </div>
             <p className="text-xl text-white text-center leading-snug font-light">
               {ariaLine}
@@ -494,9 +620,36 @@ export default function TravelEarth() {
         </div>
       )}
 
-      {/* === SUGGESTIONS (above mic, only on first load) === */}
+      {/* === SUGGESTIONS + TOUR LAUNCHER (above mic, only on first load) === */}
       {!hasStarted && (
-        <div className="absolute bottom-44 right-6 z-30 flex flex-col items-end gap-2 max-w-[min(420px,80vw)]">
+        <div className="absolute bottom-44 right-6 z-30 flex flex-col items-end gap-3 max-w-[min(420px,85vw)]">
+          {/* Featured Tour card */}
+          {TOURS.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => startTour(t.id)}
+              className="group w-full text-left px-5 py-4 rounded-2xl backdrop-blur-xl bg-gradient-to-br from-[#1B2B4B]/85 to-black/85 border border-[#C9A84C]/40 hover:border-[#C9A84C] hover:from-[#1B2B4B]/95 hover:to-black/95 shadow-2xl transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#C9A84C] text-black flex items-center justify-center shadow-lg shrink-0">
+                  <Play size={16} className="ml-0.5" fill="currentColor" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-0.5">
+                    FEATURED TOUR · {t.estSeconds}s
+                  </div>
+                  <div className="font-display text-base text-white leading-tight">
+                    {t.title}
+                  </div>
+                  <div className="text-xs text-white/60 truncate">
+                    {t.subtitle}
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
+
+          {/* Quick suggestions */}
           {SUGGESTIONS.map((s) => (
             <button
               key={s}
@@ -506,6 +659,39 @@ export default function TravelEarth() {
               {s}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* === TOUR HUD (when a tour is playing) === */}
+      {tour && (
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-5 py-3 rounded-full backdrop-blur-xl bg-black/70 border border-[#C9A84C]/40 shadow-2xl">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#C9A84C] animate-pulse" />
+            <span className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C]">
+              TOUR
+            </span>
+            <span className="text-sm text-white/90 font-light">{tour.title}</span>
+            <span className="text-xs text-white/50 ml-1">
+              {Math.min(tourStepIndex + 1, tour.steps.length)}/{tour.steps.length}
+            </span>
+          </div>
+          <div className="w-px h-5 bg-white/15" />
+          <button
+            onClick={skipStep}
+            className="text-white/70 hover:text-white flex items-center gap-1 text-xs"
+            aria-label="Skip step"
+          >
+            <SkipForward size={14} />
+            Skip
+          </button>
+          <button
+            onClick={stopTour}
+            className="text-white/70 hover:text-red-300 flex items-center gap-1 text-xs"
+            aria-label="Exit tour"
+          >
+            <X size={14} />
+            Exit
+          </button>
         </div>
       )}
 
