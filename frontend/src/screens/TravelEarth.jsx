@@ -1526,21 +1526,6 @@ export default function TravelEarth() {
             </ul>
           </div>
 
-          {/* Press logos / social proof */}
-          <div className="flex flex-col items-center gap-3 max-w-xl">
-            <div className="text-[10px] font-bold tracking-[0.32em] text-white/40">
-              AS FEATURED IN
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-white/60 font-display text-sm tracking-wider">
-              <span>FORBES</span>
-              <span className="italic">Harper's Bazaar</span>
-              <span>REFINERY29</span>
-              <span>Red Bull</span>
-              <span>Swiss</span>
-              <span>HuffPost</span>
-            </div>
-          </div>
-
           {/* CTA */}
           <button
             onClick={() => setShowBooked(false)}

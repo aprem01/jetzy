@@ -91,7 +91,7 @@ export const TOURS = [
           name: 'Faena Hotel',
           subtitle: 'Philippe Starck · Puerto Madero · Buenos Aires',
           image: '/venue-photos/luxury/faena-hero.jpg',
-          interior: ['/venue-photos/luxury/faena-inside.jpg', '/venue-photos/luxury/faena-inside.jpg'],
+          interior: ['/venue-photos/luxury/faena-inside.jpg', '/venue-photos/luxury/dining/faena-library-bar.jpg', '/venue-photos/luxury/dining/faena-dinner-table.jpg'],
           tag: 'STAY · DAY 1',
           details: [
             { label: 'Address', value: 'Martha Salotti 445, Puerto Madero' },
@@ -128,7 +128,7 @@ export const TOURS = [
           name: 'Don Julio',
           subtitle: "World's 50 Best #14 · Argentine parrilla",
           image: '/venue-photos/luxury/don-julio-hero.jpg',
-          interior: ['/venue-photos/luxury/don-julio-inside.jpg'],
+          interior: ['/venue-photos/luxury/don-julio-inside.jpg', '/venue-photos/luxury/dining/don-julio-malbec-pour.jpg', '/venue-photos/luxury/dining/don-julio-plated-steak.jpg', '/venue-photos/luxury/dining/floreria-atlantico.jpg'],
           tag: 'EAT · DAY 1 · DINNER',
           details: [
             { label: 'Address', value: 'Guatemala 4699, Palermo' },
@@ -165,7 +165,7 @@ export const TOURS = [
           name: 'Eolo · Patagonia\'s Spirit',
           subtitle: 'Nat Geo Unique Lodge · Relais & Châteaux',
           image: '/venue-photos/luxury/eolo-hero.jpg',
-          interior: ['/venue-photos/luxury/eolo-inside.jpg'],
+          interior: ['/venue-photos/luxury/eolo-inside.jpg', '/venue-photos/luxury/dining/eolo-dining-room.jpg'],
           tag: 'STAY · DAY 3-6',
           details: [
             { label: 'Location',  value: '17 km off RP-11, El Calafate' },
@@ -285,7 +285,7 @@ export const TOURS = [
             name: 'Cavas Wine Lodge',
             subtitle: 'Standalone Cavas with plunge pool · Mendoza',
             image: '/venue-photos/luxury/cavas-hero.jpg',
-            interior: ['/venue-photos/luxury/cavas-inside.jpg'],
+            interior: ['/venue-photos/luxury/cavas-inside.jpg', '/venue-photos/luxury/dining/cavas-vineyard-dinner.jpg', '/venue-photos/luxury/dining/champagne-pour.jpg'],
             tag: 'STAY · DAY 8',
             details: [
               { label: 'Address', value: 'Costaflores, Alto Agrelo' },
@@ -300,7 +300,7 @@ export const TOURS = [
             name: "Francis Mallmann · 1884",
             subtitle: '7-course menu cooked over open fire',
             image: '/venue-photos/luxury/mallmann-hero.jpg',
-            interior: ['/venue-photos/luxury/mallmann-inside.jpg'],
+            interior: ['/venue-photos/luxury/mallmann-inside.jpg', '/venue-photos/luxury/dining/mallmann-fire-feast.jpg'],
             tag: 'EAT · DAY 8 · DINNER',
             details: [
               { label: 'Chef',     value: 'Francis Mallmann · Chef\'s Table' },
@@ -315,7 +315,7 @@ export const TOURS = [
             name: 'Catena Zapata · Pyramid',
             subtitle: 'Iconic Mayan-temple winery · Adrianna Vineyard',
             image: '/venue-photos/luxury/catena-hero.jpg',
-            interior: ['/venue-photos/luxury/catena-inside.jpg'],
+            interior: ['/venue-photos/luxury/catena-inside.jpg', '/venue-photos/luxury/dining/catena-wine-tasting.jpg'],
             tag: 'DO · DAY 9',
             details: [
               { label: 'Estate',   value: 'Bodega Catena Zapata · since 1902' },
