@@ -113,23 +113,33 @@ export default function TravelEarth() {
     }
 
     // Load Google Photorealistic 3D Tiles (async). This is the "Google Earth"
-    // look — real satellite imagery + 3D buildings worldwide.
+    // look — real satellite imagery + 3D buildings worldwide. We DON'T hide
+    // the OSM globe — it stays underneath as a safety net so the user always
+    // sees terrain even while tiles stream in or if Google rejects the key.
     if (GOOGLE_MAPS_KEY) {
       (async () => {
         try {
-          tileset = await Cesium.Cesium3DTileset.fromUrl(
-            `https://tile.googleapis.com/v1/3dtiles/root.json?key=${GOOGLE_MAPS_KEY}`,
-            { showCreditsOnScreen: false },
-          );
+          // Set the global Google Maps key so Cesium uses the proper helper.
+          if (Cesium.GoogleMaps && 'defaultApiKey' in Cesium.GoogleMaps) {
+            Cesium.GoogleMaps.defaultApiKey = GOOGLE_MAPS_KEY;
+          }
+
+          if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+            tileset = await Cesium.createGooglePhotorealistic3DTileset({
+              key: GOOGLE_MAPS_KEY,
+            });
+          } else {
+            // Fallback for older Cesium versions.
+            tileset = await Cesium.Cesium3DTileset.fromUrl(
+              `https://tile.googleapis.com/v1/3dtiles/root.json?key=${GOOGLE_MAPS_KEY}`,
+            );
+          }
           if (cancelled) return;
           v.scene.primitives.add(tileset);
-          // Hide default globe so we see Google's photoreal terrain instead.
-          v.scene.globe.show = false;
-          // Slightly tighter atmosphere for the photoreal look.
-          v.scene.skyAtmosphere.show = true;
+          console.info('Google Photorealistic 3D Tiles loaded');
         } catch (e) {
-          console.warn('Google Photorealistic 3D Tiles failed to load:', e);
-          // OSM imagery layer remains as fallback (configured on the Viewer).
+          console.error('Google Photorealistic 3D Tiles failed to load:', e);
+          // OSM imagery layer remains as fallback.
         }
       })();
     }
