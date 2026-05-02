@@ -89,6 +89,16 @@ export default function TravelEarth() {
   // so the user can step out of the globe and "stand" at the venue / hotel.
   const [streetView, setStreetView] = useState(null); // { lat, lng, name } | null
 
+  // === LIVE CONCIERGE SCENES ===
+  // When the user types/speaks to Aria, voice-chat returns one or more
+  // `scenes` describing where to fly + what spotlight to show. These run
+  // outside tour mode and reuse the same spotlight render path so the live
+  // experience looks identical to the pre-baked tours.
+  const [liveScenes, setLiveScenes] = useState([]); // array from voice-chat
+  const [liveSceneIndex, setLiveSceneIndex] = useState(0);
+  const liveSceneTimersRef = useRef([]);
+  const [livePhotoMap, setLivePhotoMap] = useState({}); // venue → photo URL (Wikipedia lookup)
+
   // Hedra-rendered Aria-talking video URL for the current step (null = use the
   // static portrait image). Audio is baked into the video so we don't play
   // the separate MP3 when a video is set.
@@ -340,7 +350,59 @@ export default function TravelEarth() {
     }
   }, []);
 
-  // Core pipeline: send a user message, get reply, fly to location, speak.
+  // Apply a single live scene: fly camera, drop marker, add cart, fetch photo
+  // for the spotlight. Used by both the initial scene and any rotation.
+  const applyScene = useCallback(async (scene) => {
+    if (!scene) return;
+
+    // Camera fly with the model's framing hints (or sensible defaults).
+    if (typeof scene.lat === 'number' && typeof scene.lng === 'number') {
+      flyTo(scene.lng, scene.lat, {
+        height: scene.height ?? 5_000,
+        pitch: scene.pitch ?? -0.35,
+        heading: scene.heading ?? 0,
+        duration: scene.duration ?? 4,
+      });
+
+      const m = {
+        name: scene.venue || scene.spotlight?.name || 'Here',
+        lat: scene.lat,
+        lng: scene.lng,
+      };
+      setCurrentLocation(m);
+      setMarkers((prev) =>
+        prev.some((p) => p.name === m.name) ? prev : [...prev, m],
+      );
+    }
+
+    // Cart items for this scene.
+    if (Array.isArray(scene.cart) && scene.cart.length > 0) {
+      setCart((prev) => {
+        const have = new Set(prev.map((i) => i.name?.toLowerCase()));
+        const fresh = scene.cart.filter(
+          (i) => i?.name && !have.has(i.name.toLowerCase()),
+        );
+        if (fresh.length > 0) setTimeout(() => playChime(), 350);
+        return [...prev, ...fresh];
+      });
+    }
+
+    // Look up a Wikipedia photo for the spotlight hero. Cached client-side.
+    const venueKey = scene.venue || scene.spotlight?.name;
+    if (venueKey && !livePhotoMap[venueKey]) {
+      try {
+        const r = await fetch(`/api/venue-photo?q=${encodeURIComponent(venueKey)}`);
+        if (r.ok) {
+          const j = await r.json();
+          if (j?.url) {
+            setLivePhotoMap((prev) => ({ ...prev, [venueKey]: j.url }));
+          }
+        }
+      } catch {}
+    }
+  }, [flyTo, livePhotoMap]);
+
+  // Core pipeline: send a user message, get reply with cinematic scenes.
   const sendMessage = useCallback(async (text) => {
     const trimmed = (text || '').trim();
     if (!trimmed) return;
@@ -350,6 +412,10 @@ export default function TravelEarth() {
     setMessages(newMsgs);
     setIsThinking(true);
     setHasStarted(true);
+
+    // Clear any in-flight scene rotation from a previous turn.
+    liveSceneTimersRef.current.forEach((t) => clearTimeout(t));
+    liveSceneTimersRef.current = [];
 
     try {
       const res = await fetch('/api/voice-chat', {
@@ -363,6 +429,7 @@ export default function TravelEarth() {
       });
       const data = await res.json();
       const reply = data?.response || `Tell me more — where shall we go?`;
+      const scenes = Array.isArray(data?.scenes) ? data.scenes : [];
       const locations = Array.isArray(data?.locations) ? data.locations : [];
       const cartItems = Array.isArray(data?.cartItems) ? data.cartItems : [];
 
@@ -371,33 +438,54 @@ export default function TravelEarth() {
         { role: 'assistant', content: reply, mood: data?.mood },
       ]);
 
-      // Fly to the first location (if any) and drop a marker.
-      if (locations.length > 0) {
-        const first = locations[0];
-        const placeName =
-          typeof first === 'string' ? first : first?.name || first?.label || '';
-        if (placeName) {
-          const geo = await geocode(placeName);
-          if (geo) {
-            setCurrentLocation(geo);
-            setMarkers((prev) => {
-              // de-dupe by name
-              if (prev.some((m) => m.name === geo.name)) return prev;
-              return [...prev, geo];
-            });
-            flyTo(geo.lng, geo.lat);
+      if (scenes.length > 0) {
+        // Cinematic path: render scene-by-scene with full spotlight cards.
+        setLiveScenes(scenes);
+        setLiveSceneIndex(0);
+        applyScene(scenes[0]);
+
+        // Auto-advance through additional scenes evenly across the spoken
+        // response (so the cards line up with what Aria is actually saying).
+        if (scenes.length > 1) {
+          const totalMs = Math.max(4000, (reply.split(/\s+/).length / 2.6) * 1000);
+          const stepMs = totalMs / scenes.length;
+          scenes.slice(1).forEach((s, i) => {
+            const t = setTimeout(() => {
+              setLiveSceneIndex(i + 1);
+              applyScene(s);
+            }, stepMs * (i + 1));
+            liveSceneTimersRef.current.push(t);
+          });
+        }
+      } else {
+        // No scenes — clear any previous live spotlight so it doesn't linger.
+        setLiveScenes([]);
+        setLiveSceneIndex(0);
+        // Legacy fallback: no scenes returned. Try the location/geocode path.
+        if (locations.length > 0) {
+          const first = locations[0];
+          const placeName =
+            typeof first === 'string' ? first : first?.name || first?.label || '';
+          if (placeName) {
+            const geo = await geocode(placeName);
+            if (geo) {
+              setCurrentLocation(geo);
+              setMarkers((prev) =>
+                prev.some((m) => m.name === geo.name) ? prev : [...prev, geo],
+              );
+              flyTo(geo.lng, geo.lat);
+            }
           }
         }
-      }
-
-      if (cartItems.length > 0) {
-        setCart((prev) => {
-          const existing = new Set(prev.map((i) => i.name?.toLowerCase()));
-          const fresh = cartItems.filter(
-            (i) => i?.name && !existing.has(i.name.toLowerCase()),
-          );
-          return [...prev, ...fresh];
-        });
+        if (cartItems.length > 0) {
+          setCart((prev) => {
+            const have = new Set(prev.map((i) => i.name?.toLowerCase()));
+            const fresh = cartItems.filter(
+              (i) => i?.name && !have.has(i.name.toLowerCase()),
+            );
+            return [...prev, ...fresh];
+          });
+        }
       }
 
       setIsThinking(false);
@@ -412,7 +500,7 @@ export default function TravelEarth() {
       ]);
       speak(fallback);
     }
-  }, [user, geocode, flyTo, speak]);
+  }, [user, geocode, flyTo, speak, applyScene]);
 
   // === TOUR MODE ===
   // Plays through a sequence of pre-baked Aria audio clips. For each step we
@@ -876,9 +964,10 @@ export default function TravelEarth() {
           {/* Featured Tour cards — color accent per destination */}
           {TOURS.map((t) => {
             const accentMap = {
-              gold: { ring: '#C9A84C', text: 'text-[#C9A84C]', bg: 'bg-[#C9A84C]', border: 'border-[#C9A84C]/40 hover:border-[#C9A84C]' },
-              pink: { ring: '#F08DA5', text: 'text-pink-300', bg: 'bg-pink-300', border: 'border-pink-400/40 hover:border-pink-300' },
-              rose: { ring: '#E2746B', text: 'text-rose-300', bg: 'bg-rose-300', border: 'border-rose-400/40 hover:border-rose-300' },
+              gold:  { ring: '#C9A84C', text: 'text-[#C9A84C]', bg: 'bg-[#C9A84C]', border: 'border-[#C9A84C]/40 hover:border-[#C9A84C]' },
+              pink:  { ring: '#F08DA5', text: 'text-pink-300',  bg: 'bg-pink-300',  border: 'border-pink-400/40 hover:border-pink-300' },
+              rose:  { ring: '#E2746B', text: 'text-rose-300',  bg: 'bg-rose-300',  border: 'border-rose-400/40 hover:border-rose-300' },
+              amber: { ring: '#E89940', text: 'text-amber-300', bg: 'bg-amber-300', border: 'border-amber-400/40 hover:border-amber-300' },
             };
             const a = accentMap[t.accent] || accentMap.gold;
             return (
@@ -920,11 +1009,27 @@ export default function TravelEarth() {
         </div>
       )}
 
-      {/* === TOUR VENUE SPOTLIGHT ===
-           Steps can carry either a single `spotlight` object or a `spotlights`
-           array that rotates as the audio plays (Aria names → card swaps). */}
-      {tour && (tour.steps[tourStepIndex]?.spotlight || tour.steps[tourStepIndex]?.spotlights) && (() => {
-        const step = tour.steps[tourStepIndex];
+      {/* === VENUE SPOTLIGHT ===
+           Used by BOTH tour mode and live concierge. Tour mode reads from
+           tour.steps[tourStepIndex]; live mode reads from liveScenes[liveSceneIndex]. */}
+      {(() => {
+        const inTour = !!tour;
+        const liveScene = !inTour && liveScenes.length > 0 ? liveScenes[Math.min(liveSceneIndex, liveScenes.length - 1)] : null;
+        const step = inTour ? tour.steps[tourStepIndex] : liveScene
+          ? {
+              spotlight: liveScene.spotlight ? {
+                ...liveScene.spotlight,
+                // Inject the looked-up Wikipedia photo if model didn't supply one.
+                image: liveScene.spotlight.image || livePhotoMap[liveScene.venue || liveScene.spotlight.name],
+              } : null,
+              marker: liveScene.lat && liveScene.lng
+                ? { name: liveScene.venue || liveScene.spotlight?.name, lat: liveScene.lat, lng: liveScene.lng }
+                : null,
+              placeQuery: liveScene.placeQuery,
+              picks: liveScene.spotlight?.picks,
+            }
+          : null;
+        if (!step || (!step.spotlight && !step.spotlights)) return null;
         const rotating = Array.isArray(step.spotlights) && step.spotlights.length > 0;
         const s = rotating
           ? step.spotlights[Math.min(activeSubSpotlight, step.spotlights.length - 1)]

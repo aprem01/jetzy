@@ -1,0 +1,74 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Marco. Anniversary year. You and Sofia, never been to Africa. Where to start?",
+    "scene": "open",
+    "file": "/demo-audio-tz/01-aria-open.mp3",
+    "duration": 4.626
+  },
+  {
+    "id": "02-marco-pick",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "You tell me. Big Five. Five days max.",
+    "scene": "serengeti",
+    "file": "/demo-audio-tz/02-marco-pick.mp3",
+    "duration": 3.869
+  },
+  {
+    "id": "03-aria-singita",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Tanzania. Singita Sasakwa, Serengeti — Out of Africa-style lodge. Three nights. Big Five guaranteed.",
+    "scene": "singita",
+    "file": "/demo-audio-tz/03-aria-singita.mp3",
+    "duration": 7.5
+  },
+  {
+    "id": "04-aria-balloon",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day three at sunrise — hot-air balloon over the Mara River crossing. Champagne breakfast on the savanna.",
+    "scene": "balloon",
+    "file": "/demo-audio-tz/04-aria-balloon.mp3",
+    "duration": 6.533
+  },
+  {
+    "id": "05-marco-beach",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Beach to wind down?",
+    "scene": "mnemba",
+    "file": "/demo-audio-tz/05-marco-beach.mp3",
+    "duration": 1.518
+  },
+  {
+    "id": "06-aria-mnemba",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Two nights at andBeyond Mnemba Island, Zanzibar. Private island — eight villas, no other guests, dive the reef at dawn.",
+    "scene": "mnemba",
+    "file": "/demo-audio-tz/06-aria-mnemba.mp3",
+    "duration": 8.336
+  },
+  {
+    "id": "07-aria-close",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Five days. Two icons. Twelve thousand. Booked?",
+    "scene": "close",
+    "file": "/demo-audio-tz/07-aria-close.mp3",
+    "duration": 4.104
+  },
+  {
+    "id": "08-marco-yes",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Booked.",
+    "scene": "close",
+    "file": "/demo-audio-tz/08-marco-yes.mp3",
+    "duration": 0.76
+  }
+]

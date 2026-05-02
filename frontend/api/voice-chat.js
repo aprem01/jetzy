@@ -3,7 +3,21 @@
  * The single guide ("Aria") shifts personality, name, voice, and accent
  * based on the destination the user mentions.
  *
- * Returns: { response, locations, mood, cartItems, persona }
+ * Returns: { response, locations, mood, cartItems, persona, personaChanged, scenes }
+ *
+ * `scenes` is an additive payload that lets the client run a fully
+ * cinematic on-screen experience (camera flies, spotlight slide-ins,
+ * cart fills) for ad-hoc user input — matching the pre-baked tours
+ * in /src/data/tours.js.
+ *
+ * Implementation notes:
+ *   - We use Anthropic's tool_use to extract the structured fields
+ *     instead of the previous "JSON-on-last-line" hack. The model is
+ *     forced to call the `present_scene` tool which carries every
+ *     structured field in one validated payload, leaving the spoken
+ *     `response` text completely free of JSON noise.
+ *   - All previously-returned fields are preserved exactly so the
+ *     existing client (TravelEarth.jsx) keeps working unchanged.
  */
 
 import Anthropic from '@anthropic-ai/sdk';
@@ -210,56 +224,156 @@ export default async function handler(req, res) {
 
   const systemPrompt = `You are speaking AS ${persona.name}, ${persona.personality} Your accent is ${persona.accent}. You specialize in ${persona.region}.
 
-You are having a SPOKEN conversation with ${user?.name || 'a traveler'}. Your responses will be played as audio. Rules:
-- Keep responses SHORT (40-90 words max).
-- Sound natural, conversational, on the phone.
-- Use vivid sensory language — sounds, smells, light, food.
-- React with personality. Show emotion.
-- Naturally suggest specific bookable things — a hotel, a tour, a restaurant, a guide, a flight — with real-feeling prices.
-- Build the trip turn by turn. After they show interest, propose a concrete next step.
-- Ask one short follow-up question.
-- No markdown, no bullets, no lists in your spoken text.
+You are having a SPOKEN conversation with ${user?.name || 'a traveler'}. Your responses will be played as audio AND will drive a 3D globe experience: as you speak, the camera flies to each venue you mention, a spotlight card slides in, and bookable items drop into a cart — exactly like the pre-baked Argentina / Japan / Italy tours.
 
-If the user mentions a place outside your region, gracefully acknowledge that you'll hand them off to the right local for that destination — but still respond in your current voice for this turn. Do not mention "morphing" or "the system" — just speak naturally.
+You MUST call the \`present_scene\` tool exactly once. Do not write any text outside the tool call. The tool call carries:
+  - response: your spoken reply (40-90 words, natural, conversational, no markdown, no JSON, no bullets, no lists). Use vivid sensory language. React with personality. Naturally suggest specific bookable things with real-feeling prices. Ask one short follow-up question. If the user names a place outside your region, gracefully say you'll hand them to the right local — but answer in your current voice this turn.
+  - locations: concrete place names mentioned, most visually compelling FIRST.
+  - mood: warm | excited | curious | calm | adventurous | nostalgic | dreamy.
+  - cartItems: SPECIFIC bookable items you actually mentioned in this turn.
+  - scenes: ONE entry per venue you mentioned (in the order you mentioned them), each describing how the globe should fly there, what spotlight card to show, and what to add to cart for that venue.
 
-CRITICAL: After your spoken response, on a NEW LINE output a JSON object on a single line:
-{"locations":["place"],"mood":"warm","cartItems":[{"type":"hotel","name":"X","location":"Y","price":"$N","detail":"..."}]}
+For every \`scenes[i]\`:
+  - venue, placeQuery: full searchable name (e.g. "Park Hyatt Tokyo Shinjuku Hotel") for the Maps button.
+  - lat, lng: best-guess decimal coordinates for the venue. The client may re-geocode, but give your best shot — being off by a few hundred meters is fine, being in the wrong city is not.
+  - height (meters), pitch (radians, NEGATIVE looks down), heading (radians), duration (seconds): the cinematic camera framing. Use this guidance:
+      - City-level overview shot:        height 5000-15000,       pitch -0.40
+      - Building / venue level:          height 500-1500,         pitch -0.30
+      - Mountain or landmark from side:  height ≈ peak height,    pitch -0.05, heading toward the peak
+      - Continent / country overview:    height 3000000-4000000,  pitch -0.95
+    duration 3-5 seconds is typical. heading 0 = north.
+  - spotlight: { name, subtitle (one short editorial line), tag (one of "STAY" | "EAT" | "DRINK" | "DO", optionally suffixed with " · DAY N" e.g. "STAY · DAY 1"), details (3-4 {label,value} rows: Address, Stay/Order/Setting, Includes, Rate), picks (2-3 famous adjacent venues, each {kind: "EAT"|"DRINK"|"DO"|"STAY", name, note}). The spotlight is what the user reads while you speak — make it editorial and specific, not generic.
+  - cart: items related to THIS venue (kind: "hotel"|"meal"|"experience"|"flight"|"transport", price as a NUMBER in USD, day as integer day-of-trip when relevant).
 
-Rules:
-- "locations": concrete place names mentioned (cities, neighborhoods, landmarks). Most visually compelling FIRST. Empty array if none.
-- "mood": one of: warm, excited, curious, calm, adventurous, nostalgic, dreamy.
-- "cartItems": SPECIFIC bookable items YOU just proposed. Each: type ("hotel"|"flight"|"experience"|"restaurant"|"fixer"|"transport"), name, location, price (with currency), detail. Empty if none.
-- ONLY include items you actually mentioned in your spoken response.`;
+If the user is just chatting and didn't ask about anywhere specific, return an empty scenes array. Never invent venues — use ones you actually know exist. Keep the spoken response itself free of any JSON, bullets, or markdown.`;
+
+  // Tool definition — Claude is forced to call this exactly once.
+  const tools = [{
+    name: 'present_scene',
+    description: 'Reply to the traveler AND describe the on-screen cinematic experience (camera flies, spotlight cards, cart). Call exactly once per turn.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        response: {
+          type: 'string',
+          description: 'The spoken reply (40-90 words). Natural, conversational, no markdown, no JSON, no bullets.',
+        },
+        locations: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Concrete place names mentioned, most visually compelling first.',
+        },
+        mood: {
+          type: 'string',
+          enum: ['warm', 'excited', 'curious', 'calm', 'adventurous', 'nostalgic', 'dreamy'],
+        },
+        cartItems: {
+          type: 'array',
+          description: 'Bookable items mentioned this turn (legacy flat list, kept for the existing client).',
+          items: {
+            type: 'object',
+            properties: {
+              type: { type: 'string', enum: ['hotel', 'flight', 'experience', 'restaurant', 'fixer', 'transport'] },
+              name: { type: 'string' },
+              location: { type: 'string' },
+              price: { type: 'string', description: 'Price WITH currency, e.g. "$540".' },
+              detail: { type: 'string' },
+            },
+            required: ['type', 'name'],
+          },
+        },
+        scenes: {
+          type: 'array',
+          description: 'One entry per venue mentioned, in spoken order. Empty array if no specific venue.',
+          items: {
+            type: 'object',
+            properties: {
+              venue: { type: 'string' },
+              placeQuery: { type: 'string', description: 'Full searchable name for Google Maps button.' },
+              lat: { type: 'number' },
+              lng: { type: 'number' },
+              height: { type: 'number', description: 'Camera altitude in meters.' },
+              pitch: { type: 'number', description: 'Camera pitch in radians; negative looks down.' },
+              heading: { type: 'number', description: 'Camera heading in radians; 0 is north.' },
+              duration: { type: 'number', description: 'Camera fly-to duration in seconds (3-5 typical).' },
+              spotlight: {
+                type: 'object',
+                properties: {
+                  name: { type: 'string' },
+                  subtitle: { type: 'string' },
+                  tag: { type: 'string', description: 'STAY | EAT | DRINK | DO, optional " · DAY N" suffix.' },
+                  details: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: { label: { type: 'string' }, value: { type: 'string' } },
+                      required: ['label', 'value'],
+                    },
+                  },
+                  picks: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      properties: {
+                        kind: { type: 'string', enum: ['EAT', 'DRINK', 'DO', 'STAY'] },
+                        name: { type: 'string' },
+                        note: { type: 'string' },
+                      },
+                      required: ['kind', 'name'],
+                    },
+                  },
+                },
+                required: ['name', 'tag'],
+              },
+              cart: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    kind: { type: 'string', enum: ['hotel', 'meal', 'experience', 'flight', 'transport'] },
+                    price: { type: 'number', description: 'Numeric USD price for this venue\'s cart line.' },
+                    day: { type: 'integer' },
+                  },
+                  required: ['name', 'kind'],
+                },
+              },
+            },
+            required: ['venue', 'lat', 'lng', 'spotlight'],
+          },
+        },
+      },
+      required: ['response', 'locations', 'mood', 'cartItems', 'scenes'],
+    },
+  }];
 
   try {
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 600,
+      max_tokens: 2000,
       system: systemPrompt,
+      tools,
+      tool_choice: { type: 'tool', name: 'present_scene' },
       messages: messages.map(m => ({ role: m.role, content: m.content })),
     });
 
-    const fullText = response.content[0].text.trim();
-    const lines = fullText.split('\n').filter(l => l.trim());
-    let metadata = { locations: [], mood: 'warm', cartItems: [] };
-    let spokenResponse = fullText;
+    // Pull the tool_use block — it's guaranteed by tool_choice above,
+    // but stay defensive and fall back to a sensible empty payload.
+    const toolBlock = (response.content || []).find(b => b.type === 'tool_use');
+    const payload = toolBlock?.input || {};
 
-    for (let i = lines.length - 1; i >= 0; i--) {
-      const line = lines[i].trim();
-      if (line.startsWith('{') && line.endsWith('}')) {
-        try {
-          metadata = JSON.parse(line);
-          spokenResponse = lines.slice(0, i).join('\n').trim();
-          break;
-        } catch {}
-      }
-    }
+    const spokenResponse = (payload.response || '').trim();
+    const locations = Array.isArray(payload.locations) ? payload.locations : [];
+    const mood = payload.mood || 'warm';
+    const cartItems = Array.isArray(payload.cartItems) ? payload.cartItems : [];
+    const scenes = Array.isArray(payload.scenes) ? payload.scenes : [];
 
     res.status(200).json({
       response: spokenResponse,
-      locations: metadata.locations || [],
-      mood: metadata.mood || 'warm',
-      cartItems: metadata.cartItems || [],
+      locations,
+      mood,
+      cartItems,
+      scenes,
       persona: {
         id: persona.id,
         name: persona.name,

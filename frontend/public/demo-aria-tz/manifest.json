@@ -1,0 +1,47 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "text": "Marco. Anniversary year. You and Sofia, never been to Africa. Where to start?",
+    "scene": "open",
+    "duration": 4.626,
+    "audioFile": "/demo-audio-tz/01-aria-open.mp3",
+    "videoFile": "/demo-aria-tz/01-aria-open.mp4"
+  },
+  {
+    "id": "03-aria-singita",
+    "speaker": "aria",
+    "text": "Tanzania. Singita Sasakwa, Serengeti — Out of Africa-style lodge. Three nights. Big Five guaranteed.",
+    "scene": "singita",
+    "duration": 7.5,
+    "audioFile": "/demo-audio-tz/03-aria-singita.mp3",
+    "videoFile": "/demo-aria-tz/03-aria-singita.mp4"
+  },
+  {
+    "id": "04-aria-balloon",
+    "speaker": "aria",
+    "text": "Day three at sunrise — hot-air balloon over the Mara River crossing. Champagne breakfast on the savanna.",
+    "scene": "balloon",
+    "duration": 6.533,
+    "audioFile": "/demo-audio-tz/04-aria-balloon.mp3",
+    "videoFile": "/demo-aria-tz/04-aria-balloon.mp4"
+  },
+  {
+    "id": "06-aria-mnemba",
+    "speaker": "aria",
+    "text": "Two nights at andBeyond Mnemba Island, Zanzibar. Private island — eight villas, no other guests, dive the reef at dawn.",
+    "scene": "mnemba",
+    "duration": 8.336,
+    "audioFile": "/demo-audio-tz/06-aria-mnemba.mp3",
+    "videoFile": "/demo-aria-tz/06-aria-mnemba.mp4"
+  },
+  {
+    "id": "07-aria-close",
+    "speaker": "aria",
+    "text": "Five days. Two icons. Twelve thousand. Booked?",
+    "scene": "close",
+    "duration": 4.104,
+    "audioFile": "/demo-audio-tz/07-aria-close.mp3",
+    "videoFile": "/demo-aria-tz/07-aria-close.mp4"
+  }
+]

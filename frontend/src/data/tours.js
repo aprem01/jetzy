@@ -11,6 +11,7 @@ const T = {
   ARGENTINA: 'patagonia-8days',
   JAPAN: 'japan-10days',
   ITALY: 'italy-romantic-7days',
+  TANZANIA: 'tanzania-safari-5days',
 };
 
 // === SOCIAL: SAMPLE JETZY TRAVELERS ===
@@ -756,6 +757,159 @@ export const TOURS = [
     ],
   },
 ];
+
+// ─── TANZANIA SAFARI + ZANZIBAR (Live Concierge demo) ───────────────────
+// Showcases what the LIVE concierge experience will feel like — frames it
+// as a real back-and-forth between Marco and Aria with Aria building the
+// trip turn-by-turn, scripted so it never breaks on stage.
+TOURS.push({
+  id: T.TANZANIA,
+  title: 'Tanzania Safari · 5 Days',
+  subtitle: 'Serengeti · Mara River · Zanzibar',
+  estSeconds: 40,
+  cover: '/cover-tanzania.jpg',
+  accent: 'amber',
+  steps: [
+    {
+      audio: '/demo-audio-tz/01-aria-open.mp3',
+      video: '/demo-aria-tz/01-aria-open.mp4',
+      speaker: 'aria',
+      text: "Marco. Anniversary year. You and Sofia, never been to Africa. Where to start?",
+      duration: 4.626,
+      // Hero opener: pull way back over the African continent
+      camera: { lng: 35.0, lat: -2.5, height: 5_500_000, pitch: -0.95, duration: 3.5 },
+    },
+    {
+      audio: '/demo-audio-tz/02-marco-pick.mp3',
+      speaker: 'marco',
+      text: "You tell me. Big Five. Five days max.",
+      duration: 3.869,
+      // Zoom toward Tanzania while Marco speaks
+      camera: { lng: 34.8, lat: -2.5, height: 1_800_000, pitch: -0.95, duration: 3.0 },
+    },
+    {
+      audio: '/demo-audio-tz/03-aria-singita.mp3',
+      video: '/demo-aria-tz/03-aria-singita.mp4',
+      speaker: 'aria',
+      text: "Tanzania. Singita Sasakwa, Serengeti — Out of Africa-style lodge. Three nights. Big Five guaranteed.",
+      duration: 7.500,
+      // Drop into the Serengeti at low altitude
+      camera: { lng: 34.83, lat: -2.45, height: 4_000, pitch: -0.10, heading: -0.4, duration: 5.5 },
+      marker: { name: 'Singita Sasakwa Lodge', lat: -2.0250, lng: 34.7500 },
+      placeQuery: 'Singita Sasakwa Lodge Serengeti',
+      cart: [
+        { name: 'Singita Sasakwa · 3 nights all-inclusive', kind: 'hotel', price: 7800, day: 1 },
+      ],
+      spotlight: {
+        name: 'Singita Sasakwa',
+        subtitle: 'Out of Africa-style lodge · Singita Grumeti, Serengeti',
+        image: '/venue-photos/tz/singita-sasakwa.jpg',
+        tag: 'STAY · DAY 1-3',
+        details: [
+          { label: 'Setting',  value: 'Edwardian manor on a hill · 350,000-acre reserve' },
+          { label: 'Stay',     value: '3 nights · Sasakwa Suite · plunge pool' },
+          { label: 'Includes', value: 'All meals + drinks · 2 game drives daily' },
+          { label: 'Rate',     value: 'USD 7,800 (couple)' },
+        ],
+        picks: [
+          { kind: 'DO',   name: 'Big Five game drive', note: 'Lion, leopard, elephant, rhino, buffalo · sunrise drive' },
+          { kind: 'DO',   name: 'Bush breakfast',      note: 'Set table on the savanna with rangers' },
+          { kind: 'STAY', name: 'Sabora Tented Camp',  note: '1920s safari-camp sister property · Singita Grumeti' },
+        ],
+        travelers: [TRAVELERS.diego, TRAVELERS.amelia, TRAVELERS.zara],
+      },
+    },
+    {
+      audio: '/demo-audio-tz/04-aria-balloon.mp3',
+      video: '/demo-aria-tz/04-aria-balloon.mp4',
+      speaker: 'aria',
+      text: "Day three at sunrise — hot-air balloon over the Mara River crossing. Champagne breakfast on the savanna.",
+      duration: 6.533,
+      // Mara River area, low + sweeping
+      camera: { lng: 35.10, lat: -1.55, height: 2_500, pitch: -0.05, heading: 0.6, duration: 5.0 },
+      marker: { name: 'Mara River · Hot-Air Balloon', lat: -1.5500, lng: 35.1000 },
+      placeQuery: 'Serengeti hot air balloon safari',
+      cart: [
+        { name: 'Hot-air balloon safari + champagne breakfast', kind: 'experience', price: 1100, day: 3 },
+      ],
+      spotlight: {
+        name: 'Mara River · Sunrise Balloon',
+        subtitle: 'Miracle Experience · 4 AM lift-off · 1-hour flight',
+        image: '/venue-photos/tz/serengeti-balloon.jpg',
+        tag: 'DO · DAY 3 · DAWN',
+        details: [
+          { label: 'Operator', value: 'Miracle Experience · IATA-certified pilots' },
+          { label: 'Pickup',   value: '4:00 AM from Sasakwa · 25 min drive' },
+          { label: 'Flight',   value: '60 min over Mara River · 8-12 passengers' },
+          { label: 'Finish',   value: 'Champagne bush breakfast · service in tuxedos' },
+        ],
+        picks: [
+          { kind: 'DO',  name: 'Great Migration crossing', note: 'July-Oct only · the Mara River wildebeest crossing' },
+          { kind: 'DO',  name: 'Walking safari',           note: 'With armed Maasai ranger · post-balloon morning' },
+          { kind: 'EAT', name: 'Sundowner on the kopje',   note: 'Sunset cocktails on a granite outcrop' },
+        ],
+        travelers: [TRAVELERS.diego, TRAVELERS.noah],
+      },
+    },
+    {
+      audio: '/demo-audio-tz/05-marco-beach.mp3',
+      speaker: 'marco',
+      text: "Beach to wind down?",
+      duration: 1.518,
+      // Hold while Marco asks
+      camera: { lng: 35.10, lat: -1.55, height: 2_500, pitch: -0.05, heading: 0.6, duration: 0.4 },
+    },
+    {
+      audio: '/demo-audio-tz/06-aria-mnemba.mp3',
+      video: '/demo-aria-tz/06-aria-mnemba.mp4',
+      speaker: 'aria',
+      text: "Two nights at andBeyond Mnemba Island, Zanzibar. Private island — eight villas, no other guests, dive the reef at dawn.",
+      duration: 8.336,
+      // Mnemba Island — tiny island northeast of Zanzibar
+      camera: { lng: 39.40, lat: -5.81, height: 1_500, pitch: -0.20, heading: 0.0, duration: 6.0 },
+      marker: { name: '&Beyond Mnemba Island · Zanzibar', lat: -5.8167, lng: 39.3833 },
+      placeQuery: '&Beyond Mnemba Island Zanzibar',
+      cart: [
+        { name: '&Beyond Mnemba Island · 2 nights', kind: 'hotel', price: 3100, day: 4 },
+        { name: 'Mnemba reef dive at dawn',         kind: 'experience', price: 280, day: 4 },
+      ],
+      spotlight: {
+        name: '&Beyond Mnemba Island',
+        subtitle: 'Private island · 8 villas · Zanzibar archipelago',
+        image: '/venue-photos/tz/mnemba-island.jpg',
+        tag: 'STAY · DAY 4-5',
+        details: [
+          { label: 'Setting',  value: 'Private 1.5 km island · whole-island buyout possible' },
+          { label: 'Stay',     value: '2 nights · Mnemba Banda · ocean-front, makuti-thatch' },
+          { label: 'Includes', value: 'All meals · diving · turtle release · spa' },
+          { label: 'Rate',     value: 'USD 3,100 + USD 280 dive (couple)' },
+        ],
+        picks: [
+          { kind: 'DO',   name: 'Stone Town dhow sunset', note: 'Half-day to old Zanzibar · House of Wonders' },
+          { kind: 'DO',   name: 'Whale-shark snorkel',     note: 'Oct-Feb only · 30 min off Mnemba' },
+          { kind: 'EAT',  name: 'The Rock Restaurant',     note: 'Restaurant on a coral outcrop offshore' },
+        ],
+        travelers: [TRAVELERS.zara, TRAVELERS.amelia, TRAVELERS.diego],
+      },
+    },
+    {
+      audio: '/demo-audio-tz/07-aria-close.mp3',
+      video: '/demo-aria-tz/07-aria-close.mp4',
+      speaker: 'aria',
+      text: "Five days. Two icons. Twelve thousand. Booked?",
+      duration: 4.104,
+      // Pull back to show the East Africa route
+      camera: { lng: 37.0, lat: -3.5, height: 2_500_000, pitch: -0.95, duration: 3.0 },
+    },
+    {
+      audio: '/demo-audio-tz/08-marco-yes.mp3',
+      speaker: 'marco',
+      text: "Booked.",
+      duration: 0.760,
+      camera: { lng: 37.0, lat: -3.5, height: 2_500_000, pitch: -0.95, duration: 0.4 },
+    },
+  ],
+});
 
 export function getTour(id) {
   return TOURS.find((t) => t.id === id) || null;
