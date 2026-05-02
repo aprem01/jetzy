@@ -1,0 +1,65 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "text": "School half-term. You, Sofia, the kids — Iceland in spring. Five days. I've put together the version locals would do with their own kids.",
+    "scene": "open",
+    "duration": 9.903,
+    "audioFile": "/demo-audio-is/01-aria-open.mp3",
+    "videoFile": "/demo-aria-is/01-aria-open.mp4"
+  },
+  {
+    "id": "03-aria-ion",
+    "speaker": "aria",
+    "text": "Ion Adventure Hotel — Sigga at the front desk has the kids covered. Two nights. Northern Lights wake-up call, glass-roof bar after they're asleep, and a private guide for the Silfra dive between the continents.",
+    "scene": "ion",
+    "duration": 13.012,
+    "audioFile": "/demo-audio-is/03-aria-ion.mp3",
+    "videoFile": "/demo-aria-is/03-aria-ion.mp4"
+  },
+  {
+    "id": "04-aria-golden",
+    "speaker": "aria",
+    "text": "Day two — the Golden Circle, but the back-roads version. Strokkur erupts every six minutes. Skip Geysir's restaurant — lunch at Friðheimar, eating tomato soup inside the greenhouse where it grows.",
+    "scene": "golden",
+    "duration": 12.881,
+    "audioFile": "/demo-audio-is/04-aria-golden.mp3",
+    "videoFile": "/demo-aria-is/04-aria-golden.mp4"
+  },
+  {
+    "id": "06-aria-husavik",
+    "speaker": "aria",
+    "text": "Day three — fly to Akureyri. Húsavík with Captain Stefán's RIB — ninety percent humpback rate in May. He'll cut the engine and let you hear them sing through a hydrophone.",
+    "scene": "whales",
+    "duration": 10.478,
+    "audioFile": "/demo-audio-is/06-aria-husavik.mp3",
+    "videoFile": "/demo-aria-is/06-aria-husavik.mp4"
+  },
+  {
+    "id": "07-aria-glacier",
+    "speaker": "aria",
+    "text": "Day four — Sólheimajökull glacier. Mini crampons, age-eight friendly. Guide Örvar sets up an ice-cave stop the day-trippers miss. Then Seljavallalaug — a 1923 thermal pool the kids will swim in alone.",
+    "scene": "glacier",
+    "duration": 13.952,
+    "audioFile": "/demo-audio-is/07-aria-glacier.mp3",
+    "videoFile": "/demo-aria-is/07-aria-glacier.mp4"
+  },
+  {
+    "id": "08-aria-reykjavik",
+    "speaker": "aria",
+    "text": "Day five — Hallgrímskirkja for the tower view. Skyr and cinnamon snúðar at Brauð and Co before the airport. Unna's bakery secret: ask for them straight from the oven.",
+    "scene": "reykjavik",
+    "duration": 11.444,
+    "audioFile": "/demo-audio-is/08-aria-reykjavik.mp3",
+    "videoFile": "/demo-aria-is/08-aria-reykjavik.mp4"
+  },
+  {
+    "id": "09-aria-close",
+    "speaker": "aria",
+    "text": "Five days. Family of four. Sixty-two hundred. Booked?",
+    "scene": "close",
+    "duration": 4.287,
+    "audioFile": "/demo-audio-is/09-aria-close.mp3",
+    "videoFile": "/demo-aria-is/09-aria-close.mp4"
+  }
+]

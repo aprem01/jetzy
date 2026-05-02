@@ -26,6 +26,15 @@ Cesium.Ion.defaultAccessToken = undefined;
 const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 const ARIA_AVATAR = '/aria-character.png';
+// Per-character avatars so the face matches the voice. Stock portraits chosen
+// to match the warm, premium "Soho-House-meets-travel" Jetzy aesthetic.
+const MARCO_AVATAR = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face';
+const SOFIA_AVATAR = 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=400&fit=crop&crop=face';
+function avatarFor(speaker) {
+  if (speaker === 'marco') return MARCO_AVATAR;
+  if (speaker === 'sofia') return SOFIA_AVATAR;
+  return ARIA_AVATAR;
+}
 
 // Initial hero view — pulled back over South America so the user sees the
 // continent the demo is about to traverse. Tilted slightly so the horizon
@@ -400,7 +409,17 @@ export default function TravelEarth() {
     setIsThinking(true);
     setHasStarted(true);
 
-    // Clear any in-flight scene rotation from a previous turn.
+    // Clear any in-flight scene rotation from a previous turn AND stop any
+    // ElevenLabs / tour audio that's still playing — prevents voice overlap.
+    try { stopEleven(); } catch {}
+    try {
+      const a = tourAudioRef.current;
+      if (a) { a.pause(); a.currentTime = 0; }
+    } catch {}
+    try {
+      const v = ariaVideoRef.current;
+      if (v) { v.pause(); v.currentTime = 0; }
+    } catch {}
     liveSceneTimersRef.current.forEach((t) => clearTimeout(t));
     liveSceneTimersRef.current = [];
 
@@ -678,6 +697,23 @@ export default function TravelEarth() {
       audioUnlockedRef.current = true;
     }
 
+    // Stop ANY in-flight audio first — live-concierge ElevenLabs, prior tour
+    // audio/video, leftover live-scene timers — so we don't get voice overlap.
+    try { stopEleven(); } catch {}
+    try {
+      const a = tourAudioRef.current;
+      if (a) { a.pause(); a.currentTime = 0; }
+    } catch {}
+    try {
+      const v = ariaVideoRef.current;
+      if (v) { v.pause(); v.currentTime = 0; }
+    } catch {}
+    tourAudioRef.current = null;
+    liveSceneTimersRef.current.forEach((t) => clearTimeout(t));
+    liveSceneTimersRef.current = [];
+    setLiveScenes([]);
+    setLiveSceneIndex(0);
+
     tourAbortRef.current = false;
     setHasStarted(true);
     setTour(t);
@@ -923,21 +959,27 @@ export default function TravelEarth() {
                 isSpeaking && currentSpeaker === 'aria'
                   ? 'border-[#C9A84C] shadow-[0_0_30px_rgba(201,168,76,0.55)]'
                   : 'border-[#C9A84C]/70 shadow-[0_0_20px_rgba(201,168,76,0.25)]'
-              } ${currentSpeaker !== 'aria' ? 'opacity-50' : 'opacity-100'} transition-all`}
+              } transition-all`}
             >
-              {ariaVideo ? (
+              {/* Avatar backdrop matches the speaker (Aria / Marco / Sofia)
+                  so the face matches the voice. Hedra video overlays when
+                  available — if it 404s (still rendering), the photo
+                  underneath stays visible. */}
+              <img
+                src={avatarFor(currentSpeaker)}
+                alt={currentSpeaker === 'marco' ? 'Marco' : currentSpeaker === 'sofia' ? 'Sofia' : 'Aria'}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {ariaVideo && currentSpeaker === 'aria' && (
                 <video
                   ref={ariaVideoRef}
                   src={ariaVideo}
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                   playsInline
                   preload="auto"
-                />
-              ) : (
-                <img
-                  src={ARIA_AVATAR}
-                  alt="Aria"
-                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                 />
               )}
             </div>

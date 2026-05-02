@@ -1,0 +1,20 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "text": "Sofia. Six girls, four days. Marrakech in March is peak — bougainvillea, jasmine, golden hour. I have the city dialed in.",
+    "scene": "open",
+    "duration": 8.153,
+    "audioFile": "/demo-audio-ma/01-aria-open.mp3",
+    "videoFile": "/demo-aria-ma/01-aria-open.mp4"
+  },
+  {
+    "id": "03-aria-mamounia",
+    "speaker": "aria",
+    "text": "La Mamounia, three nights. I held the Mamounia Suite — garden access, Atlas view from the terrace. Karim at the spa knows you're coming. Welcome rose-petal hammam at four.",
+    "scene": "mamounia",
+    "duration": 11.392,
+    "audioFile": "/demo-audio-ma/03-aria-mamounia.mp3",
+    "videoFile": "/demo-aria-ma/03-aria-mamounia.mp4"
+  }
+]

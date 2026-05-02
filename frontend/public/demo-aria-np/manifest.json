@@ -16,5 +16,50 @@
     "duration": 9.877,
     "audioFile": "/demo-audio-np/03-aria-pokhara.mp3",
     "videoFile": "/demo-aria-np/03-aria-pokhara.mp4"
+  },
+  {
+    "id": "04-aria-poonhill",
+    "speaker": "aria",
+    "text": "Day three — Ghorepani Poon Hill. We leave at four AM with headlamps. Local guide Pemba has done this trail two hundred times. Tea at the top, before the day-trippers arrive.",
+    "scene": "poonhill",
+    "duration": 10.243,
+    "audioFile": "/demo-audio-np/04-aria-poonhill.mp3",
+    "videoFile": "/demo-aria-np/04-aria-poonhill.mp4"
+  },
+  {
+    "id": "06-aria-group",
+    "speaker": "aria",
+    "text": "All twelve. Average age thirty-six. WhatsApp group already humming. Three of them have done Kilimanjaro. You'll trade notes by night two.",
+    "scene": "pokhara",
+    "duration": 8.806,
+    "audioFile": "/demo-audio-np/06-aria-group.mp3",
+    "videoFile": "/demo-aria-np/06-aria-group.mp4"
+  },
+  {
+    "id": "07-aria-abc",
+    "speaker": "aria",
+    "text": "Day seven — Annapurna Base Camp at dawn. Pemba knows a kopje just past the cairn for sunrise photos — no other hikers know it. Group portrait, no one else in frame.",
+    "scene": "abc",
+    "duration": 11.549,
+    "audioFile": "/demo-audio-np/07-aria-abc.mp3",
+    "videoFile": "/demo-aria-np/07-aria-abc.mp4"
+  },
+  {
+    "id": "08-aria-spa",
+    "speaker": "aria",
+    "text": "Day nine — back to Tiger Mountain. Surya does the Nepali oil massage — ninety minutes, ask for the deep one. Sunset paddle on Phewa with Annapurna mirrored.",
+    "scene": "spa",
+    "duration": 10.661,
+    "audioFile": "/demo-audio-np/08-aria-spa.mp3",
+    "videoFile": "/demo-aria-np/08-aria-spa.mp4"
+  },
+  {
+    "id": "09-aria-close",
+    "speaker": "aria",
+    "text": "Ten days. Twelve lifelong friends. Three thousand eight hundred all in. Booked?",
+    "scene": "close",
+    "duration": 6.429,
+    "audioFile": "/demo-audio-np/09-aria-close.mp3",
+    "videoFile": "/demo-aria-np/09-aria-close.mp4"
   }
 ]
