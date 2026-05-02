@@ -21,6 +21,7 @@ export const TOURS = [
     steps: [
       {
         audio: '/demo-audio/01-aria-open.mp3',
+        video: '/demo-aria/01-aria-open.mp4',
         speaker: 'aria',
         text: "Hey Marco. You did Kilimanjaro in February. What's next?",
         duration: 3.808,
@@ -37,50 +38,99 @@ export const TOURS = [
       },
       {
         audio: '/demo-audio/03-aria-day1.mp3',
+        video: '/demo-aria/03-aria-day1.mp4',
         speaker: 'aria',
         text: "Day one — Buenos Aires. One night at Mio Hotel in Palermo. Dinner at Don Julio.",
         duration: 5.712,
-        // Drop into Palermo neighborhood — low altitude shows the streets.
         camera: { lng: -58.4239, lat: -34.5895, height: 4_500, pitch: -0.35 },
-        marker: { name: 'Buenos Aires · Day 1', lat: -34.5895, lng: -58.4239 },
+        marker: { name: 'Mio Hotel · Palermo', lat: -34.5895, lng: -58.4239 },
         cart: [
           { name: 'Mio Hotel · Palermo', kind: 'hotel', price: 280, day: 1 },
         ],
+        spotlight: {
+          name: 'Mio Hotel · Palermo',
+          subtitle: 'Boutique design hotel in the Palermo Soho district',
+          image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=900&q=80',
+          tag: 'STAY · DAY 1',
+          details: [
+            { label: 'Address', value: 'Av. Quintana 465, Palermo, BA' },
+            { label: 'Stay', value: '1 night · King suite' },
+            { label: 'Includes', value: 'Breakfast · Spa access' },
+            { label: 'Price', value: 'USD 280' },
+          ],
+        },
       },
       {
         audio: '/demo-audio/04-aria-don-julio.mp3',
+        video: '/demo-aria/04-aria-don-julio.mp4',
         speaker: 'aria',
         text: "The entraña is worth it.",
         duration: 1.579,
-        // Pan slightly to Don Julio steakhouse address.
         camera: { lng: -58.4338, lat: -34.5867, height: 1_500, pitch: -0.3 },
+        marker: { name: 'Don Julio Steakhouse', lat: -34.5867, lng: -58.4338 },
         cart: [
           { name: "Dinner · Don Julio", kind: 'meal', price: 95, day: 1 },
         ],
+        spotlight: {
+          name: 'Don Julio',
+          subtitle: 'World 50 Best #14 · Argentine parrilla',
+          image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=900&q=80',
+          tag: 'EAT · DAY 1',
+          details: [
+            { label: 'Address', value: 'Guatemala 4699, Palermo' },
+            { label: 'Order', value: 'Entraña · Provoleta · Malbec' },
+            { label: 'Reservation', value: 'Booked for two · 9:30pm' },
+            { label: 'Price', value: 'USD 95 pp' },
+          ],
+        },
       },
       {
         audio: '/demo-audio/05-aria-day3.mp3',
+        video: '/demo-aria/05-aria-day3.mp4',
         speaker: 'aria',
         text: "Day three — fly south to El Calafate, drive to El Chaltén. Senderos Hostería, four nights.",
         duration: 6.269,
-        // Sweep down to El Chaltén — wide shot to convey the journey.
         camera: { lng: -72.8869, lat: -49.3315, height: 35_000, pitch: -0.5 },
-        marker: { name: 'El Chaltén · Day 3-6', lat: -49.3315, lng: -72.8869 },
+        marker: { name: 'Senderos Hostería · El Chaltén', lat: -49.3315, lng: -72.8869 },
         cart: [
           { name: 'Senderos Hostería · 4 nights', kind: 'hotel', price: 760, day: 3 },
         ],
+        spotlight: {
+          name: 'Senderos Hostería',
+          subtitle: 'Mountain lodge at the foot of Fitz Roy',
+          image: 'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=900&q=80',
+          tag: 'STAY · DAY 3-6',
+          details: [
+            { label: 'Address', value: 'Perito Moreno 35, El Chaltén' },
+            { label: 'Stay', value: '4 nights · Trail-view room' },
+            { label: 'Includes', value: 'Breakfast · Trail packs · Guide concierge' },
+            { label: 'Price', value: 'USD 760' },
+          ],
+        },
       },
       {
         audio: '/demo-audio/06-aria-day4.mp3',
+        video: '/demo-aria/06-aria-day4.mp4',
         speaker: 'aria',
         text: "Day four — sunrise on Fitz Roy. Local guide Lucas. Ten hour round trip.",
         duration: 5.294,
-        // Dramatic flyover at Fitz Roy peak — low + tilted to feel the granite spires.
         camera: { lng: -73.0428, lat: -49.2719, height: 6_000, pitch: -0.25 },
-        marker: { name: 'Fitz Roy · Day 4', lat: -49.2719, lng: -73.0428 },
+        marker: { name: 'Fitz Roy Sunrise Trek', lat: -49.2719, lng: -73.0428 },
         cart: [
           { name: 'Fitz Roy guided sunrise · Lucas', kind: 'experience', price: 320, day: 4 },
         ],
+        spotlight: {
+          name: 'Fitz Roy · Sunrise Trek',
+          subtitle: 'Laguna de los Tres at first light',
+          image: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=900&q=80',
+          tag: 'DO · DAY 4',
+          details: [
+            { label: 'Guide', value: 'Lucas · 12 yrs in the range' },
+            { label: 'Pickup', value: '4:30 AM at hostería' },
+            { label: 'Distance', value: '20 km · 1,200m gain' },
+            { label: 'Price', value: 'USD 320 (private)' },
+          ],
+        },
       },
       {
         audio: '/demo-audio/07-marco-perito.mp3',
@@ -92,31 +142,56 @@ export const TOURS = [
       },
       {
         audio: '/demo-audio/08-aria-perito.mp3',
+        video: '/demo-aria/08-aria-perito.mp4',
         speaker: 'aria',
         text: "Adding it — Day seven. Park entry plus a Big Ice trek. Two hours on the glacier.",
         duration: 5.108,
-        // Fly to Perito Moreno glacier face.
         camera: { lng: -73.0388, lat: -50.4972, height: 7_000, pitch: -0.3 },
-        marker: { name: 'Perito Moreno · Day 7', lat: -50.4972, lng: -73.0388 },
+        marker: { name: 'Perito Moreno · Big Ice', lat: -50.4972, lng: -73.0388 },
         cart: [
           { name: 'Perito Moreno · Big Ice trek', kind: 'experience', price: 240, day: 7 },
         ],
+        spotlight: {
+          name: 'Perito Moreno · Big Ice',
+          subtitle: 'Glacier trek with crampons + ice tools',
+          image: 'https://images.unsplash.com/photo-1517783999520-f068d7431a60?w=900&q=80',
+          tag: 'DO · DAY 7',
+          details: [
+            { label: 'Operator', value: 'Hielo y Aventura · IFMGA-certified' },
+            { label: 'Duration', value: '6 hrs · 2 hrs on ice' },
+            { label: 'Includes', value: 'Park entry · Crampons · Lunch' },
+            { label: 'Price', value: 'USD 240' },
+          ],
+        },
       },
       {
         audio: '/demo-audio/09-aria-mendoza.mp3',
+        video: '/demo-aria/09-aria-mendoza.mp4',
         speaker: 'aria',
         text: "Day eight — wind down in Mendoza. Cavas Wine Lodge, tasting at Catena Zapata.",
         duration: 5.433,
-        // Mendoza wine country — Cavas Wine Lodge address.
         camera: { lng: -68.8447, lat: -33.0048, height: 8_000, pitch: -0.35 },
-        marker: { name: 'Mendoza · Day 8', lat: -33.0048, lng: -68.8447 },
+        marker: { name: 'Cavas Wine Lodge · Mendoza', lat: -33.0048, lng: -68.8447 },
         cart: [
           { name: 'Cavas Wine Lodge · 1 night', kind: 'hotel', price: 420, day: 8 },
           { name: 'Catena Zapata tasting', kind: 'experience', price: 180, day: 8 },
         ],
+        spotlight: {
+          name: 'Cavas Wine Lodge',
+          subtitle: 'Vineyard suites with private plunge pool',
+          image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80',
+          tag: 'STAY · DAY 8',
+          details: [
+            { label: 'Address', value: 'Costaflores, Alto Agrelo, Mendoza' },
+            { label: 'Stay', value: '1 night · Standalone Cava' },
+            { label: 'Tasting', value: 'Catena Zapata · 6 vintages + tour' },
+            { label: 'Price', value: 'USD 600' },
+          ],
+        },
       },
       {
         audio: '/demo-audio/10-aria-close.mp3',
+        video: '/demo-aria/10-aria-close.mp4',
         speaker: 'aria',
         text: "Eight days. Three regions. Twenty-four hundred. Want me to book it?",
         duration: 3.994,

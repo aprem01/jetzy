@@ -11,12 +11,13 @@ import { Viewer, Entity } from 'resium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
 import {
   Mic, MicOff, X, Send, ShoppingBag, Sparkles, MapPin, ArrowLeft,
-  Play, SkipForward,
+  Play, SkipForward, Eye, Compass, Check, Plane, Mail,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { SAMPLE_USERS } from '../data/seed';
 import { VOICES, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
 import { TOURS } from '../data/tours';
+import { playWhoosh, playChime, startBackgroundMusic, stopBackgroundMusic } from '../lib/sounds';
 
 // Cesium Ion not required — we use Google Photorealistic 3D Tiles when a
 // GOOGLE_MAPS_API_KEY is present and fall back to OSM tiles otherwise.
@@ -78,6 +79,39 @@ export default function TravelEarth() {
   const tourAudioRef = useRef(null);
   const tourAbortRef = useRef(false);
 
+  // Street View modal — opens a Google Street View pano at the current location
+  // so the user can step out of the globe and "stand" at the venue / hotel.
+  const [streetView, setStreetView] = useState(null); // { lat, lng, name } | null
+
+  // Hedra-rendered Aria-talking video URL for the current step (null = use the
+  // static portrait image). Audio is baked into the video so we don't play
+  // the separate MP3 when a video is set.
+  const [ariaVideo, setAriaVideo] = useState(null);
+  const ariaVideoRef = useRef(null);
+
+  // Demo end card — "Booked" overlay with confirmation + press logos.
+  const [showBooked, setShowBooked] = useState(false);
+
+  // Animated total cost — tweens up smoothly when cart items add.
+  const [displayedTotal, setDisplayedTotal] = useState(0);
+  const cartTotal = cart.reduce((s, i) => s + (Number(i.price) || 0), 0);
+  useEffect(() => {
+    if (displayedTotal === cartTotal) return;
+    const start = displayedTotal;
+    const delta = cartTotal - start;
+    const duration = 600;
+    const t0 = performance.now();
+    let raf;
+    const tick = (t) => {
+      const p = Math.min(1, (t - t0) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setDisplayedTotal(Math.round(start + delta * eased));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [cartTotal]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // === DEBUG HUD ===
   // On-screen log so we can debug rendering issues without DevTools.
   // Captures console.log/warn/error and any uncaught errors, pushes to a
@@ -130,75 +164,94 @@ export default function TravelEarth() {
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
-  // Configure the Cesium scene once the viewer mounts. When a Google Maps
-  // API key is configured we additionally load the Photorealistic 3D Tiles
-  // dataset on top of the globe — this gives real satellite imagery and 3D
-  // buildings everywhere on Earth.
+  // Configure the Cesium scene once the viewer mounts. Resium populates the
+  // ref's `cesiumElement` asynchronously, so we poll briefly until it appears
+  // before kicking off the rest of setup. When a Google Maps API key is
+  // configured we additionally load the Photorealistic 3D Tiles dataset.
   useEffect(() => {
-    const v = viewerRef.current?.cesiumElement;
-    if (!v) return;
-
-    let tileset;
+    console.info('[init] useEffect fired');
     let cancelled = false;
+    let tileset;
 
-    try {
-      // Hide the default Cesium credit container (we render our own footer).
-      const credits = v.creditDisplay?.container;
-      if (credits) credits.style.display = 'none';
+    const waitForViewer = async () => {
+      const start = Date.now();
+      while (!cancelled && Date.now() - start < 8000) {
+        if (viewerRef.current?.cesiumElement) return viewerRef.current.cesiumElement;
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      return null;
+    };
 
-      v.scene.globe.enableLighting = true;
-      v.scene.globe.showGroundAtmosphere = true;
-      v.scene.skyAtmosphere.show = true;
-      v.scene.fog.enabled = true;
-      v.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0b0f1a');
+    (async () => {
+      const v = await waitForViewer();
+      if (cancelled) return;
+      if (!v) {
+        console.error('[init] cesiumElement never appeared (8s timeout)');
+        return;
+      }
+      console.info('[init] cesiumElement ready');
 
-      // Initial camera over Philadelphia.
-      v.camera.setView({
-        destination: Cesium.Cartesian3.fromDegrees(HOME_LNG, HOME_LAT, HOME_HEIGHT),
-        orientation: { heading: 0, pitch: -Cesium.Math.PI_OVER_TWO + 0.2, roll: 0 },
-      });
-    } catch (e) {
-      console.warn('Cesium init warning:', e);
-    }
+      try {
+        const credits = v.creditDisplay?.container;
+        if (credits) credits.style.display = 'none';
 
-    // Load Google Photorealistic 3D Tiles (async). This is the "Google Earth"
-    // look — real satellite imagery + 3D buildings worldwide. We DON'T hide
-    // the OSM globe — it stays underneath as a safety net so the user always
-    // sees terrain even while tiles stream in or if Google rejects the key.
-    if (GOOGLE_MAPS_KEY) {
-      (async () => {
-        try {
-          // Set the global Google Maps key so Cesium uses the proper helper.
-          if (Cesium.GoogleMaps && 'defaultApiKey' in Cesium.GoogleMaps) {
-            Cesium.GoogleMaps.defaultApiKey = GOOGLE_MAPS_KEY;
-          }
+        v.scene.globe.enableLighting = true;
+        v.scene.globe.showGroundAtmosphere = true;
+        v.scene.skyAtmosphere.show = true;
+        v.scene.fog.enabled = true;
+        v.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0b0f1a');
 
-          if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
-            tileset = await Cesium.createGooglePhotorealistic3DTileset({
-              key: GOOGLE_MAPS_KEY,
-            });
-          } else {
-            // Fallback for older Cesium versions.
-            tileset = await Cesium.Cesium3DTileset.fromUrl(
-              `https://tile.googleapis.com/v1/3dtiles/root.json?key=${GOOGLE_MAPS_KEY}`,
-            );
-          }
-          if (cancelled) return;
-          v.scene.primitives.add(tileset);
-          console.info('Google Photorealistic 3D Tiles loaded');
-        } catch (e) {
-          console.error('Google Photorealistic 3D Tiles failed to load:', e);
-          // OSM imagery layer remains as fallback.
+        v.camera.setView({
+          destination: Cesium.Cartesian3.fromDegrees(HOME_LNG, HOME_LAT, HOME_HEIGHT),
+          orientation: { heading: 0, pitch: -Cesium.Math.PI_OVER_TWO + 0.2, roll: 0 },
+        });
+        console.info('[init] scene configured + camera over Philadelphia');
+
+        const c = v.canvas;
+        console.info('[init] canvas =', c?.width, 'x', c?.height);
+        const gl = c?.getContext('webgl2') || c?.getContext('webgl');
+        console.info('[init] webgl ctx =', !!gl, 'vendor =', gl?.getParameter?.(gl.VENDOR));
+      } catch (e) {
+        console.error('[init] scene setup threw:', e?.message || e);
+      }
+
+      if (!GOOGLE_MAPS_KEY) {
+        console.warn('[tiles] no GOOGLE_MAPS_KEY — skipping Photorealistic 3D Tiles');
+        return;
+      }
+
+      console.info('[tiles] starting Google Photorealistic 3D Tiles load…');
+      try {
+        if (Cesium.GoogleMaps && 'defaultApiKey' in Cesium.GoogleMaps) {
+          Cesium.GoogleMaps.defaultApiKey = GOOGLE_MAPS_KEY;
+          console.info('[tiles] set Cesium.GoogleMaps.defaultApiKey');
         }
-      })();
-    }
+
+        if (typeof Cesium.createGooglePhotorealistic3DTileset === 'function') {
+          console.info('[tiles] using createGooglePhotorealistic3DTileset helper');
+          tileset = await Cesium.createGooglePhotorealistic3DTileset({
+            key: GOOGLE_MAPS_KEY,
+          });
+        } else {
+          console.info('[tiles] falling back to Cesium3DTileset.fromUrl');
+          tileset = await Cesium.Cesium3DTileset.fromUrl(
+            `https://tile.googleapis.com/v1/3dtiles/root.json?key=${GOOGLE_MAPS_KEY}`,
+          );
+        }
+        console.info('[tiles] tileset loaded');
+        if (cancelled) { console.info('[tiles] cancelled before add'); return; }
+        v.scene.primitives.add(tileset);
+        console.info('[tiles] tileset added to scene primitives');
+      } catch (e) {
+        console.error('[tiles] load failed:', e?.message || e, e?.stack?.slice?.(0, 200));
+      }
+    })();
 
     return () => {
       cancelled = true;
       try {
-        if (tileset && v.scene?.primitives) {
-          v.scene.primitives.remove(tileset);
-        }
+        const v = viewerRef.current?.cesiumElement;
+        if (tileset && v?.scene?.primitives) v.scene.primitives.remove(tileset);
       } catch {}
     };
   }, []);
@@ -249,13 +302,14 @@ export default function TravelEarth() {
   const flyTo = useCallback((lng, lat, opts = {}) => {
     const v = viewerRef.current?.cesiumElement;
     if (!v) return;
-    const { height = 5000, pitch = -0.5, duration = 4, heading = 0 } = opts;
+    const { height = 5000, pitch = -0.5, duration = 4, heading = 0, silent = false } = opts;
     try {
       v.camera.flyTo({
         destination: Cesium.Cartesian3.fromDegrees(lng, lat, height),
         duration,
         orientation: { heading, pitch, roll: 0 },
       });
+      if (!silent) playWhoosh();
     } catch (e) {
       console.warn('flyTo failed:', e);
     }
@@ -365,19 +419,26 @@ export default function TravelEarth() {
       const a = tourAudioRef.current;
       if (a) { a.pause(); a.currentTime = 0; }
     } catch {}
+    try {
+      const v = ariaVideoRef.current;
+      if (v) { v.pause(); v.currentTime = 0; }
+    } catch {}
     tourAudioRef.current = null;
     setTour(null);
     setTourStepIndex(-1);
     setIsSpeaking(false);
     setAriaLine(null);
     setCurrentSpeaker('aria');
+    setAriaVideo(null);
+    setShowBooked(false);
+    stopBackgroundMusic();
   }, []);
 
   const playStep = useCallback((step) => {
     return new Promise((resolve) => {
       if (tourAbortRef.current) return resolve();
 
-      // Camera fly first (non-blocking — runs in parallel with audio).
+      // Camera fly first (non-blocking — runs in parallel with audio/video).
       if (step.camera) {
         flyTo(step.camera.lng, step.camera.lat, {
           height: step.camera.height,
@@ -400,6 +461,10 @@ export default function TravelEarth() {
           const fresh = step.cart.filter(
             (i) => i?.name && !have.has(i.name.toLowerCase()),
           );
+          if (fresh.length > 0) {
+            // Slight delay so the chime lands after the camera whoosh.
+            setTimeout(() => playChime(), 350);
+          }
           return [...prev, ...fresh];
         });
       }
@@ -408,27 +473,59 @@ export default function TravelEarth() {
       setAriaLine(step.text);
       setIsSpeaking(true);
 
-      const audio = new Audio(step.audio);
-      audio.preload = 'auto';
-      tourAudioRef.current = audio;
+      // Prefer the Hedra-rendered talking video (audio baked in). For Marco
+      // lines or any step missing a video, fall back to the audio-only path.
+      const useVideo = !!step.video;
+      setAriaVideo(useVideo ? step.video : null);
 
       const finish = () => {
-        if (tourAudioRef.current === audio) tourAudioRef.current = null;
+        if (tourAudioRef.current) tourAudioRef.current = null;
         setIsSpeaking(false);
-        // small breath between lines
         setTimeout(resolve, 250);
       };
-      audio.onended = finish;
-      audio.onerror = finish;
 
-      // Wait briefly so the camera fly has time to start before audio.
-      setTimeout(() => {
-        if (tourAbortRef.current) return resolve();
-        audio.play().catch((e) => {
-          console.warn('tour audio play failed:', e);
-          finish();
-        });
-      }, 200);
+      if (useVideo) {
+        // Wait one tick for React to mount the <video> element with the new src,
+        // then trigger play. The element's onEnded handler resolves the step.
+        setTimeout(() => {
+          if (tourAbortRef.current) return resolve();
+          const v = ariaVideoRef.current;
+          if (!v) {
+            // Element didn't render in time — fall back to audio.
+            const audio = new Audio(step.audio);
+            tourAudioRef.current = audio;
+            audio.onended = finish;
+            audio.onerror = finish;
+            audio.play().catch(finish);
+            return;
+          }
+          v.currentTime = 0;
+          v.muted = false;
+          v.onended = finish;
+          v.onerror = finish;
+          v.play().catch((e) => {
+            console.warn('aria video play failed, falling back to audio:', e?.message);
+            const audio = new Audio(step.audio);
+            tourAudioRef.current = audio;
+            audio.onended = finish;
+            audio.onerror = finish;
+            audio.play().catch(finish);
+          });
+        }, 80);
+      } else {
+        const audio = new Audio(step.audio);
+        audio.preload = 'auto';
+        tourAudioRef.current = audio;
+        audio.onended = finish;
+        audio.onerror = finish;
+        setTimeout(() => {
+          if (tourAbortRef.current) return resolve();
+          audio.play().catch((e) => {
+            console.warn('tour audio play failed:', e);
+            finish();
+          });
+        }, 200);
+      }
     });
   }, [flyTo]);
 
@@ -446,6 +543,9 @@ export default function TravelEarth() {
     setTour(t);
     setTourStepIndex(0);
 
+    // Kick off the cinematic ambient track. Silently skips if no asset.
+    startBackgroundMusic();
+
     for (let i = 0; i < t.steps.length; i++) {
       if (tourAbortRef.current) break;
       setTourStepIndex(i);
@@ -453,10 +553,15 @@ export default function TravelEarth() {
     }
 
     if (!tourAbortRef.current) {
-      // Tour completed — leave markers/cart visible, clear speaking state.
+      // Tour completed — show the "Booked." overlay over the final scene.
       setIsSpeaking(false);
-      setAriaLine(`Eight days planned. Your itinerary is ready.`);
+      setAriaVideo(null);
+      setAriaLine(null);
       setCurrentSpeaker('aria');
+      setShowBooked(true);
+      // Final celebratory chime, then fade out the music.
+      setTimeout(() => playChime({ volume: 0.25 }), 400);
+      stopBackgroundMusic({ fadeMs: 1500 });
     }
     setTour(null);
     setTourStepIndex(-1);
@@ -597,15 +702,44 @@ export default function TravelEarth() {
               </span>
             </div>
           )}
+          {currentLocation?.lat && currentLocation?.lng && (
+            <button
+              onClick={() => setStreetView({
+                lat: currentLocation.lat,
+                lng: currentLocation.lng,
+                name: currentLocation.name,
+              })}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md bg-[#C9A84C]/15 border border-[#C9A84C]/50 hover:bg-[#C9A84C]/30 hover:border-[#C9A84C] text-[#C9A84C] text-xs font-medium transition-all"
+              aria-label="Look around in Street View"
+            >
+              <Eye size={12} />
+              <span className="hidden sm:inline">Look around</span>
+            </button>
+          )}
         </div>
 
         {/* Top-right HUD */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-md bg-black/40 border border-[#C9A84C]/40">
-            <ShoppingBag size={14} className="text-[#C9A84C]" />
-            <span className="text-sm font-semibold text-[#C9A84C]">
-              {cart.length}
-            </span>
+          <div className="flex items-center gap-3 px-4 py-2 rounded-full backdrop-blur-md bg-black/55 border border-[#C9A84C]/40 shadow-lg">
+            <div className="flex items-center gap-1.5">
+              <ShoppingBag size={14} className="text-[#C9A84C]" />
+              <span className="text-sm font-semibold text-[#C9A84C] tabular-nums">
+                {cart.length}
+              </span>
+            </div>
+            {displayedTotal > 0 && (
+              <>
+                <div className="w-px h-4 bg-[#C9A84C]/40" />
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-bold tracking-[0.18em] text-[#C9A84C]/80">
+                    USD
+                  </span>
+                  <span className="text-sm font-bold text-white tabular-nums">
+                    {displayedTotal.toLocaleString()}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
           <button
             onClick={onExit}
@@ -629,17 +763,27 @@ export default function TravelEarth() {
               </>
             )}
             <div
-              className={`w-24 h-24 rounded-full overflow-hidden border-2 ${
+              className={`w-28 h-28 rounded-full overflow-hidden border-2 ${
                 isSpeaking && currentSpeaker === 'aria'
                   ? 'border-[#C9A84C] shadow-[0_0_30px_rgba(201,168,76,0.55)]'
                   : 'border-[#C9A84C]/70 shadow-[0_0_20px_rgba(201,168,76,0.25)]'
               } ${currentSpeaker === 'marco' ? 'opacity-50' : 'opacity-100'} transition-all`}
             >
-              <img
-                src={ARIA_AVATAR}
-                alt="Aria"
-                className="w-full h-full object-cover"
-              />
+              {ariaVideo ? (
+                <video
+                  ref={ariaVideoRef}
+                  src={ariaVideo}
+                  className="w-full h-full object-cover"
+                  playsInline
+                  preload="auto"
+                />
+              ) : (
+                <img
+                  src={ARIA_AVATAR}
+                  alt="Aria"
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
           </div>
           <div className="mt-2 text-center">
@@ -720,6 +864,70 @@ export default function TravelEarth() {
           ))}
         </div>
       )}
+
+      {/* === TOUR VENUE SPOTLIGHT === */}
+      {tour && tour.steps[tourStepIndex]?.spotlight && (() => {
+        const s = tour.steps[tourStepIndex].spotlight;
+        const m = tour.steps[tourStepIndex].marker;
+        return (
+          <div className="absolute top-32 right-6 z-30 w-[min(380px,90vw)] animate-fade-up">
+            <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+              {/* hero image */}
+              <div className="relative h-44 bg-[#1B2B4B]">
+                {s.image && (
+                  <img
+                    src={s.image}
+                    alt={s.name}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                {s.tag && (
+                  <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C9A84C] text-black text-[10px] font-bold tracking-[0.18em]">
+                    {s.tag}
+                  </div>
+                )}
+                <div className="absolute bottom-3 left-4 right-4">
+                  <div className="font-display text-2xl text-white leading-tight drop-shadow-lg">
+                    {s.name}
+                  </div>
+                  {s.subtitle && (
+                    <div className="text-xs text-white/85 mt-1 drop-shadow">
+                      {s.subtitle}
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* details grid */}
+              {Array.isArray(s.details) && s.details.length > 0 && (
+                <div className="px-4 py-3 grid grid-cols-2 gap-x-4 gap-y-2">
+                  {s.details.map((d) => (
+                    <div key={d.label}>
+                      <div className="text-[9px] font-bold tracking-[0.16em] text-[#C9A84C] uppercase mb-0.5">
+                        {d.label}
+                      </div>
+                      <div className="text-xs text-white/90 leading-snug">
+                        {d.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {/* CTA */}
+              {m?.lat && m?.lng && (
+                <button
+                  onClick={() => setStreetView({ lat: m.lat, lng: m.lng, name: s.name })}
+                  className="w-full py-3 bg-[#C9A84C]/15 hover:bg-[#C9A84C]/30 border-t border-[#C9A84C]/30 flex items-center justify-center gap-2 text-[#C9A84C] text-sm font-medium transition-colors"
+                >
+                  <Eye size={14} />
+                  Step inside · Street View
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* === TOUR HUD (when a tour is playing) === */}
       {tour && (
@@ -809,6 +1017,154 @@ export default function TravelEarth() {
           <span className="text-xs text-white/80 ml-1 tracking-wide">
             Aria is thinking
           </span>
+        </div>
+      )}
+
+      {/* === END CARD — "Booked." overlay shown when the tour completes === */}
+      {showBooked && (
+        <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#0b0f1a]/95 via-[#1B2B4B]/95 to-black/95 backdrop-blur-xl flex flex-col items-center justify-center px-6 animate-fade-up">
+          {/* Close button */}
+          <button
+            onClick={() => setShowBooked(false)}
+            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/60 border border-white/15 hover:bg-white/10 text-white flex items-center justify-center"
+            aria-label="Close"
+          >
+            <X size={18} />
+          </button>
+
+          {/* Hero: BOOKED stamp */}
+          <div className="flex flex-col items-center text-center mb-10">
+            <div className="relative mb-5">
+              <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center shadow-[0_0_60px_rgba(52,211,153,0.4)]">
+                <Check size={42} strokeWidth={3} className="text-emerald-300" />
+              </div>
+            </div>
+            <div className="text-[11px] font-bold tracking-[0.32em] text-emerald-300/90 mb-2">
+              CONFIRMED
+            </div>
+            <h1 className="font-display text-5xl md:text-6xl text-white mb-2 tracking-tight">
+              Booked.
+            </h1>
+            <p className="text-base md:text-lg text-white/70 max-w-md">
+              Your 8-day Patagonia itinerary is locked.
+              Confirmation in your inbox in 30 seconds.
+            </p>
+            <div className="mt-3 flex items-center gap-2 text-xs text-white/50">
+              <Mail size={12} />
+              <span>{user?.email || 'you@jetzylife.com'}</span>
+            </div>
+          </div>
+
+          {/* Itinerary checklist */}
+          <div className="w-full max-w-2xl rounded-2xl border border-white/10 bg-black/40 backdrop-blur p-5 mb-8 shadow-2xl">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Plane size={14} className="text-[#C9A84C]" />
+                <span className="font-display text-sm tracking-wide text-white">
+                  Your itinerary
+                </span>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-bold tracking-[0.2em] text-[#C9A84C]/80">
+                  TOTAL
+                </div>
+                <div className="text-xl font-bold text-white tabular-nums">
+                  USD {cartTotal.toLocaleString()}
+                </div>
+              </div>
+            </div>
+            <ul className="space-y-2">
+              {cart.map((item, i) => (
+                <li
+                  key={item.name}
+                  className="flex items-center gap-3 text-sm animate-fade-up"
+                  style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
+                >
+                  <div className="w-6 h-6 rounded-full bg-emerald-500/25 border border-emerald-400/50 flex items-center justify-center shrink-0">
+                    <Check size={12} strokeWidth={3} className="text-emerald-300" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white truncate">{item.name}</div>
+                    {item.day && (
+                      <div className="text-[10px] uppercase tracking-wider text-white/40">
+                        Day {item.day} · {item.kind}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-white/80 font-semibold tabular-nums">
+                    ${item.price?.toLocaleString?.() || item.price}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Press logos / social proof */}
+          <div className="flex flex-col items-center gap-3 max-w-xl">
+            <div className="text-[10px] font-bold tracking-[0.32em] text-white/40">
+              AS FEATURED IN
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-white/60 font-display text-sm tracking-wider">
+              <span>FORBES</span>
+              <span className="italic">Harper's Bazaar</span>
+              <span>REFINERY29</span>
+              <span>Red Bull</span>
+              <span>Swiss</span>
+              <span>HuffPost</span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <button
+            onClick={() => setShowBooked(false)}
+            className="mt-8 px-8 py-3 rounded-full bg-[#C9A84C] hover:bg-[#d8b85c] text-black font-semibold text-sm tracking-wide shadow-2xl transition-all"
+          >
+            Plan another trip
+          </button>
+        </div>
+      )}
+
+      {/* === STREET VIEW MODAL === */}
+      {streetView && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col">
+          {/* header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/50 flex items-center justify-center">
+                <Compass size={16} className="text-[#C9A84C]" />
+              </div>
+              <div>
+                <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-0.5">
+                  STREET VIEW
+                </div>
+                <div className="font-display text-base text-white leading-tight">
+                  {streetView.name || 'You are here'}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setStreetView(null)}
+              className="w-10 h-10 rounded-full bg-black/60 border border-white/10 hover:bg-red-500/30 hover:border-red-400/60 text-white flex items-center justify-center transition-colors"
+              aria-label="Close Street View"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          {/* iframe */}
+          <div className="flex-1 relative">
+            <iframe
+              key={`${streetView.lat}-${streetView.lng}`}
+              title="Street View"
+              src={`https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_MAPS_KEY}&location=${streetView.lat},${streetView.lng}&heading=210&pitch=0&fov=80`}
+              className="w-full h-full border-0"
+              allow="accelerometer; gyroscope; fullscreen"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+            {/* small footer hint */}
+            <div className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 rounded-full backdrop-blur-md bg-black/60 border border-white/10 text-xs text-white/70">
+              Drag to look around · arrows to walk
+            </div>
+          </div>
         </div>
       )}
 
