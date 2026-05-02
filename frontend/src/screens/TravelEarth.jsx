@@ -99,6 +99,21 @@ export default function TravelEarth() {
   // so the user can step out of the globe and "stand" at the venue / hotel.
   const [streetView, setStreetView] = useState(null); // { lat, lng, name } | null
 
+  // === MOBILE COMPACT SPOTLIGHT ===
+  // On phones the full spotlight card covers the photoreal globe. Instead
+  // we show a small "title card" strip at the top with hero thumbnail +
+  // tag + name + price + tagline. It auto-fades in on settle, holds for
+  // 5s while Aria speaks the lead, then fades out so the globe is hero.
+  const [mobileTitleCard, setMobileTitleCard] = useState(null);
+  const mobileTitleTimerRef = useRef(null);
+  const showMobileTitle = useCallback((data) => {
+    if (mobileTitleTimerRef.current) clearTimeout(mobileTitleTimerRef.current);
+    setMobileTitleCard(data);
+    mobileTitleTimerRef.current = setTimeout(() => {
+      setMobileTitleCard(null);
+    }, 5500);
+  }, []);
+
   // === LIVE CONCIERGE SCENES ===
   // When the user types/speaks to Aria, voice-chat returns one or more
   // `scenes` describing where to fly + what spotlight to show. These run
@@ -646,11 +661,24 @@ export default function TravelEarth() {
 
         // Auto-open the Step Inside carousel 1.8s after spotlight reveals.
         // Skipped on mobile (<640px) because the modal would cover the photo-
-        // real Google globe — on phones the spotlight + camera fly carry it.
+        // real Google globe — on phones we show a compact title card instead.
         const isMobile = typeof window !== 'undefined' && window.innerWidth < 640;
         const sp0 = Array.isArray(step.spotlights) && step.spotlights.length > 0
           ? step.spotlights[0]
           : step.spotlight;
+
+        // Mobile title-card: appears with the spotlight, auto-hides at 5.5s.
+        if (isMobile && sp0) {
+          const cartItem = Array.isArray(step.cart) && step.cart.length > 0 ? step.cart[0] : null;
+          showMobileTitle({
+            name: sp0.name,
+            subtitle: sp0.subtitle,
+            tag: sp0.tag,
+            image: sp0.image,
+            price: cartItem?.price,
+          });
+        }
+
         if (!isMobile && sp0 && step.duration > 3) {
           const insidePhotos = [
             ...(sp0.image ? [sp0.image] : []),
@@ -1397,6 +1425,55 @@ export default function TravelEarth() {
         );
       })()}
       </div>
+
+      {/* === MOBILE TITLE CARD (compact spotlight for phones) ===
+           Appears top-center under the Tour HUD on mobile only. Auto-fades
+           after 5.5s so the photoreal globe stays the hero. Premium-feel
+           thumbnail + tag + name + price — like a TV broadcast lower-third. */}
+      {mobileTitleCard && (
+        <div
+          key={mobileTitleCard.name}
+          className="sm:hidden absolute top-[5.25rem] left-1/2 -translate-x-1/2 z-40 w-[min(360px,calc(100vw-1.5rem))] animate-fade-up"
+        >
+          <div className="flex items-stretch gap-3 px-3 py-2.5 rounded-2xl backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_18px_50px_rgba(0,0,0,0.6)]">
+            {mobileTitleCard.image && (
+              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-[#1B2B4B]">
+                <img
+                  src={mobileTitleCard.image}
+                  alt={mobileTitleCard.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                />
+              </div>
+            )}
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
+              {mobileTitleCard.tag && (
+                <div className="text-[8px] font-bold tracking-[0.22em] text-[#C9A84C] uppercase mb-0.5 truncate">
+                  {mobileTitleCard.tag}
+                </div>
+              )}
+              <div className="font-display text-base text-white leading-tight truncate">
+                {mobileTitleCard.name}
+              </div>
+              {mobileTitleCard.subtitle && (
+                <div className="text-[10px] text-white/60 leading-tight truncate mt-0.5">
+                  {mobileTitleCard.subtitle}
+                </div>
+              )}
+            </div>
+            {mobileTitleCard.price != null && (
+              <div className="flex flex-col items-end justify-center px-1">
+                <div className="text-[8px] font-bold tracking-[0.18em] text-[#C9A84C]/80">
+                  USD
+                </div>
+                <div className="font-display text-base text-white tabular-nums leading-tight">
+                  {mobileTitleCard.price.toLocaleString?.() || mobileTitleCard.price}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* === TOUR HUD (when a tour is playing) === */}
       {tour && (
