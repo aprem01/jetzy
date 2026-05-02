@@ -78,6 +78,55 @@ export default function TravelEarth() {
   const tourAudioRef = useRef(null);
   const tourAbortRef = useRef(false);
 
+  // === DEBUG HUD ===
+  // On-screen log so we can debug rendering issues without DevTools.
+  // Captures console.log/warn/error and any uncaught errors, pushes to a
+  // visible panel toggleable in the corner of the screen.
+  const [debugLogs, setDebugLogs] = useState([]);
+  const [debugOpen, setDebugOpen] = useState(true);
+  const debugRef = useRef([]);
+  useEffect(() => {
+    const push = (level, args) => {
+      const text = args
+        .map((a) => {
+          try {
+            if (a instanceof Error) return `${a.name}: ${a.message}`;
+            if (typeof a === 'object') return JSON.stringify(a);
+            return String(a);
+          } catch {
+            return '[unserializable]';
+          }
+        })
+        .join(' ');
+      const entry = { level, text, t: Date.now() };
+      debugRef.current = [...debugRef.current.slice(-40), entry];
+      setDebugLogs(debugRef.current);
+    };
+    const origLog = console.log.bind(console);
+    const origWarn = console.warn.bind(console);
+    const origErr = console.error.bind(console);
+    const origInfo = console.info.bind(console);
+    console.log = (...a) => { push('log', a); origLog(...a); };
+    console.warn = (...a) => { push('warn', a); origWarn(...a); };
+    console.error = (...a) => { push('error', a); origErr(...a); };
+    console.info = (...a) => { push('info', a); origInfo(...a); };
+    const onErr = (e) => push('error', [`window.onerror: ${e.message} @ ${e.filename}:${e.lineno}`]);
+    const onRej = (e) => push('error', [`unhandledrejection: ${e.reason?.message || e.reason}`]);
+    window.addEventListener('error', onErr);
+    window.addEventListener('unhandledrejection', onRej);
+    push('info', [`Travel Earth boot · ua=${navigator.userAgent.slice(0, 60)}`]);
+    push('info', [`GOOGLE_MAPS_KEY=${GOOGLE_MAPS_KEY ? 'set' : 'MISSING'}`]);
+    push('info', [`Cesium=${typeof Cesium} · createGooglePhoto=${typeof Cesium?.createGooglePhotorealistic3DTileset}`]);
+    return () => {
+      console.log = origLog;
+      console.warn = origWarn;
+      console.error = origErr;
+      console.info = origInfo;
+      window.removeEventListener('error', onErr);
+      window.removeEventListener('unhandledrejection', onRej);
+    };
+  }, []);
+
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
@@ -762,6 +811,39 @@ export default function TravelEarth() {
           </span>
         </div>
       )}
+
+      {/* === DEBUG HUD (always-on screen log so we can debug without DevTools) === */}
+      <div className="absolute top-20 right-4 z-40 max-w-[min(440px,90vw)]">
+        <button
+          onClick={() => setDebugOpen((v) => !v)}
+          className="px-3 py-1.5 rounded-t-lg bg-black/85 border border-white/15 text-[10px] font-mono text-white/80 hover:text-white"
+        >
+          {debugOpen ? 'hide' : 'show'} debug ({debugLogs.length})
+        </button>
+        {debugOpen && (
+          <div className="rounded-l-lg rounded-br-lg bg-black/85 border border-white/15 p-2 max-h-[60vh] overflow-y-auto font-mono text-[10px] leading-tight">
+            {debugLogs.length === 0 && (
+              <div className="text-white/40">no logs yet…</div>
+            )}
+            {debugLogs.map((l, i) => (
+              <div
+                key={i}
+                className={
+                  l.level === 'error'
+                    ? 'text-red-300'
+                    : l.level === 'warn'
+                      ? 'text-yellow-300'
+                      : l.level === 'info'
+                        ? 'text-cyan-300'
+                        : 'text-white/70'
+                }
+              >
+                <span className="opacity-50">[{l.level}]</span> {l.text}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
