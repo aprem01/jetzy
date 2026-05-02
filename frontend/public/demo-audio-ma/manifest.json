@@ -1,0 +1,83 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Sofia and the girls. Long weekend. Where to?",
+    "scene": "open",
+    "file": "/demo-audio-ma/01-aria-open.mp3",
+    "duration": 3.373
+  },
+  {
+    "id": "02-marco-pick",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Somewhere we can fully reset. Spa, food, photos.",
+    "scene": "open",
+    "file": "/demo-audio-ma/02-marco-pick.mp3",
+    "duration": 4.444
+  },
+  {
+    "id": "03-aria-mamounia",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Marrakech. La Mamounia, three nights. Mamounia Suite with garden access.",
+    "scene": "mamounia",
+    "file": "/demo-audio-ma/03-aria-mamounia.mp3",
+    "duration": 6.559
+  },
+  {
+    "id": "04-aria-hammam",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day two — hammam at Royal Mansour. Lunch on the rooftop at Nomad. Le Jardin Secret in the afternoon.",
+    "scene": "hammam",
+    "file": "/demo-audio-ma/04-aria-hammam.mp3",
+    "duration": 6.977
+  },
+  {
+    "id": "05-aria-balloon",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day three — sunrise hot-air balloon over the Atlas. Lunch at Fellah Hotel. Sky Bar Renaissance for cocktails.",
+    "scene": "balloon",
+    "file": "/demo-audio-ma/05-aria-balloon.mp3",
+    "duration": 7.395
+  },
+  {
+    "id": "06-marco-souks",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Souks?",
+    "scene": "souks",
+    "file": "/demo-audio-ma/06-marco-souks.mp3",
+    "duration": 0.865
+  },
+  {
+    "id": "07-aria-souks",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Last day. Mahmood Mahjoub guide. Argan oil, lanterns, leather. He keeps the touts off you.",
+    "scene": "souks",
+    "file": "/demo-audio-ma/07-aria-souks.mp3",
+    "duration": 5.906
+  },
+  {
+    "id": "08-aria-close",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Four days. Six girls. Three thousand each. Booked?",
+    "scene": "close",
+    "file": "/demo-audio-ma/08-aria-close.mp3",
+    "duration": 3.791
+  },
+  {
+    "id": "09-marco-yes",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Booked.",
+    "scene": "close",
+    "file": "/demo-audio-ma/09-marco-yes.mp3",
+    "duration": 0.813
+  }
+]

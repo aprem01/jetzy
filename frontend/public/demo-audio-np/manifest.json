@@ -1,0 +1,92 @@
+[
+  {
+    "id": "01-aria-open",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Marco. Group adventure — twelve Jetzy hikers, Annapurna Base Camp, ten days. In?",
+    "scene": "open",
+    "file": "/demo-audio-np/01-aria-open.mp3",
+    "duration": 7.97
+  },
+  {
+    "id": "02-marco-pick",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "I'm in. How fit do I need to be?",
+    "scene": "open",
+    "file": "/demo-audio-np/02-marco-pick.mp3",
+    "duration": 2.563
+  },
+  {
+    "id": "03-aria-pokhara",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Moderate. Pokhara to ABC — classic. Tiger Mountain Lodge to start. Welcome dinner with your group.",
+    "scene": "pokhara",
+    "file": "/demo-audio-np/03-aria-pokhara.mp3",
+    "duration": 6.847
+  },
+  {
+    "id": "04-aria-poonhill",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day three — Ghorepani Poon Hill at sunrise. Dhaulagiri and Annapurna in one frame.",
+    "scene": "poonhill",
+    "file": "/demo-audio-np/04-aria-poonhill.mp3",
+    "duration": 5.776
+  },
+  {
+    "id": "05-marco-group",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Other hikers good?",
+    "scene": "pokhara",
+    "file": "/demo-audio-np/05-marco-group.mp3",
+    "duration": 1.413
+  },
+  {
+    "id": "06-aria-group",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Two doctors, a chef, a documentary filmmaker. Average age thirty-six. You'll like them.",
+    "scene": "pokhara",
+    "file": "/demo-audio-np/06-aria-group.mp3",
+    "duration": 5.828
+  },
+  {
+    "id": "07-aria-abc",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day seven — Annapurna Base Camp at dawn. Group photo at fourteen-thousand feet.",
+    "scene": "abc",
+    "file": "/demo-audio-np/07-aria-abc.mp3",
+    "duration": 5.123
+  },
+  {
+    "id": "08-aria-spa",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Day nine — back to Tiger Mountain. Massage. Lake Phewa sunset paddle.",
+    "scene": "spa",
+    "file": "/demo-audio-np/08-aria-spa.mp3",
+    "duration": 5.462
+  },
+  {
+    "id": "09-aria-close",
+    "speaker": "aria",
+    "voiceName": "Sarah",
+    "text": "Ten days. Twelve new friends. Thirty-eight hundred all in. Booked?",
+    "scene": "close",
+    "file": "/demo-audio-np/09-aria-close.mp3",
+    "duration": 5.358
+  },
+  {
+    "id": "10-marco-yes",
+    "speaker": "marco",
+    "voiceName": "Bill",
+    "text": "Booked.",
+    "scene": "close",
+    "file": "/demo-audio-np/10-marco-yes.mp3",
+    "duration": 0.813
+  }
+]

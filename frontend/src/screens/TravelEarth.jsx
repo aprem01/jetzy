@@ -99,6 +99,15 @@ export default function TravelEarth() {
   const liveSceneTimersRef = useRef([]);
   const [livePhotoMap, setLivePhotoMap] = useState({}); // venue → photo URL (Wikipedia lookup)
 
+  // === VIRTUAL INSIDE EXPERIENCE ===
+  // Fullscreen "step inside" modal — auto-fading carousel of interior /
+  // close-up photos for a venue, with optional Street View toggle.
+  const [insideExperience, setInsideExperience] = useState(null);
+  // shape: { name, photos: [url, ...], streetView: { lat, lng, heading } | null, autoAdvance: boolean }
+  const [insidePhotoIndex, setInsidePhotoIndex] = useState(0);
+  const [insideMode, setInsideMode] = useState('photos'); // 'photos' | 'streetview'
+  const insideAdvanceTimerRef = useRef(null);
+
   // Hedra-rendered Aria-talking video URL for the current step (null = use the
   // static portrait image). Audio is baked into the video so we don't play
   // the separate MP3 when a video is set.
@@ -179,6 +188,33 @@ export default function TravelEarth() {
 
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
+
+  // Auto-advance the inside-experience photo carousel when in photos mode.
+  useEffect(() => {
+    if (!insideExperience || insideMode !== 'photos') return;
+    const photos = insideExperience.photos || [];
+    if (photos.length <= 1) return;
+    if (insideAdvanceTimerRef.current) clearTimeout(insideAdvanceTimerRef.current);
+    insideAdvanceTimerRef.current = setTimeout(() => {
+      setInsidePhotoIndex((i) => (i + 1) % photos.length);
+    }, 3500);
+    return () => {
+      if (insideAdvanceTimerRef.current) clearTimeout(insideAdvanceTimerRef.current);
+    };
+  }, [insideExperience, insidePhotoIndex, insideMode]);
+
+  const openInside = useCallback((opts) => {
+    setInsidePhotoIndex(0);
+    setInsideMode(Array.isArray(opts.photos) && opts.photos.length > 0 ? 'photos' : 'streetview');
+    setInsideExperience(opts);
+  }, []);
+
+  const closeInside = useCallback(() => {
+    setInsideExperience(null);
+    setInsidePhotoIndex(0);
+    setInsideMode('photos');
+    if (insideAdvanceTimerRef.current) clearTimeout(insideAdvanceTimerRef.current);
+  }, []);
 
   // Configure the Cesium scene once the viewer mounts. Resium populates the
   // ref's `cesiumElement` asynchronously, so we poll briefly until it appears
@@ -589,6 +625,29 @@ export default function TravelEarth() {
         });
       }
 
+      // Auto-open the "Step Inside" interior gallery a beat after the
+      // spotlight appears, if the spotlight has interior photos. Plays in
+      // an inset window so the Aria avatar + caption stay visible — viewer
+      // is taken inside the venue without clicking anything.
+      const sp0 = Array.isArray(step.spotlights) && step.spotlights.length > 0
+        ? step.spotlights[0]
+        : step.spotlight;
+      if (sp0 && Array.isArray(sp0.interior) && sp0.interior.length > 0 && step.duration > 3) {
+        const insideTimer = setTimeout(() => {
+          if (tourAbortRef.current) return;
+          const photos = [...(sp0.image ? [sp0.image] : []), ...sp0.interior];
+          openInside({
+            name: sp0.name,
+            photos,
+            streetView: step.marker?.lat && step.marker?.lng
+              ? { lat: step.marker.lat, lng: step.marker.lng, heading: 210 }
+              : null,
+            auto: true,
+          });
+        }, 1400);
+        subSpotlightTimersRef.current.push(insideTimer);
+      }
+
       // We used to auto-open a Google Maps embed (Street View / Place Detail)
       // here. Investors found the iframe generic and uninspiring. Now the
       // venue spotlight card itself is the showcase — full-bleed hero photo
@@ -605,8 +664,10 @@ export default function TravelEarth() {
         if (streetViewTimer) clearTimeout(streetViewTimer);
         subSpotlightTimersRef.current.forEach((t) => clearTimeout(t));
         subSpotlightTimersRef.current = [];
-        // Close any auto-opened Street View as we move to the next step.
+        // Close any auto-opened overlays as we move to the next step.
         if (step.autoStreetView) setStreetView(null);
+        // Auto-close the Step Inside if the prior step opened it.
+        setInsideExperience((curr) => (curr?.auto ? null : curr));
         if (tourAudioRef.current) tourAudioRef.current = null;
         setIsSpeaking(false);
         setTimeout(resolve, 250);
@@ -1051,7 +1112,7 @@ export default function TravelEarth() {
         return (
           <div
             key={rotating ? `${tourStepIndex}-${activeSubSpotlight}` : tourStepIndex}
-            className="absolute top-24 right-6 z-30 w-[min(560px,92vw)] max-h-[calc(100vh-9rem)] overflow-y-auto animate-fade-up"
+            className="absolute top-20 right-3 sm:right-6 z-30 w-[min(560px,calc(100vw-1.5rem))] max-h-[calc(100vh-22rem)] sm:max-h-[calc(100vh-9rem)] overflow-y-auto animate-fade-up"
           >
             <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
               {/* Sub-spotlight progress dots when rotating */}
@@ -1069,9 +1130,9 @@ export default function TravelEarth() {
                   ))}
                 </div>
               )}
-              {/* Cinematic hero image with Ken Burns slow zoom */}
-              <div className="relative h-72 overflow-hidden bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
-                {s.image && (
+              {/* Cinematic hero image with Ken Burns slow zoom + default fallback */}
+              <div className="relative h-56 sm:h-72 overflow-hidden bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
+                {s.image ? (
                   <img
                     src={s.image}
                     alt={s.name}
@@ -1079,6 +1140,15 @@ export default function TravelEarth() {
                     loading="eager"
                     onError={(e) => { e.currentTarget.style.display = 'none'; }}
                   />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center px-6">
+                      <Sparkles size={32} className="mx-auto text-[#C9A84C]/40 mb-2" />
+                      <div className="text-[10px] font-bold tracking-[0.22em] text-white/40">
+                        DETAIL VIEW
+                      </div>
+                    </div>
+                  </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
                 {s.tag && (
@@ -1087,11 +1157,11 @@ export default function TravelEarth() {
                   </div>
                 )}
                 <div className="absolute bottom-4 left-5 right-5">
-                  <div className="font-display text-3xl text-white leading-tight drop-shadow-2xl tracking-tight">
+                  <div className="font-display text-2xl sm:text-3xl text-white leading-tight drop-shadow-2xl tracking-tight">
                     {s.name}
                   </div>
                   {s.subtitle && (
-                    <div className="text-sm text-white/90 mt-1.5 drop-shadow-lg leading-snug">
+                    <div className="text-xs sm:text-sm text-white/90 mt-1.5 drop-shadow-lg leading-snug">
                       {s.subtitle}
                     </div>
                   )}
@@ -1170,19 +1240,39 @@ export default function TravelEarth() {
                   </ul>
                 </div>
               )}
-              {/* CTA */}
-              {m?.lat && m?.lng && (
-                <button
-                  onClick={() => setStreetView({
-                    lat: m.lat, lng: m.lng,
-                    name: s.name,
-                    placeQuery: s.placeQuery || step.placeQuery || s.name,
-                  })}
-                  className="w-full py-3 bg-[#C9A84C]/15 hover:bg-[#C9A84C]/30 border-t border-[#C9A84C]/30 flex items-center justify-center gap-2 text-[#C9A84C] text-sm font-medium transition-colors"
-                >
-                  <MapPin size={14} />
-                  See on Google Maps
-                </button>
+              {/* CTAs — Step Inside (interior gallery) + See on Maps */}
+              {(s.interior?.length > 0 || s.image || (m?.lat && m?.lng)) && (
+                <div className="grid grid-cols-2 border-t border-[#C9A84C]/30">
+                  <button
+                    onClick={() => {
+                      const photos = [
+                        ...(s.image ? [s.image] : []),
+                        ...(s.interior || []),
+                      ];
+                      const sv = (m?.lat && m?.lng)
+                        ? { lat: m.lat, lng: m.lng, heading: 210 }
+                        : null;
+                      openInside({ name: s.name, photos, streetView: sv });
+                    }}
+                    className="py-3 bg-[#C9A84C]/15 hover:bg-[#C9A84C]/30 flex items-center justify-center gap-2 text-[#C9A84C] text-sm font-medium transition-colors"
+                  >
+                    <Eye size={14} />
+                    Step Inside
+                  </button>
+                  {m?.lat && m?.lng && (
+                    <button
+                      onClick={() => setStreetView({
+                        lat: m.lat, lng: m.lng,
+                        name: s.name,
+                        placeQuery: s.placeQuery || step.placeQuery || s.name,
+                      })}
+                      className="py-3 bg-black/40 hover:bg-[#C9A84C]/15 border-l border-[#C9A84C]/30 flex items-center justify-center gap-2 text-white/85 text-sm font-medium transition-colors"
+                    >
+                      <MapPin size={14} />
+                      Maps
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -1383,6 +1473,155 @@ export default function TravelEarth() {
           </button>
         </div>
       )}
+
+      {/* === VIRTUAL INSIDE EXPERIENCE MODAL ===
+           Fullscreen takeover: auto-cross-fading carousel of interior photos
+           OR Google Street View if the venue has a panorama. Designed to
+           feel like stepping into a luxury travel-magazine spread. */}
+      {insideExperience && (() => {
+        const exp = insideExperience;
+        const photos = exp.photos || [];
+        const photo = photos[insidePhotoIndex] || photos[0];
+        const hasPhotos = photos.length > 0;
+        const hasSV = !!exp.streetView;
+        // Auto-trigger from a tour step: render as a centered inset window
+        // so the avatar, caption, and HUD stay visible during the demo.
+        // Manual click: full-screen takeover.
+        const auto = !!exp.auto;
+        // Auto (during a tour): centered inset on desktop, centered + nearly
+        // full-width on phone so we don't crowd the frame. Manual click:
+        // full-screen takeover.
+        const wrapperClass = auto
+          ? 'absolute inset-0 z-30 flex items-center sm:items-start justify-center pt-2 sm:pt-20 px-2 sm:px-4 pointer-events-none'
+          : 'fixed inset-0 z-50 bg-black flex flex-col animate-fade-in';
+        const innerClass = auto
+          ? 'relative w-[min(900px,96vw)] h-[min(560px,55vh)] sm:h-[min(560px,62vh)] rounded-2xl overflow-hidden bg-black border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)] pointer-events-auto'
+          : 'relative w-full h-full bg-black flex flex-col';
+        return (
+          <div className={wrapperClass}>
+            <div className={innerClass}>
+            {/* header */}
+            <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-5 pt-4 pb-10 bg-gradient-to-b from-black/85 to-transparent">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[#C9A84C]/20 border border-[#C9A84C]/50 flex items-center justify-center">
+                  <Eye size={16} className="text-[#C9A84C]" />
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-0.5">
+                    {insideMode === 'streetview' ? 'STREET VIEW' : 'STEP INSIDE'}
+                  </div>
+                  <div className="font-display text-base text-white leading-tight">
+                    {exp.name}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {/* Mode toggle when both options available */}
+                {hasPhotos && hasSV && (
+                  <div className="flex rounded-full bg-black/60 border border-white/15 p-0.5 mr-2">
+                    <button
+                      onClick={() => setInsideMode('photos')}
+                      className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.18em] transition-all ${
+                        insideMode === 'photos' ? 'bg-[#C9A84C] text-black' : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      PHOTOS
+                    </button>
+                    <button
+                      onClick={() => setInsideMode('streetview')}
+                      className={`px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.18em] transition-all ${
+                        insideMode === 'streetview' ? 'bg-[#C9A84C] text-black' : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      STREET
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={closeInside}
+                  className="w-10 h-10 rounded-full bg-black/60 border border-white/15 hover:bg-red-500/30 hover:border-red-400/60 text-white flex items-center justify-center transition-colors"
+                  aria-label="Close inside experience"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+
+            {/* Hero stage */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              {insideMode === 'photos' && hasPhotos && (
+                <>
+                  {/* Photos render stacked so we get a smooth crossfade */}
+                  {photos.map((src, i) => (
+                    <img
+                      key={`${src}-${i}`}
+                      src={src}
+                      alt={exp.name}
+                      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
+                        i === insidePhotoIndex ? 'opacity-100 animate-ken-burns' : 'opacity-0'
+                      }`}
+                      style={{ zIndex: i === insidePhotoIndex ? 1 : 0 }}
+                    />
+                  ))}
+                  {/* Subtle vignette so caption stays legible */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/40 z-10 pointer-events-none" />
+                </>
+              )}
+              {insideMode === 'streetview' && hasSV && (
+                <iframe
+                  key={`sv-${exp.streetView.lat}-${exp.streetView.lng}`}
+                  title="Street View"
+                  src={`https://www.google.com/maps/embed/v1/streetview?key=${GOOGLE_MAPS_KEY}&location=${exp.streetView.lat},${exp.streetView.lng}&heading=${exp.streetView.heading || 210}&pitch=0&fov=80`}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; gyroscope; fullscreen"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              )}
+            </div>
+
+            {/* Bottom bar — photo counter + nav */}
+            {insideMode === 'photos' && photos.length > 1 && (
+              <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between px-6 pb-6 pt-12 bg-gradient-to-t from-black/80 to-transparent">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setInsidePhotoIndex((i) => (i - 1 + photos.length) % photos.length)}
+                    className="w-10 h-10 rounded-full bg-black/60 border border-white/15 hover:bg-white/10 text-white flex items-center justify-center"
+                    aria-label="Previous photo"
+                  >
+                    <ArrowLeft size={16} />
+                  </button>
+                  <button
+                    onClick={() => setInsidePhotoIndex((i) => (i + 1) % photos.length)}
+                    className="w-10 h-10 rounded-full bg-black/60 border border-white/15 hover:bg-white/10 text-white flex items-center justify-center"
+                    aria-label="Next photo"
+                  >
+                    <ArrowLeft size={16} className="rotate-180" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-black/60 border border-white/15">
+                  <div className="flex gap-1">
+                    {photos.map((_, i) => (
+                      <span
+                        key={i}
+                        className={
+                          i === insidePhotoIndex
+                            ? 'w-6 h-1.5 rounded-full bg-[#C9A84C] transition-all'
+                            : 'w-1.5 h-1.5 rounded-full bg-white/30 transition-all'
+                        }
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-bold tracking-[0.18em] text-white/70 ml-2 tabular-nums">
+                    {insidePhotoIndex + 1} / {photos.length}
+                  </span>
+                </div>
+                <div className="w-[88px]" /> {/* spacer for symmetric layout */}
+              </div>
+            )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* === PLACE DETAIL MODAL ===
            Uses Google Maps Embed "place" mode — shows the actual venue card
