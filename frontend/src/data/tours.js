@@ -214,8 +214,6 @@ export const TOURS = [
         speaker: 'aria',
         text: "Mendoza to wind down. Cavas Wine Lodge. Dinner at Francis Mallmann's 1884. Catena Zapata in the morning.",
         duration: 8.153,
-        // Sweep over the Uco Valley vineyards, low altitude, looking west
-        // toward the Andes line — wine country meets cordillera in one frame.
         camera: { lng: -68.78, lat: -33.0048, height: 2_200, pitch: -0.10, heading: -1.5708, duration: 5.0 },
         marker: { name: 'Cavas Wine Lodge · Mendoza', lat: -33.0048, lng: -68.8447 },
         cart: [
@@ -223,24 +221,57 @@ export const TOURS = [
           { name: "Dinner · Francis Mallmann's 1884", kind: 'meal', price: 220, day: 8 },
           { name: 'Catena Zapata · private tasting', kind: 'experience', price: 220, day: 9 },
         ],
-        autoStreetView: { delayMs: 3000 },
-        spotlight: {
-          name: 'Mendoza · Wind Down',
-          subtitle: 'Cavas Wine Lodge + Mallmann + Catena',
-          image: '/venue-photos/cavas-mendoza.jpg',
-          tag: 'STAY + EAT · DAY 8',
-          details: [
-            { label: 'Stay',     value: 'Cavas Wine Lodge · standalone Cava + plunge' },
-            { label: 'Dinner',   value: "Francis Mallmann's 1884 Restaurante · open fire" },
-            { label: 'Morning',  value: 'Catena Zapata · 6 vintages + pyramid tour' },
-            { label: 'Bundle',   value: 'USD 1,020' },
-          ],
-          picks: [
-            { kind: 'EAT',  name: 'Casa El Enemigo',   note: 'Adrianna Catena & Aleardo Ferrer · 7-course tasting' },
-            { kind: 'DRINK',name: 'Bodega Salentein',  note: 'Greek-temple winery in the Uco Valley' },
-            { kind: 'DO',   name: 'Caballadas horseback', note: 'Sunset ride through the vineyards' },
-          ],
-        },
+        autoStreetView: { delayMs: 6000 },
+        // Three-stage rotating spotlight that tracks Aria's narration in
+        // real time: she names Cavas → 1884 → Catena, the card swaps with
+        // her so the viewer sees the venue she's saying right now.
+        spotlights: [
+          {
+            startMs: 0,
+            name: 'Cavas Wine Lodge',
+            subtitle: 'Standalone Cavas with plunge pool · Mendoza',
+            image: '/venue-photos/cavas-mendoza.jpg',
+            tag: 'STAY · DAY 8',
+            details: [
+              { label: 'Address', value: 'Costaflores, Alto Agrelo' },
+              { label: 'Stay',    value: '1 night · Standalone Cava + plunge' },
+              { label: 'Includes',value: 'Sunset on the rooftop' },
+              { label: 'Rate',    value: 'USD 580' },
+            ],
+          },
+          {
+            startMs: 2700,
+            name: "Francis Mallmann · 1884",
+            subtitle: '7-course menu cooked over open fire',
+            image: '/venue-photos/mallmann-1884.jpg',
+            tag: 'EAT · DAY 8 · DINNER',
+            details: [
+              { label: 'Chef',     value: 'Francis Mallmann · Chef\'s Table' },
+              { label: 'Address',  value: 'Bodega Escorihuela, Belgrano 1188' },
+              { label: 'Menu',     value: '7 courses · open-fire cooking' },
+              { label: 'Rate',     value: 'USD 220 pp' },
+            ],
+          },
+          {
+            startMs: 5400,
+            name: 'Catena Zapata · Pyramid',
+            subtitle: 'Iconic Mayan-temple winery · Adrianna Vineyard',
+            image: '/venue-photos/catena-zapata.jpg',
+            tag: 'DO · DAY 9',
+            details: [
+              { label: 'Estate',   value: 'Bodega Catena Zapata · since 1902' },
+              { label: 'Tasting',  value: '6 vintages incl. Adrianna' },
+              { label: 'Tour',     value: 'Pyramid winery + cellar' },
+              { label: 'Rate',     value: 'USD 220 pp' },
+            ],
+          },
+        ],
+        // Picks shown across all three sub-spotlights (curated overflow).
+        picks: [
+          { kind: 'EAT',  name: 'Casa El Enemigo',   note: 'Adrianna Catena & Aleardo Ferrer · 7-course tasting' },
+          { kind: 'DRINK',name: 'Bodega Salentein',  note: 'Greek-temple winery in the Uco Valley' },
+          { kind: 'DO',   name: 'Caballadas horseback', note: 'Sunset ride through the vineyards' },
+        ],
       },
       {
         audio: '/demo-audio/10-aria-close.mp3',

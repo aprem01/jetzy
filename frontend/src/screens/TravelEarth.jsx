@@ -80,8 +80,10 @@ export default function TravelEarth() {
   // Tour mode
   const [tour, setTour] = useState(null); // active tour object or null
   const [tourStepIndex, setTourStepIndex] = useState(-1);
+  const [activeSubSpotlight, setActiveSubSpotlight] = useState(0); // for steps with spotlights[]
   const tourAudioRef = useRef(null);
   const tourAbortRef = useRef(false);
+  const subSpotlightTimersRef = useRef([]);
 
   // Street View modal — opens a Google Street View pano at the current location
   // so the user can step out of the globe and "stand" at the venue / hotel.
@@ -482,6 +484,23 @@ export default function TravelEarth() {
       setAriaLine(step.text);
       setIsSpeaking(true);
 
+      // Reset rotating sub-spotlights to index 0 and schedule transitions for
+      // each one based on its startMs so the right venue card is on screen at
+      // the moment Aria names it in the audio.
+      setActiveSubSpotlight(0);
+      subSpotlightTimersRef.current.forEach((t) => clearTimeout(t));
+      subSpotlightTimersRef.current = [];
+      if (Array.isArray(step.spotlights) && step.spotlights.length > 1) {
+        step.spotlights.forEach((sp, i) => {
+          if (i === 0) return;
+          const t = setTimeout(() => {
+            if (tourAbortRef.current) return;
+            setActiveSubSpotlight(i);
+          }, sp.startMs ?? 0);
+          subSpotlightTimersRef.current.push(t);
+        });
+      }
+
       // Auto-open Street View at venue stops so the viewer is taken inside
       // the actual restaurant / hotel during the narration. Closes when the
       // step finishes so we transition cleanly back to the globe view.
@@ -505,6 +524,8 @@ export default function TravelEarth() {
 
       const finish = () => {
         if (streetViewTimer) clearTimeout(streetViewTimer);
+        subSpotlightTimersRef.current.forEach((t) => clearTimeout(t));
+        subSpotlightTimersRef.current = [];
         // Close any auto-opened Street View as we move to the next step.
         if (step.autoStreetView) setStreetView(null);
         if (tourAudioRef.current) tourAudioRef.current = null;
@@ -838,20 +859,12 @@ export default function TravelEarth() {
           </div>
         </div>
 
-        {/* Dialogue bubble */}
-        {ariaLine && (
-          <div className="relative mb-8 px-5 py-4 rounded-2xl rounded-bl-sm backdrop-blur-xl bg-black/60 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.5)] max-w-md">
-            <div className="text-[10px] font-bold tracking-[0.22em] text-[#C9A84C] mb-1.5">
-              {currentSpeaker === 'marco' ? 'MARCO' : 'ARIA'}
-            </div>
-            <p className="text-lg leading-snug text-white font-light">
-              {ariaLine}
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* === CAPTION OVERLAY (near bottom-center) === */}
+      {/* === CAPTION (single, centered, subtitle-style) ===
+           Only renders the bottom-center caption — the duplicate bubble next
+           to the avatar was removed. The avatar still shows speaker name and
+           status below the portrait, so identification is preserved. */}
       {ariaLine && isSpeaking && (
         <div className="pointer-events-none absolute bottom-40 left-1/2 -translate-x-1/2 z-20 max-w-[min(720px,80vw)]">
           <div className="px-6 py-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-white/10 shadow-2xl">
@@ -907,10 +920,20 @@ export default function TravelEarth() {
         </div>
       )}
 
-      {/* === TOUR VENUE SPOTLIGHT === */}
-      {tour && tour.steps[tourStepIndex]?.spotlight && (() => {
-        const s = tour.steps[tourStepIndex].spotlight;
-        const m = tour.steps[tourStepIndex].marker;
+      {/* === TOUR VENUE SPOTLIGHT ===
+           Steps can carry either a single `spotlight` object or a `spotlights`
+           array that rotates as the audio plays (Aria names → card swaps). */}
+      {tour && (tour.steps[tourStepIndex]?.spotlight || tour.steps[tourStepIndex]?.spotlights) && (() => {
+        const step = tour.steps[tourStepIndex];
+        const rotating = Array.isArray(step.spotlights) && step.spotlights.length > 0;
+        const s = rotating
+          ? step.spotlights[Math.min(activeSubSpotlight, step.spotlights.length - 1)]
+          : step.spotlight;
+        const m = step.marker;
+        // Carry the parent step's `picks` through if the rotating spotlight
+        // doesn't define its own — keeps the curated-picks list visible
+        // even as the hero card rotates.
+        const picks = s.picks || step.picks;
         const kindStyle = (k) => {
           switch (k) {
             case 'EAT':   return { dot: 'bg-orange-400',  label: 'text-orange-300' };
@@ -921,8 +944,26 @@ export default function TravelEarth() {
           }
         };
         return (
-          <div className="absolute top-32 right-6 z-30 w-[min(420px,92vw)] max-h-[calc(100vh-12rem)] overflow-y-auto animate-fade-up">
+          <div
+            key={rotating ? `${tourStepIndex}-${activeSubSpotlight}` : tourStepIndex}
+            className="absolute top-32 right-6 z-30 w-[min(420px,92vw)] max-h-[calc(100vh-12rem)] overflow-y-auto animate-fade-up"
+          >
             <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+              {/* Sub-spotlight progress dots when rotating */}
+              {rotating && (
+                <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/15">
+                  {step.spotlights.map((_, i) => (
+                    <span
+                      key={i}
+                      className={
+                        i === activeSubSpotlight
+                          ? 'w-2 h-2 rounded-full bg-[#C9A84C]'
+                          : 'w-1.5 h-1.5 rounded-full bg-white/30'
+                      }
+                    />
+                  ))}
+                </div>
+              )}
               {/* hero image */}
               <div className="relative h-44 bg-gradient-to-br from-[#1B2B4B] via-[#0b0f1a] to-[#1B2B4B]">
                 {s.image && (
@@ -967,13 +1008,13 @@ export default function TravelEarth() {
                 </div>
               )}
               {/* Famous adjacent picks — eat / drink / do */}
-              {Array.isArray(s.picks) && s.picks.length > 0 && (
+              {Array.isArray(picks) && picks.length > 0 && (
                 <div className="px-4 pt-1 pb-3 border-t border-white/10">
                   <div className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/85 uppercase mb-2 mt-2">
                     Curated picks here
                   </div>
                   <ul className="space-y-2">
-                    {s.picks.map((p) => {
+                    {picks.map((p) => {
                       const k = kindStyle(p.kind);
                       return (
                         <li key={p.name} className="flex items-start gap-2.5">
