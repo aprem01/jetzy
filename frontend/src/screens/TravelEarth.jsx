@@ -606,7 +606,13 @@ export default function TravelEarth() {
       subSpotlightTimersRef.current.forEach((t) => clearTimeout(t));
       subSpotlightTimersRef.current = [];
 
-      const useVideo = !!step.video;
+      // iOS Safari is hostile to autoplay-from-setTimeout for unmuted video,
+      // even after gesture priming. On iPhone we skip the Hedra video and
+      // use the audio file with the static Aria portrait — no lip-sync but
+      // reliable playback over the screen recording.
+      const isIOS = typeof navigator !== 'undefined' &&
+        /iPad|iPhone|iPod/.test(navigator.userAgent || '');
+      const useVideo = !!step.video && !isIOS;
 
       // Settle hold: camera flies for `flyDur` seconds, then we wait ~65% of
       // that for the destination to land before the spotlight + cart + audio
@@ -1405,51 +1411,58 @@ export default function TravelEarth() {
       })()}
       </div>
 
-      {/* === MOBILE TITLE CARD (compact spotlight for phones) ===
-           Appears top-center under the Tour HUD on mobile only. Auto-fades
-           after 5.5s so the photoreal globe stays the hero. Premium-feel
-           thumbnail + tag + name + price — like a TV broadcast lower-third. */}
+      {/* === MOBILE BOTTOM SPOTLIGHT CARD (cinematic for phones) ===
+           Anchored to the bottom of the screen — hero photo fills the card,
+           venue info overlaid. Globe stays visible in the top 60%. Slides
+           up from bottom on settle, auto-fades after 5.5s.
+           Tighter layout = no scroll needed, more impact than a tiny top chip. */}
       {mobileTitleCard && (
         <div
           key={mobileTitleCard.name}
-          className="sm:hidden absolute top-[5.5rem] left-1/2 -translate-x-1/2 z-40 w-[calc(100vw-1.25rem)] max-w-[440px] animate-fade-up"
+          className="sm:hidden absolute bottom-0 left-0 right-0 z-40 px-3 pb-3 animate-fade-up pointer-events-none"
         >
-          <div className="flex items-stretch gap-3.5 p-3 rounded-2xl backdrop-blur-xl bg-black/80 border border-[#C9A84C]/45 shadow-[0_24px_60px_rgba(0,0,0,0.7)]">
+          <div className="relative h-[34vh] max-h-[300px] min-h-[220px] rounded-2xl overflow-hidden border border-[#C9A84C]/50 shadow-[0_-20px_60px_rgba(0,0,0,0.7)] bg-[#1B2B4B] pointer-events-auto">
             {mobileTitleCard.image && (
-              <div className="w-[88px] h-[88px] rounded-xl overflow-hidden flex-shrink-0 bg-[#1B2B4B]">
-                <img
-                  src={mobileTitleCard.image}
-                  alt={mobileTitleCard.name}
-                  className="w-full h-full object-cover"
-                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                />
+              <img
+                src={mobileTitleCard.image}
+                alt={mobileTitleCard.name}
+                className="absolute inset-0 w-full h-full object-cover animate-ken-burns"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
+            {/* Top gradient for tag legibility */}
+            <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/70 via-black/20 to-transparent" />
+            {/* Bottom gradient for venue info legibility */}
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
+
+            {/* Tag — top-left */}
+            {mobileTitleCard.tag && (
+              <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#C9A84C] text-black text-[10px] font-bold tracking-[0.22em] uppercase shadow-lg">
+                {mobileTitleCard.tag}
               </div>
             )}
-            <div className="flex-1 min-w-0 flex flex-col justify-center">
-              {mobileTitleCard.tag && (
-                <div className="text-[9px] font-bold tracking-[0.24em] text-[#C9A84C] uppercase mb-1 truncate">
-                  {mobileTitleCard.tag}
-                </div>
-              )}
-              <div className="font-display text-lg text-white leading-tight truncate">
+
+            {/* Price — top-right */}
+            {mobileTitleCard.price != null && (
+              <div className="absolute top-3 right-3 flex items-baseline gap-1 px-3 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-[#C9A84C]/50">
+                <span className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/85">USD</span>
+                <span className="font-display text-base text-white tabular-nums leading-none">
+                  {mobileTitleCard.price.toLocaleString?.() || mobileTitleCard.price}
+                </span>
+              </div>
+            )}
+
+            {/* Venue name + subtitle — bottom-left */}
+            <div className="absolute bottom-4 left-4 right-4">
+              <div className="font-display text-2xl text-white leading-tight tracking-tight drop-shadow-2xl">
                 {mobileTitleCard.name}
               </div>
               {mobileTitleCard.subtitle && (
-                <div className="text-[11px] text-white/65 leading-snug mt-1 line-clamp-2">
+                <div className="text-[12px] text-white/85 leading-snug mt-1.5 drop-shadow-lg line-clamp-2">
                   {mobileTitleCard.subtitle}
                 </div>
               )}
             </div>
-            {mobileTitleCard.price != null && (
-              <div className="flex flex-col items-end justify-center px-1">
-                <div className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/80">
-                  USD
-                </div>
-                <div className="font-display text-lg text-white tabular-nums leading-tight">
-                  {mobileTitleCard.price.toLocaleString?.() || mobileTitleCard.price}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
