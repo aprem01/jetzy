@@ -16,11 +16,13 @@ import { useApp } from '../context/AppContext';
 import { SAMPLE_USERS } from '../data/seed';
 import { VOICES, playEleven, stopEleven, unlockAudio } from '../lib/elevenlabs';
 
-// We don't need a Cesium Ion key — we use OpenStreetMap tiles directly.
+// Cesium Ion not required — we use Google Photorealistic 3D Tiles when a
+// GOOGLE_MAPS_API_KEY is present and fall back to OSM tiles otherwise.
 Cesium.Ion.defaultAccessToken = undefined;
 
-const ARIA_AVATAR =
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face';
+const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+const ARIA_AVATAR = '/aria-character.png';
 
 const HOME_LAT = 39.95;
 const HOME_LNG = -75.16;
@@ -38,7 +40,8 @@ const SUGGESTIONS = [
   'I want to see Bali',
 ];
 
-// Build the OSM imagery provider once per module.
+// Build the OSM imagery provider once per module (used as fallback when
+// Google Photorealistic 3D Tiles are unavailable).
 const osmImageryProvider = new Cesium.UrlTemplateImageryProvider({
   url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   credit: 'OpenStreetMap',
@@ -69,12 +72,19 @@ export default function TravelEarth() {
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
-  // Configure the Cesium scene once the viewer mounts.
+  // Configure the Cesium scene once the viewer mounts. When a Google Maps
+  // API key is configured we additionally load the Photorealistic 3D Tiles
+  // dataset on top of the globe — this gives real satellite imagery and 3D
+  // buildings everywhere on Earth.
   useEffect(() => {
     const v = viewerRef.current?.cesiumElement;
     if (!v) return;
+
+    let tileset;
+    let cancelled = false;
+
     try {
-      // Hide the default Cesium credit container (we use OSM credit only).
+      // Hide the default Cesium credit container (we render our own footer).
       const credits = v.creditDisplay?.container;
       if (credits) credits.style.display = 'none';
 
@@ -84,7 +94,7 @@ export default function TravelEarth() {
       v.scene.fog.enabled = true;
       v.scene.globe.baseColor = Cesium.Color.fromCssColorString('#0b0f1a');
 
-      // Initial camera over Philadelphia
+      // Initial camera over Philadelphia.
       v.camera.setView({
         destination: Cesium.Cartesian3.fromDegrees(HOME_LNG, HOME_LAT, HOME_HEIGHT),
         orientation: { heading: 0, pitch: -Cesium.Math.PI_OVER_TWO + 0.2, roll: 0 },
@@ -92,6 +102,37 @@ export default function TravelEarth() {
     } catch (e) {
       console.warn('Cesium init warning:', e);
     }
+
+    // Load Google Photorealistic 3D Tiles (async). This is the "Google Earth"
+    // look — real satellite imagery + 3D buildings worldwide.
+    if (GOOGLE_MAPS_KEY) {
+      (async () => {
+        try {
+          tileset = await Cesium.Cesium3DTileset.fromUrl(
+            `https://tile.googleapis.com/v1/3dtiles/root.json?key=${GOOGLE_MAPS_KEY}`,
+            { showCreditsOnScreen: false },
+          );
+          if (cancelled) return;
+          v.scene.primitives.add(tileset);
+          // Hide default globe so we see Google's photoreal terrain instead.
+          v.scene.globe.show = false;
+          // Slightly tighter atmosphere for the photoreal look.
+          v.scene.skyAtmosphere.show = true;
+        } catch (e) {
+          console.warn('Google Photorealistic 3D Tiles failed to load:', e);
+          // OSM imagery layer remains as fallback (configured on the Viewer).
+        }
+      })();
+    }
+
+    return () => {
+      cancelled = true;
+      try {
+        if (tileset && v.scene?.primitives) {
+          v.scene.primitives.remove(tileset);
+        }
+      } catch {}
+    };
   }, []);
 
   // Speech recognition setup (Web Speech API).
