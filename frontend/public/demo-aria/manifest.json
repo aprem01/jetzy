@@ -4,71 +4,26 @@
     "speaker": "aria",
     "text": "Hey Marco. You did Kilimanjaro in February. What's next?",
     "scene": "kilimanjaro",
-    "duration": 3.808,
+    "duration": 3.738,
     "audioFile": "/demo-audio/01-aria-open.mp3",
     "videoFile": "/demo-aria/01-aria-open.mp4"
   },
   {
     "id": "03-aria-day1",
     "speaker": "aria",
-    "text": "Day one — Buenos Aires. One night at Mio Hotel in Palermo. Dinner at Don Julio.",
+    "text": "Buenos Aires, day one. Faena Hotel for arrival. Don Julio for steak — World's Fifty Best. Florería Atlántico for the nightcap.",
     "scene": "buenos_aires",
-    "duration": 5.712,
+    "duration": 9.119,
     "audioFile": "/demo-audio/03-aria-day1.mp3",
     "videoFile": "/demo-aria/03-aria-day1.mp4"
   },
   {
     "id": "04-aria-don-julio",
     "speaker": "aria",
-    "text": "The entraña is worth it.",
+    "text": "The entraña is unmissable.",
     "scene": "don_julio",
-    "duration": 1.579,
+    "duration": 1.831,
     "audioFile": "/demo-audio/04-aria-don-julio.mp3",
     "videoFile": "/demo-aria/04-aria-don-julio.mp4"
-  },
-  {
-    "id": "05-aria-day3",
-    "speaker": "aria",
-    "text": "Day three — fly south to El Calafate, drive to El Chaltén. Senderos Hostería, four nights.",
-    "scene": "el_chalten",
-    "duration": 6.269,
-    "audioFile": "/demo-audio/05-aria-day3.mp3",
-    "videoFile": "/demo-aria/05-aria-day3.mp4"
-  },
-  {
-    "id": "06-aria-day4",
-    "speaker": "aria",
-    "text": "Day four — sunrise on Fitz Roy. Local guide Lucas. Ten hour round trip.",
-    "scene": "fitz_roy",
-    "duration": 5.294,
-    "audioFile": "/demo-audio/06-aria-day4.mp3",
-    "videoFile": "/demo-aria/06-aria-day4.mp4"
-  },
-  {
-    "id": "08-aria-perito",
-    "speaker": "aria",
-    "text": "Adding it — Day seven. Park entry plus a Big Ice trek. Two hours on the glacier.",
-    "scene": "perito_moreno",
-    "duration": 5.108,
-    "audioFile": "/demo-audio/08-aria-perito.mp3",
-    "videoFile": "/demo-aria/08-aria-perito.mp4"
-  },
-  {
-    "id": "09-aria-mendoza",
-    "speaker": "aria",
-    "text": "Day eight — wind down in Mendoza. Cavas Wine Lodge, tasting at Catena Zapata.",
-    "scene": "mendoza",
-    "duration": 5.433,
-    "audioFile": "/demo-audio/09-aria-mendoza.mp3",
-    "videoFile": "/demo-aria/09-aria-mendoza.mp4"
-  },
-  {
-    "id": "10-aria-close",
-    "speaker": "aria",
-    "text": "Eight days. Three regions. Twenty-four hundred. Want me to book it?",
-    "scene": "wine_pour",
-    "duration": 3.994,
-    "audioFile": "/demo-audio/10-aria-close.mp3",
-    "videoFile": "/demo-aria/10-aria-close.mp4"
   }
 ]

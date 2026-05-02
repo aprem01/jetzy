@@ -905,8 +905,17 @@ export default function TravelEarth() {
       {tour && tour.steps[tourStepIndex]?.spotlight && (() => {
         const s = tour.steps[tourStepIndex].spotlight;
         const m = tour.steps[tourStepIndex].marker;
+        const kindStyle = (k) => {
+          switch (k) {
+            case 'EAT':   return { dot: 'bg-orange-400',  label: 'text-orange-300' };
+            case 'DRINK': return { dot: 'bg-rose-400',    label: 'text-rose-300' };
+            case 'DO':    return { dot: 'bg-emerald-400', label: 'text-emerald-300' };
+            case 'STAY':  return { dot: 'bg-sky-400',     label: 'text-sky-300' };
+            default:      return { dot: 'bg-white/70',    label: 'text-white/70' };
+          }
+        };
         return (
-          <div className="absolute top-32 right-6 z-30 w-[min(380px,90vw)] animate-fade-up">
+          <div className="absolute top-32 right-6 z-30 w-[min(420px,92vw)] max-h-[calc(100vh-12rem)] overflow-y-auto animate-fade-up">
             <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
               {/* hero image */}
               <div className="relative h-44 bg-[#1B2B4B]">
@@ -948,6 +957,37 @@ export default function TravelEarth() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+              {/* Famous adjacent picks — eat / drink / do */}
+              {Array.isArray(s.picks) && s.picks.length > 0 && (
+                <div className="px-4 pt-1 pb-3 border-t border-white/10">
+                  <div className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/85 uppercase mb-2 mt-2">
+                    Curated picks here
+                  </div>
+                  <ul className="space-y-2">
+                    {s.picks.map((p) => {
+                      const k = kindStyle(p.kind);
+                      return (
+                        <li key={p.name} className="flex items-start gap-2.5">
+                          <span className={`mt-1.5 w-1.5 h-1.5 rounded-full ${k.dot} shrink-0`} />
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline gap-2">
+                              <span className={`text-[9px] font-bold tracking-[0.18em] ${k.label}`}>
+                                {p.kind}
+                              </span>
+                              <span className="text-sm text-white font-medium truncate">
+                                {p.name}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-white/55 leading-snug">
+                              {p.note}
+                            </div>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
                 </div>
               )}
               {/* CTA */}

@@ -19,20 +19,20 @@ const OUT_DIR = path.join(__dirname, '..', 'frontend', 'public', 'demo-audio');
 const VOICE_ARIA  = { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', stability: 0.4,  similarity: 0.88, style: 0.45 };
 const VOICE_MARCO = { id: 'pqHfZKP75CvOlQylNhV4', name: 'Bill',  stability: 0.55, similarity: 0.85, style: 0.25 };
 
-// === DIALOG SCRIPT — same as live demo, in order ===
+// === DIALOG SCRIPT — denser name-drops, variety across stay/eat/drink/adventure ===
 // Each line: speaker, text, scene tag (matches a video in render-demo.js)
 const LINES = [
-  { id: '01-aria-open',     speaker: 'aria',  text: "Hey Marco. You did Kilimanjaro in February. What's next?",                                  scene: 'kilimanjaro' },
-  { id: '02-marco-pick',    speaker: 'marco', text: "Patagonia. Eight days, mid-October.",                                                       scene: 'kilimanjaro' },
-  { id: '03-aria-day1',     speaker: 'aria',  text: "Day one — Buenos Aires. One night at Mio Hotel in Palermo. Dinner at Don Julio.",          scene: 'buenos_aires' },
-  { id: '04-aria-don-julio',speaker: 'aria',  text: "The entraña is worth it.",                                                                   scene: 'don_julio' },
-  { id: '05-aria-day3',     speaker: 'aria',  text: "Day three — fly south to El Calafate, drive to El Chaltén. Senderos Hostería, four nights.", scene: 'el_chalten' },
-  { id: '06-aria-day4',     speaker: 'aria',  text: "Day four — sunrise on Fitz Roy. Local guide Lucas. Ten hour round trip.",                  scene: 'fitz_roy' },
-  { id: '07-marco-perito',  speaker: 'marco', text: "What about Perito Moreno?",                                                                 scene: 'fitz_roy' },
-  { id: '08-aria-perito',   speaker: 'aria',  text: "Adding it — Day seven. Park entry plus a Big Ice trek. Two hours on the glacier.",         scene: 'perito_moreno' },
-  { id: '09-aria-mendoza',  speaker: 'aria',  text: "Day eight — wind down in Mendoza. Cavas Wine Lodge, tasting at Catena Zapata.",            scene: 'mendoza' },
-  { id: '10-aria-close',    speaker: 'aria',  text: "Eight days. Three regions. Twenty-four hundred. Want me to book it?",                      scene: 'wine_pour' },
-  { id: '11-marco-yes',     speaker: 'marco', text: "Yes. Book it.",                                                                              scene: 'wine_pour' },
+  { id: '01-aria-open',     speaker: 'aria',  text: "Hey Marco. You did Kilimanjaro in February. What's next?",                                                                  scene: 'kilimanjaro' },
+  { id: '02-marco-pick',    speaker: 'marco', text: "Argentina. Eight days, mid October.",                                                                                       scene: 'kilimanjaro' },
+  { id: '03-aria-day1',     speaker: 'aria',  text: "Buenos Aires, day one. Faena Hotel for arrival. Don Julio for steak — World's Fifty Best. Florería Atlántico for the nightcap.", scene: 'buenos_aires' },
+  { id: '04-aria-don-julio',speaker: 'aria',  text: "The entraña is unmissable.",                                                                                                scene: 'don_julio' },
+  { id: '05-aria-day3',     speaker: 'aria',  text: "Day three — south to El Chaltén. Eolo Lodge, four nights. National Geographic Unique Lodge of the World.",                  scene: 'el_chalten' },
+  { id: '06-aria-day4',     speaker: 'aria',  text: "Sunrise on Fitz Roy. The same trail Yvon Chouinard pioneered.",                                                             scene: 'fitz_roy' },
+  { id: '07-marco-perito',  speaker: 'marco', text: "Perito Moreno?",                                                                                                            scene: 'fitz_roy' },
+  { id: '08-aria-perito',   speaker: 'aria',  text: "Adding it — day seven. Big Ice trek. Two hours walking on a glacier the size of Buenos Aires.",                             scene: 'perito_moreno' },
+  { id: '09-aria-mendoza',  speaker: 'aria',  text: "Mendoza to wind down. Cavas Wine Lodge. Dinner at Francis Mallmann's 1884. Catena Zapata in the morning.",                  scene: 'mendoza' },
+  { id: '10-aria-close',    speaker: 'aria',  text: "Eight days. Six iconic names. Twenty-eight hundred. Booked?",                                                                scene: 'wine_pour' },
+  { id: '11-marco-yes',     speaker: 'marco', text: "Booked.",                                                                                                                    scene: 'wine_pour' },
 ];
 
 async function tts(text, voice) {
@@ -58,10 +58,19 @@ async function tts(text, voice) {
   return Buffer.from(await r.arrayBuffer());
 }
 
-function durationOf(filePath) {
-  const out = execSync(`ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`)
-    .toString().trim();
-  return parseFloat(out);
+function durationOf(filePath, fileSize) {
+  // Try ffprobe first for accuracy; fall back to bitrate math when the
+  // platform binary won't run (Apple Silicon + x86_64 ffprobe).
+  try {
+    const out = execSync(
+      `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "${filePath}"`,
+      { stdio: ['pipe', 'pipe', 'pipe'] },
+    ).toString().trim();
+    const d = parseFloat(out);
+    if (Number.isFinite(d) && d > 0) return d;
+  } catch {}
+  // ElevenLabs returns 128 kbps MP3 (mp3_44100_128). duration ≈ size*8 / bitrate.
+  return (fileSize * 8) / (128 * 1000);
 }
 
 async function run() {
@@ -81,7 +90,7 @@ async function run() {
     const audio = await tts(line.text, voice);
     await writeFile(filepath, audio);
 
-    const duration = durationOf(filepath);
+    const duration = durationOf(filepath, audio.length);
     manifest.push({
       id: line.id,
       speaker: line.speaker,
