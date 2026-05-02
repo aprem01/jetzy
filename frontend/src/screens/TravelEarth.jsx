@@ -1084,22 +1084,7 @@ export default function TravelEarth() {
 
       </div>
 
-      {/* === CAPTION (single, centered, subtitle-style) ===
-           Only renders the bottom-center caption — the duplicate bubble next
-           to the avatar was removed. The avatar still shows speaker name and
-           status below the portrait, so identification is preserved. */}
-      {ariaLine && isSpeaking && (
-        <div className="pointer-events-none absolute bottom-40 left-1/2 -translate-x-1/2 z-20 max-w-[min(720px,80vw)]">
-          <div className="px-6 py-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-white/10 shadow-2xl">
-            <div className="text-[10px] font-bold tracking-[0.25em] text-[#C9A84C] mb-1.5">
-              {currentSpeaker === 'marco' ? 'MARCO' : currentSpeaker === 'sofia' ? 'SOFIA' : 'ARIA'}
-            </div>
-            <p className="text-xl text-white text-center leading-snug font-light">
-              {ariaLine}
-            </p>
-          </div>
-        </div>
-      )}
+      {/* (caption removed per investor-demo preference — voice carries it) */}
 
       {/* === SUGGESTIONS + TOUR LAUNCHER (above mic, only on first load) === */}
       {!hasStarted && (
@@ -1433,11 +1418,11 @@ export default function TravelEarth() {
       {mobileTitleCard && (
         <div
           key={mobileTitleCard.name}
-          className="sm:hidden absolute top-[5.25rem] left-1/2 -translate-x-1/2 z-40 w-[min(360px,calc(100vw-1.5rem))] animate-fade-up"
+          className="sm:hidden absolute top-[5.5rem] left-1/2 -translate-x-1/2 z-40 w-[calc(100vw-1.25rem)] max-w-[440px] animate-fade-up"
         >
-          <div className="flex items-stretch gap-3 px-3 py-2.5 rounded-2xl backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_18px_50px_rgba(0,0,0,0.6)]">
+          <div className="flex items-stretch gap-3.5 p-3 rounded-2xl backdrop-blur-xl bg-black/80 border border-[#C9A84C]/45 shadow-[0_24px_60px_rgba(0,0,0,0.7)]">
             {mobileTitleCard.image && (
-              <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-[#1B2B4B]">
+              <div className="w-[88px] h-[88px] rounded-xl overflow-hidden flex-shrink-0 bg-[#1B2B4B]">
                 <img
                   src={mobileTitleCard.image}
                   alt={mobileTitleCard.name}
@@ -1448,25 +1433,25 @@ export default function TravelEarth() {
             )}
             <div className="flex-1 min-w-0 flex flex-col justify-center">
               {mobileTitleCard.tag && (
-                <div className="text-[8px] font-bold tracking-[0.22em] text-[#C9A84C] uppercase mb-0.5 truncate">
+                <div className="text-[9px] font-bold tracking-[0.24em] text-[#C9A84C] uppercase mb-1 truncate">
                   {mobileTitleCard.tag}
                 </div>
               )}
-              <div className="font-display text-base text-white leading-tight truncate">
+              <div className="font-display text-lg text-white leading-tight truncate">
                 {mobileTitleCard.name}
               </div>
               {mobileTitleCard.subtitle && (
-                <div className="text-[10px] text-white/60 leading-tight truncate mt-0.5">
+                <div className="text-[11px] text-white/65 leading-snug mt-1 line-clamp-2">
                   {mobileTitleCard.subtitle}
                 </div>
               )}
             </div>
             {mobileTitleCard.price != null && (
               <div className="flex flex-col items-end justify-center px-1">
-                <div className="text-[8px] font-bold tracking-[0.18em] text-[#C9A84C]/80">
+                <div className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/80">
                   USD
                 </div>
-                <div className="font-display text-base text-white tabular-nums leading-tight">
+                <div className="font-display text-lg text-white tabular-nums leading-tight">
                   {mobileTitleCard.price.toLocaleString?.() || mobileTitleCard.price}
                 </div>
               </div>
