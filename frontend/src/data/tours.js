@@ -98,6 +98,12 @@ export const TOURS = [
             { label: 'Includes', value: 'Cabaret · Spa · Library bar' },
             { label: 'Rate', value: 'USD 540' },
           ],
+          itinerary: [
+            { time: 'Day 1 · 5 PM', what: 'Arrival check-in · Library Bar aperitivo' },
+            { time: 'Day 1 · 7:30', what: 'Cabaret-restaurant Rojo Tango (private box)' },
+            { time: 'Day 1 · 9:30', what: 'Don Julio dinner (table held)' },
+            { time: 'Day 1 · 11 PM', what: 'Florería Atlántico nightcap' },
+          ],
           picks: [
             { kind: 'EAT',  name: 'Don Julio',          note: "World's 50 Best #14 · entraña + Malbec" },
             { kind: 'DRINK',name: 'Florería Atlántico', note: "World's 50 Best Bars · speakeasy under a flower shop" },
@@ -128,6 +134,12 @@ export const TOURS = [
             { label: 'Order', value: 'Entraña · Provoleta · Catena Malbec' },
             { label: 'Reservation', value: '9:30 pm · Two seats secured' },
             { label: 'Spend', value: 'USD 110 pp' },
+          ],
+          itinerary: [
+            { time: '9:30 PM', what: 'Two corner-window seats reserved' },
+            { time: 'Order', what: 'Provoleta · entraña · Catena Adrianna Malbec' },
+            { time: '11:30 PM', what: "Owner Pablo's chocolate flan, on the house" },
+            { time: 'After', what: "Walk Plaza Serrano · ice cream at Lucciano's" },
           ],
           picks: [
             { kind: 'EAT',  name: 'Anchoita',     note: "World's 50 Best Latin America · pasta omakase" },
@@ -160,6 +172,12 @@ export const TOURS = [
             { label: 'Includes',  value: 'All meals · Wines · Daily excursions' },
             { label: 'Rate',      value: 'USD 2,400 (couple)' },
           ],
+          itinerary: [
+            { time: 'Day 3 · 4 PM', what: 'Arrival via Ruta 11 · welcome carbonada' },
+            { time: 'Day 4 · 5 AM', what: 'Pre-dawn pickup → Fitz Roy trail (Lucas)' },
+            { time: 'Day 5 · all day', what: 'Estancia Cristina boat day on Lake Argentino' },
+            { time: 'Day 6 · 7 PM', what: 'Farewell asado on the kopje (sundowner)' },
+          ],
           picks: [
             { kind: 'DO',   name: 'Estancia Cristina', note: 'Boat to a working sheep ranch on Lake Argentino' },
             { kind: 'EAT',  name: 'La Tablita',         note: 'El Calafate institution · Patagonian lamb on the cross' },
@@ -188,6 +206,12 @@ export const TOURS = [
             { label: 'Pickup',   value: '4:30 AM at Eolo' },
             { label: 'Distance', value: '20 km · 1,200 m gain' },
             { label: 'Rate',    value: 'USD 320 (private)' },
+          ],
+          itinerary: [
+            { time: '4:30 AM', what: 'Pickup at Eolo (Lucas)' },
+            { time: '6:15', what: 'Trailhead Hostería El Pilar' },
+            { time: '10:00', what: 'Laguna de los Tres · summit photo' },
+            { time: '3:00 PM', what: 'Return + post-trek beer at La Cervecería' },
           ],
           picks: [
             { kind: 'EAT',  name: 'La Cervecería',    note: 'Post-trek brewery in El Chaltén · locro stew' },
@@ -224,6 +248,12 @@ export const TOURS = [
             { label: 'Duration', value: '6 hrs total · 2 hrs on the ice' },
             { label: 'Includes', value: 'Crampons · Lunch on a moraine · Park fee' },
             { label: 'Rate',    value: 'USD 280' },
+          ],
+          itinerary: [
+            { time: 'Day 7 · 7:30', what: 'Pickup at Eolo' },
+            { time: '10:00 AM', what: 'Brazo Rico boat across the channel' },
+            { time: '11:30', what: 'Crampons on · 2 hrs walking the glacier' },
+            { time: '3:30 PM', what: 'Whisky on glacier-ice at the lookout' },
           ],
           picks: [
             { kind: 'DO',   name: 'Catwalks lookout', note: 'Watch ice calve into Lago Argentino · free' },
@@ -366,6 +396,12 @@ export const TOURS = [
             { label: 'Includes',value: 'New York Bar nightcap · pool · spa' },
             { label: 'Rate',    value: 'USD 1,100' },
           ],
+          itinerary: [
+            { time: 'Day 1 · 4 PM', what: 'Arrival · Park Suite 4501 (Mt Fuji view)' },
+            { time: 'Day 1 · 7:30', what: 'Sukiyabashi Jiro Honten · 6 PM seat' },
+            { time: 'Day 1 · 10 PM', what: 'New York Bar · Lost in Translation jazz' },
+            { time: 'Day 2 · 7 AM', what: 'Pool with the city skyline · then Tsukiji' },
+          ],
           picks: [
             { kind: 'EAT',  name: 'Sukiyabashi Jiro', note: '3 Michelin stars · Jiro Dreams of Sushi' },
             { kind: 'EAT',  name: 'Den',              note: "World's 50 Best #20 · modern kaiseki" },
@@ -396,6 +432,12 @@ export const TOURS = [
             { label: 'Course',  value: '20 pieces of nigiri · 20 minutes' },
             { label: 'Booking', value: 'Concierge-only · 6:00 pm seat' },
             { label: 'Rate',    value: 'USD 350 pp' },
+          ],
+          itinerary: [
+            { time: '6:00 PM', what: 'Seated at the counter' },
+            { time: '6:20', what: '20 pieces of nigiri · 20 minutes flat' },
+            { time: '6:45', what: "Photo with Jiro Ono if he's in" },
+            { time: '7:00', what: 'Walk to Bar High Five for an Old Fashioned' },
           ],
           picks: [
             { kind: 'EAT',  name: 'Sushi Saito',     note: '3★ · Roppongi · the Tokyo connoisseurs choice' },
@@ -429,6 +471,12 @@ export const TOURS = [
             { label: 'Meals',   value: 'Kaiseki dinner + Japanese breakfast' },
             { label: 'Rate',    value: 'USD 1,400' },
           ],
+          itinerary: [
+            { time: 'Day 3 · 3 PM', what: 'Check in · welcome matcha + wagashi' },
+            { time: 'Day 3 · 6:30', what: 'Kaiseki dinner (in your suite)' },
+            { time: 'Day 4 · 5 AM', what: 'Private onsen · Mt Fuji at sunrise' },
+            { time: 'Day 4 · 11', what: 'Hakone Open-Air Museum (Picasso pavilion)' },
+          ],
           picks: [
             { kind: 'DO',   name: 'Hakone Open-Air Museum', note: 'Picasso pavilion in a sculpture garden' },
             { kind: 'DO',   name: 'Lake Ashi cruise',       note: 'Pirate ship across the caldera lake · Fuji backdrop' },
@@ -459,6 +507,12 @@ export const TOURS = [
             { label: 'Stay',    value: '4 nights · Pavilion suite · forest view' },
             { label: 'Includes',value: 'Daily kaiseki · onsen · meditation' },
             { label: 'Rate',    value: 'USD 4,800 (couple)' },
+          ],
+          itinerary: [
+            { time: 'Day 5 · 3 PM', what: 'Arrival · welcome incense ceremony' },
+            { time: 'Day 6 · 5 AM', what: 'Sunrise at Fushimi Inari (private guide)' },
+            { time: 'Day 6 · 11 AM', what: 'Hanami picnic at Maruyama Park (chef-prepared)' },
+            { time: 'Day 6 · 7 PM', what: 'Kikunoi 3★ kaiseki · master chef Murata' },
           ],
           picks: [
             { kind: 'EAT',  name: 'Kikunoi',           note: '3★ · Kyoto kaiseki institution' },
@@ -521,6 +575,12 @@ export const TOURS = [
             travelers: [TRAVELERS.priya, TRAVELERS.yuki, TRAVELERS.marcus],
           },
         ],
+          itinerary: [
+            { time: '4:30 AM', what: 'Pickup at Aman with thermos of matcha' },
+            { time: '5:15', what: 'Empty torii tunnels · 4 km loop' },
+            { time: '7:30', what: 'Tea at the summit shrine' },
+            { time: '9:00', what: 'Back to Kyoto · breakfast at Inoda Coffee' },
+          ],
         picks: [
           { kind: 'DO',   name: 'Gion geisha district', note: 'Walk Hanami-koji at dusk · spot maiko' },
           { kind: 'EAT',  name: 'Hyotei',              note: '450-year-old kaiseki house · Nanzen-ji area' },
@@ -549,6 +609,12 @@ export const TOURS = [
             { label: 'Stops',  value: 'Takoyaki · okonomiyaki · kushikatsu · ramen' },
             { label: 'Finish', value: 'Glico Man neon photo · river cruise' },
             { label: 'Rate',   value: 'USD 280 pp' },
+          ],
+          itinerary: [
+            { time: '6:00 PM', what: 'Meet Chef Hasegawa at Glico Sign' },
+            { time: '6:30', what: 'Takoyaki at Wanaka (the original)' },
+            { time: '7:30', what: "Okonomiyaki at Mizuno · order the 'modan-yaki'" },
+            { time: '9:00', what: 'Kushikatsu at Daruma · finish with ichiran ramen' },
           ],
           picks: [
             { kind: 'EAT',  name: 'Ichiran ramen',  note: 'Solo-booth tonkotsu · open 24/7' },
@@ -623,6 +689,12 @@ export const TOURS = [
             { label: 'Includes',value: 'Garden breakfast · spa access' },
             { label: 'Rate',    value: 'USD 720' },
           ],
+          itinerary: [
+            { time: 'Day 1 · 4 PM', what: 'Arrival · garden suite + Stravinskij prosecco' },
+            { time: 'Day 1 · 7 PM', what: 'Pierluigi · Trastevere seafood (table held)' },
+            { time: 'Day 2 · 9 AM', what: 'Galleria Borghese (timed entry)' },
+            { time: 'Day 2 · 1 PM', what: 'Lunch at Roscioli Salumeria' },
+          ],
           picks: [
             { kind: 'EAT',  name: 'Pierluigi',        note: 'Trastevere institution · Roman seafood' },
             { kind: 'DRINK',name: 'Stravinskij Bar',  note: 'Hotel garden bar · Negroni in the courtyard' },
@@ -653,6 +725,12 @@ export const TOURS = [
             { label: 'Stay',     value: '3 nights · Sea-view suite + balcony' },
             { label: 'Includes', value: 'Champagne breakfast · pool · La Sponda dinner' },
             { label: 'Rate',     value: 'USD 2,400' },
+          ],
+          itinerary: [
+            { time: 'Day 2 · 4 PM', what: 'Arrival · sea-view suite + welcome limoncello' },
+            { time: 'Day 3 · 8 AM', what: 'Champagne breakfast on the terrace' },
+            { time: 'Day 3 · 11 AM', what: 'Path of the Gods (private guide pickup)' },
+            { time: 'Day 3 · 9 PM', what: 'La Sponda dinner (400 candles)' },
           ],
           picks: [
             { kind: 'EAT',  name: 'La Sponda',          note: '1★ · 400 candles, sea-view, in-house' },
@@ -687,6 +765,12 @@ export const TOURS = [
             { label: 'Lunch',   value: 'La Fontelina · seaside under the Faraglioni' },
             { label: 'Night',   value: 'Anema e Core · Capri tarantella tavern' },
             { label: 'Rate',   value: 'USD 660 (couple)' },
+          ],
+          itinerary: [
+            { time: 'Day 4 · 9 AM', what: 'Skipper Antonio meets at Marina Grande' },
+            { time: '11 AM', what: 'Blue Grotto (before the lines)' },
+            { time: '1 PM', what: 'La Fontelina lunch under the Faraglioni' },
+            { time: '11 PM', what: 'Anema e Core nightcap · tarantella' },
           ],
           picks: [
             { kind: 'DO',   name: 'Blue Grotto',       note: 'Sea cave · early-morning before crowds' },
@@ -729,6 +813,12 @@ export const TOURS = [
             { label: 'Stay',     value: '2 nights · Garden cottage · vineyard view' },
             { label: 'Sunrise',  value: 'Truffle hunt with the dogs + farm breakfast' },
             { label: 'Rate',     value: 'USD 2,200 (couple, all in)' },
+          ],
+          itinerary: [
+            { time: 'Day 5 · 4 PM', what: 'Arrival · garden cottage + welcome tasting' },
+            { time: 'Day 6 · 5 AM', what: 'Truffle hunt with Giorgio + the dogs' },
+            { time: 'Day 6 · 1 PM', what: 'Castello Banfi tasting + cellar tour' },
+            { time: 'Day 6 · 8 PM', what: 'Meo Modo 1★ in-house dinner' },
           ],
           picks: [
             { kind: 'EAT',  name: 'Meo Modo',           note: '1★ · in-house · garden-to-table' },
@@ -844,6 +934,12 @@ TOURS.push({
           { label: 'Includes', value: 'All meals + drinks · 2 game drives daily' },
           { label: 'Rate',     value: 'USD 7,800 (couple)' },
         ],
+          itinerary: [
+            { time: 'Day 1 · 3 PM', what: 'Arrival · Sasakwa Suite + welcome G&T' },
+            { time: 'Day 1 · 4 PM', what: 'Sunset game drive (Big Five spotting)' },
+            { time: 'Day 2 · 5:30', what: 'Dawn drive · breakfast on the savanna' },
+            { time: 'Day 3 · 4 AM', what: 'Hot-air balloon → champagne breakfast' },
+          ],
         picks: [
           { kind: 'DO',   name: 'Big Five game drive', note: 'Lion, leopard, elephant, rhino, buffalo · sunrise drive' },
           { kind: 'DO',   name: 'Bush breakfast',      note: 'Set table on the savanna with rangers' },
@@ -877,6 +973,12 @@ TOURS.push({
           { label: 'Flight',   value: '60 min over Mara River · 8-12 passengers' },
           { label: 'Finish',   value: 'Champagne bush breakfast · service in tuxedos' },
         ],
+          itinerary: [
+            { time: '4:00 AM', what: 'Pickup at Sasakwa' },
+            { time: '5:30', what: 'Lift-off · dawn over the migration' },
+            { time: '6:30', what: 'Touchdown · champagne breakfast in tuxedo service' },
+            { time: '8:30', what: 'Walking safari with Maasai ranger' },
+          ],
         picks: [
           { kind: 'DO',  name: 'Great Migration crossing', note: 'July-Oct only · the Mara River wildebeest crossing' },
           { kind: 'DO',  name: 'Walking safari',           note: 'With armed Maasai ranger · post-balloon morning' },
@@ -919,6 +1021,12 @@ TOURS.push({
           { label: 'Includes', value: 'All meals · diving · turtle release · spa' },
           { label: 'Rate',     value: 'USD 3,100 + USD 280 dive (couple)' },
         ],
+          itinerary: [
+            { time: 'Day 4 · noon', what: 'Boat from Zanzibar · welcome coconut' },
+            { time: 'Day 4 · 4 PM', what: 'Snorkel the house reef + turtle release' },
+            { time: 'Day 5 · 6 AM', what: 'Pre-breakfast dive (3 sites · turtles, rays)' },
+            { time: 'Day 5 · 7 PM', what: 'Beach dinner under the constellations' },
+          ],
         picks: [
           { kind: 'DO',   name: 'Stone Town dhow sunset', note: 'Half-day to old Zanzibar · House of Wonders' },
           { kind: 'DO',   name: 'Whale-shark snorkel',     note: 'Oct-Feb only · 30 min off Mnemba' },
@@ -997,6 +1105,12 @@ TOURS.push({
           { label: 'Includes', value: 'All meals · trek briefing · welcome rakshi' },
           { label: 'Rate',     value: 'USD 580 (per hiker)' },
         ],
+          itinerary: [
+            { time: 'Day 1 · 4 PM', what: 'Helicopter from Kathmandu · Annapurna view' },
+            { time: 'Day 1 · 7 PM', what: 'Welcome dinner with all 12 hikers' },
+            { time: 'Day 2 · 6 AM', what: 'Sunrise meditation · briefing with Pemba' },
+            { time: 'Day 2 · 10 AM', what: 'Trail start → Birethanti' },
+          ],
         picks: [
           { kind: 'EAT',  name: 'Bistro Caroline',     note: 'Phewa lakeside · sundowner momos' },
           { kind: 'DO',   name: 'World Peace Pagoda',  note: 'Hilltop white stupa · 1-hr round trip' },
@@ -1027,6 +1141,12 @@ TOURS.push({
           { label: 'Why dawn',  value: 'Annapurna I lit first, then full panorama' },
           { label: 'Rate',     value: 'USD 220 (group rate, with guide)' },
         ],
+          itinerary: [
+            { time: '4:00 AM', what: 'Headlamp climb from Snowland Lodge' },
+            { time: '5:15', what: 'Summit · Annapurna I lit first' },
+            { time: '5:30', what: 'Hot lemon-honey tea at the kiosk' },
+            { time: '6:30', what: 'Descent → breakfast → continue to Tadapani' },
+          ],
         picks: [
           { kind: 'EAT',  name: 'Sunrise Hotel tea house', note: 'Hot lemon honey at the top · post-sunrise' },
           { kind: 'DO',   name: 'Poon Hill loop trail',    note: 'Add Tadapani via rhododendron forest' },
@@ -1063,6 +1183,12 @@ TOURS.push({
           { label: 'Avg age',  value: '36 (range 28-49)' },
           { label: 'Pace',     value: 'Moderate · acclimatization day on Day 5' },
         ],
+          itinerary: [
+            { time: 'Daily · 7 PM', what: 'Group dinner at the tea house' },
+            { time: 'Day 5', what: 'Acclimatization rest + story circle' },
+            { time: 'Day 7 · 4 AM', what: 'ABC summit bid · group photo' },
+            { time: 'Post-trek', what: 'WhatsApp group · lifelong reunions' },
+          ],
         picks: [
           { kind: 'DO',  name: 'Group dinner each night', note: 'Chef-curated tea-house menus' },
           { kind: 'DO',  name: 'Story circle at ABC',     note: 'Headlamps off, stargazing at 14k ft' },
@@ -1092,6 +1218,12 @@ TOURS.push({
           { label: 'Trail',    value: 'Sunrise climb from MBC · 2 hrs gentle gain' },
           { label: 'Memory',   value: 'Sherpa-shot group photo at the cairn' },
         ],
+          itinerary: [
+            { time: '4:30 AM', what: 'Headlamp departure from MBC' },
+            { time: '6:15', what: "ABC arrival · Pemba's hidden kopje" },
+            { time: '6:30', what: 'Group portrait at 14,000 ft' },
+            { time: '11 AM', what: 'Descent to MBC · helicopter back optional' },
+          ],
         picks: [
           { kind: 'DO',   name: 'Annapurna I sunset',   note: 'Sit and watch · alpenglow on the south face' },
           { kind: 'STAY', name: 'ABC Tea Houses',       note: 'Basic but warm · dal bhat with the group' },
@@ -1197,6 +1329,12 @@ TOURS.push({
           { label: 'Includes', value: 'Northern Lights wake-up call · breakfast · pool' },
           { label: 'Rate',     value: 'USD 1,100' },
         ],
+          itinerary: [
+            { time: 'Day 1 · 5 PM', what: 'Arrival · family suite + spa intro' },
+            { time: 'Day 1 · 9 PM', what: 'Northern Lights wake-up call active' },
+            { time: 'Day 2 · 8 AM', what: 'Family breakfast · Silfra dive briefing' },
+            { time: 'Day 2 · 11 AM', what: 'Silfra snorkel between continents' },
+          ],
         picks: [
           { kind: 'DO',   name: 'Thingvellir continental rift', note: 'Walk between North American + Eurasian plates' },
           { kind: 'DO',   name: 'Silfra snorkel',               note: '8-yo+ · between the plates · 4 °C clearest water on Earth' },
@@ -1230,6 +1368,12 @@ TOURS.push({
           { label: 'Lunch',    value: 'Friðheimar · tomato soup + fresh bread inside the greenhouse' },
           { label: 'Rate',    value: 'USD 575 (family of 4)' },
         ],
+          itinerary: [
+            { time: '9 AM', what: 'Þingvellir continental rift walk' },
+            { time: '11 AM', what: 'Strokkur geyser · erupts every 6 min' },
+            { time: '1 PM', what: 'Friðheimar greenhouse lunch' },
+            { time: '4 PM', what: 'Gullfoss waterfall · 2-tier stairs' },
+          ],
         picks: [
           { kind: 'DO',   name: 'Kerið Crater',          note: 'Bonus stop · red-rock volcanic crater lake' },
           { kind: 'EAT',  name: 'Bjarteyjarsandur farm', note: 'Lamb burger · meet the sheep · kids favorite' },
@@ -1270,6 +1414,12 @@ TOURS.push({
           { label: 'Stay',     value: 'Fosshotel Húsavík · 1 night before flying back' },
           { label: 'Rate',    value: 'USD 540 (private 4-person RIB)' },
         ],
+          itinerary: [
+            { time: 'Day 3 · 9 AM', what: 'Akureyri flight from Reykjavík' },
+            { time: 'Day 3 · 1 PM', what: "Captain Stefán's RIB · 3-hr tour" },
+            { time: 'Day 3 · 4 PM', what: 'GeoSea cliff-side hot pools' },
+            { time: 'Day 3 · 7 PM', what: 'Naustið dinner · fish stew + rye' },
+          ],
         picks: [
           { kind: 'DO',   name: 'GeoSea baths',         note: 'Cliffside hot pools · whales visible from the water' },
           { kind: 'EAT',  name: 'Naustið restaurant',   note: 'Fish stew + fresh-baked rye · kids menu' },
@@ -1303,6 +1453,12 @@ TOURS.push({
           { label: 'After',    value: 'Seljavallalaug · 1923 mountain-built natural pool' },
           { label: 'Rate',    value: 'USD 380 (family of 4)' },
         ],
+          itinerary: [
+            { time: '9 AM', what: 'Briefing + crampons on with guide Örvar' },
+            { time: '10:30', what: 'Glacier walk + ice-cave stop' },
+            { time: '1 PM', what: 'Lunch at Vík village (lamb soup)' },
+            { time: '3 PM', what: 'Seljavallalaug 1923 thermal pool' },
+          ],
         picks: [
           { kind: 'DO',   name: 'Skógafoss waterfall',      note: '60-m waterfall · stairs to the top · kids love' },
           { kind: 'DO',   name: 'Reynisfjara black beach', note: 'Basalt columns · Game of Thrones location' },
@@ -1411,6 +1567,12 @@ TOURS.push({
           { label: 'Includes',value: 'Pool · spa access · breakfast on the terrace' },
           { label: 'Rate',    value: 'USD 4,800 (per girl in shared suites)' },
         ],
+          itinerary: [
+            { time: 'Day 1 · 3 PM', what: 'Arrival · Mamounia Suite + rose-petal hammam' },
+            { time: 'Day 1 · 8 PM', what: "Welcome dinner · L'Italien par Pierre Gagnaire" },
+            { time: 'Day 2 · 9 AM', what: 'Garden walk (700-yr olive trees)' },
+            { time: 'Day 2 · 11 AM', what: 'Karim · Mamounia signature spa ritual' },
+          ],
         picks: [
           { kind: 'EAT',  name: 'L\'Italien par Pierre Gagnaire',  note: '3★ chef · in-house · garden setting' },
           { kind: 'DRINK',name: 'Le Bar Churchill',                 note: 'Cigar room speakeasy · live jazz · post-hammam negroni' },
@@ -1478,6 +1640,12 @@ TOURS.push({
           travelers: [TRAVELERS.layla, TRAVELERS.nadia, TRAVELERS.camille],
         },
       ],
+          itinerary: [
+            { time: '10 AM', what: 'Arrival at Royal Mansour spa' },
+            { time: '10:30', what: 'Black-soap exfoliation in the marble vault' },
+            { time: '11:30', what: 'Argan + rhassoul wrap' },
+            { time: '1 PM', what: 'Lunch on the rooftop at Nomad' },
+          ],
       picks: [
         { kind: 'EAT',  name: 'NaranJ',           note: 'Lebanese · medina · the oasis after the souks' },
         { kind: 'DRINK',name: 'Sky Bar Renaissance', note: '7-floor 360° sundowner · Atlas backdrop' },
@@ -1508,6 +1676,12 @@ TOURS.push({
           { label: 'Flight',   value: '60 min over the Atlas foothills + palm groves' },
           { label: 'After',    value: 'Berber tent breakfast · camel ride optional' },
         ],
+          itinerary: [
+            { time: '4:30 AM', what: "Pickup at Mamounia (Ciel d'Afrique)" },
+            { time: '6:00', what: 'Lift-off · dawn over the Atlas foothills' },
+            { time: '7:30', what: 'Touchdown · Berber tent breakfast' },
+            { time: '9:00', what: 'Camel ride back to the road' },
+          ],
         picks: [
           { kind: 'EAT',  name: 'Fellah Hotel lunch',     note: '15-acre olive farm · Provençal-Moroccan tasting' },
           { kind: 'DRINK',name: 'Sky Bar Renaissance',     note: '7-floor 360° rooftop · Atlas backdrop · golden hour' },
@@ -1548,6 +1722,12 @@ TOURS.push({
           { label: 'Buys',     value: 'Argan oil cooperative · saffron · zellige tiles · leather pouf' },
           { label: 'Rate',     value: 'USD 480 (private 4 hrs · group of 6)' },
         ],
+          itinerary: [
+            { time: '10 AM', what: 'Meet Mahmood at Café des Épices' },
+            { time: '11:00', what: 'Spice Souk · saffron + ras el hanout' },
+            { time: '1 PM', what: "NaranJ Lebanese lunch (mahmood's favorite)" },
+            { time: '3 PM', what: 'Argan oil cooperative + leather + lanterns' },
+          ],
         picks: [
           { kind: 'EAT',  name: 'Café des Épices',     note: 'Spice Souk corner · mint-tea + view of the action' },
           { kind: 'DO',   name: 'Yves Saint Laurent Garden', note: 'Cobalt-blue villa Majorelle · 25 min from souks' },

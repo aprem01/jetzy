@@ -1203,6 +1203,27 @@ export default function TravelEarth() {
                 </div>
               )}
 
+              {/* Per-stay itinerary timeline — what's planned hour-by-hour */}
+              {Array.isArray(s.itinerary) && s.itinerary.length > 0 && (
+                <div className="px-4 pt-1 pb-3 border-t border-white/10">
+                  <div className="text-[9px] font-bold tracking-[0.18em] text-[#C9A84C]/85 uppercase mb-2 mt-2">
+                    While you're here
+                  </div>
+                  <ol className="space-y-1.5">
+                    {s.itinerary.map((it, i) => (
+                      <li key={i} className="flex items-start gap-3 text-xs">
+                        <span className="text-[10px] font-bold tracking-wide text-[#C9A84C]/90 whitespace-nowrap min-w-[88px]">
+                          {it.time}
+                        </span>
+                        <span className="text-white/85 leading-snug flex-1">
+                          {it.what}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
               {/* Famous adjacent picks — eat / drink / do */}
               {Array.isArray(picks) && picks.length > 0 && (
                 <div className="px-4 pt-1 pb-3 border-t border-white/10">
