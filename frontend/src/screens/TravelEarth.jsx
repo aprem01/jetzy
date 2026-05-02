@@ -1106,13 +1106,16 @@ export default function TravelEarth() {
         return (
           <div
             key={rotating ? `${tourStepIndex}-${activeSubSpotlight}` : tourStepIndex}
-            className="absolute top-20 right-3 sm:right-6 z-30 w-[min(560px,calc(100vw-1.5rem))] max-h-[calc(100vh-13rem)] sm:max-h-[calc(100vh-9rem)] overflow-y-auto overscroll-contain animate-fade-up"
-            style={{ touchAction: 'pan-y', WebkitOverflowScrolling: 'touch', isolation: 'isolate' }}
+            className="absolute top-20 right-3 sm:right-6 z-30 w-[min(420px,calc(100vw-1.5rem))] animate-fade-up rounded-2xl overflow-y-auto overscroll-contain backdrop-blur-xl bg-black/85 border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)]"
+            style={{
+              maxHeight: 'calc(100vh - 7rem)',
+              overflowY: 'scroll',
+              touchAction: 'pan-y',
+              WebkitOverflowScrolling: 'touch',
+              isolation: 'isolate',
+            }}
             onTouchStart={(e) => {
               e.stopPropagation();
-              // Cesium's camera controller captures global pointer events for
-              // pan/pinch — disable inputs while a finger is on the spotlight
-              // so iOS/Android can do native vertical scroll inside the card.
               const v = viewerRef.current?.cesiumElement;
               if (v?.scene?.screenSpaceCameraController) {
                 v.scene.screenSpaceCameraController.enableInputs = false;
@@ -1133,8 +1136,6 @@ export default function TravelEarth() {
             }}
             onWheel={(e) => e.stopPropagation()}
             onMouseEnter={() => {
-              // Disable Cesium scroll-zoom when the cursor is over the card
-              // so a desktop wheel scrolls the card content, not the globe.
               const v = viewerRef.current?.cesiumElement;
               if (v?.scene?.screenSpaceCameraController) {
                 v.scene.screenSpaceCameraController.enableZoom = false;
@@ -1147,7 +1148,7 @@ export default function TravelEarth() {
               }
             }}
           >
-            <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-black/80 border border-[#C9A84C]/40 shadow-[0_30px_80px_rgba(0,0,0,0.7)]">
+            <div className="relative">
               {/* Sub-spotlight progress dots when rotating */}
               {rotating && (
                 <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 px-2 py-1 rounded-full bg-black/55 backdrop-blur-md border border-white/15">
