@@ -3,82 +3,82 @@
     "id": "01-aria-open",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Marco. Group adventure — twelve Jetzy hikers, Annapurna Base Camp, ten days. In?",
+    "text": "Marco. I just opened twelve seats on a private Annapurna trek. Doctors, a chef, a filmmaker — your kind of people. Ten days. In?",
     "scene": "open",
     "file": "/demo-audio-np/01-aria-open.mp3",
-    "duration": 7.97
+    "duration": 10.321
   },
   {
     "id": "02-marco-pick",
     "speaker": "marco",
     "voiceName": "Bill",
-    "text": "I'm in. How fit do I need to be?",
+    "text": "How fit do I need to be — and what makes this trek different?",
     "scene": "open",
     "file": "/demo-audio-np/02-marco-pick.mp3",
-    "duration": 2.563
+    "duration": 4.391
   },
   {
     "id": "03-aria-pokhara",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Moderate. Pokhara to ABC — classic. Tiger Mountain Lodge to start. Welcome dinner with your group.",
+    "text": "Moderate. We start at Tiger Mountain Pokhara — Adrian Boote built this place. He's saving you the corner room with the Annapurna view. Welcome dinner with the group on the lawn.",
     "scene": "pokhara",
     "file": "/demo-audio-np/03-aria-pokhara.mp3",
-    "duration": 6.847
+    "duration": 9.877
   },
   {
     "id": "04-aria-poonhill",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day three — Ghorepani Poon Hill at sunrise. Dhaulagiri and Annapurna in one frame.",
+    "text": "Day three — Ghorepani Poon Hill. We leave at four AM with headlamps. Local guide Pemba has done this trail two hundred times. Tea at the top, before the day-trippers arrive.",
     "scene": "poonhill",
     "file": "/demo-audio-np/04-aria-poonhill.mp3",
-    "duration": 5.776
+    "duration": 10.243
   },
   {
     "id": "05-marco-group",
     "speaker": "marco",
     "voiceName": "Bill",
-    "text": "Other hikers good?",
+    "text": "Other hikers vetted?",
     "scene": "pokhara",
     "file": "/demo-audio-np/05-marco-group.mp3",
-    "duration": 1.413
+    "duration": 1.544
   },
   {
     "id": "06-aria-group",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Two doctors, a chef, a documentary filmmaker. Average age thirty-six. You'll like them.",
+    "text": "All twelve. Average age thirty-six. WhatsApp group already humming. Three of them have done Kilimanjaro. You'll trade notes by night two.",
     "scene": "pokhara",
     "file": "/demo-audio-np/06-aria-group.mp3",
-    "duration": 5.828
+    "duration": 8.806
   },
   {
     "id": "07-aria-abc",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day seven — Annapurna Base Camp at dawn. Group photo at fourteen-thousand feet.",
+    "text": "Day seven — Annapurna Base Camp at dawn. Pemba knows a kopje just past the cairn for sunrise photos — no other hikers know it. Group portrait, no one else in frame.",
     "scene": "abc",
     "file": "/demo-audio-np/07-aria-abc.mp3",
-    "duration": 5.123
+    "duration": 11.549
   },
   {
     "id": "08-aria-spa",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day nine — back to Tiger Mountain. Massage. Lake Phewa sunset paddle.",
+    "text": "Day nine — back to Tiger Mountain. Surya does the Nepali oil massage — ninety minutes, ask for the deep one. Sunset paddle on Phewa with Annapurna mirrored.",
     "scene": "spa",
     "file": "/demo-audio-np/08-aria-spa.mp3",
-    "duration": 5.462
+    "duration": 10.661
   },
   {
     "id": "09-aria-close",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Ten days. Twelve new friends. Thirty-eight hundred all in. Booked?",
+    "text": "Ten days. Twelve lifelong friends. Three thousand eight hundred all in. Booked?",
     "scene": "close",
     "file": "/demo-audio-np/09-aria-close.mp3",
-    "duration": 5.358
+    "duration": 6.429
   },
   {
     "id": "10-marco-yes",

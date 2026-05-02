@@ -3,64 +3,64 @@
     "id": "01-aria-open",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Sofia and the girls. Long weekend. Where to?",
+    "text": "Sofia. Six girls, four days. Marrakech in March is peak — bougainvillea, jasmine, golden hour. I have the city dialed in.",
     "scene": "open",
     "file": "/demo-audio-ma/01-aria-open.mp3",
-    "duration": 3.373
+    "duration": 8.153
   },
   {
-    "id": "02-marco-pick",
-    "speaker": "marco",
-    "voiceName": "Bill",
-    "text": "Somewhere we can fully reset. Spa, food, photos.",
+    "id": "02-sofia-pick",
+    "speaker": "sofia",
+    "voiceName": "Charlotte",
+    "text": "Spa, food, photos — and somewhere we can fully reset.",
     "scene": "open",
-    "file": "/demo-audio-ma/02-marco-pick.mp3",
-    "duration": 4.444
+    "file": "/demo-audio-ma/02-sofia-pick.mp3",
+    "duration": 4.522
   },
   {
     "id": "03-aria-mamounia",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Marrakech. La Mamounia, three nights. Mamounia Suite with garden access.",
+    "text": "La Mamounia, three nights. I held the Mamounia Suite — garden access, Atlas view from the terrace. Karim at the spa knows you're coming. Welcome rose-petal hammam at four.",
     "scene": "mamounia",
     "file": "/demo-audio-ma/03-aria-mamounia.mp3",
-    "duration": 6.559
+    "duration": 11.392
   },
   {
     "id": "04-aria-hammam",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day two — hammam at Royal Mansour. Lunch on the rooftop at Nomad. Le Jardin Secret in the afternoon.",
+    "text": "Day two — Royal Mansour for the real hammam. Lunch at Nomad rooftop, ask for the table on the medina-facing corner. Le Jardin Secret in the afternoon — Mostafa lets you up the tower before it opens.",
     "scene": "hammam",
     "file": "/demo-audio-ma/04-aria-hammam.mp3",
-    "duration": 6.977
+    "duration": 13.351
   },
   {
     "id": "05-aria-balloon",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day three — sunrise hot-air balloon over the Atlas. Lunch at Fellah Hotel. Sky Bar Renaissance for cocktails.",
+    "text": "Day three — sunrise balloon over the Atlas with Ciel d'Afrique. Berber breakfast in the dunes. Lunch at Fellah, then Sky Bar Renaissance for golden-hour cocktails.",
     "scene": "balloon",
     "file": "/demo-audio-ma/05-aria-balloon.mp3",
-    "duration": 7.395
+    "duration": 10.243
   },
   {
-    "id": "06-marco-souks",
-    "speaker": "marco",
-    "voiceName": "Bill",
+    "id": "06-sofia-souks",
+    "speaker": "sofia",
+    "voiceName": "Charlotte",
     "text": "Souks?",
     "scene": "souks",
-    "file": "/demo-audio-ma/06-marco-souks.mp3",
-    "duration": 0.865
+    "file": "/demo-audio-ma/06-sofia-souks.mp3",
+    "duration": 0.891
   },
   {
     "id": "07-aria-souks",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Last day. Mahmood Mahjoub guide. Argan oil, lanterns, leather. He keeps the touts off you.",
+    "text": "Last day — Mahmood Mahjoub. Twenty-two years in the medina. He keeps the touts off you, opens the doors of the workshops the tour groups never see. Argan oil cooperative, lantern atelier, Berber rug seller who'll pour you mint tea before showing the rare ones.",
     "scene": "souks",
     "file": "/demo-audio-ma/07-aria-souks.mp3",
-    "duration": 5.906
+    "duration": 16.355
   },
   {
     "id": "08-aria-close",
@@ -69,15 +69,15 @@
     "text": "Four days. Six girls. Three thousand each. Booked?",
     "scene": "close",
     "file": "/demo-audio-ma/08-aria-close.mp3",
-    "duration": 3.791
+    "duration": 5.044
   },
   {
-    "id": "09-marco-yes",
-    "speaker": "marco",
-    "voiceName": "Bill",
+    "id": "09-sofia-yes",
+    "speaker": "sofia",
+    "voiceName": "Charlotte",
     "text": "Booked.",
     "scene": "close",
-    "file": "/demo-audio-ma/09-marco-yes.mp3",
-    "duration": 0.813
+    "file": "/demo-audio-ma/09-sofia-yes.mp3",
+    "duration": 0.865
   }
 ]

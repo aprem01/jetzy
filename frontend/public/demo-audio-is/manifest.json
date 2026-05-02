@@ -3,73 +3,73 @@
     "id": "01-aria-open",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "School half-term. You, Sofia, the kids — never been to Iceland. Five days?",
+    "text": "School half-term. You, Sofia, the kids — Iceland in spring. Five days. I've put together the version locals would do with their own kids.",
     "scene": "open",
     "file": "/demo-audio-is/01-aria-open.mp3",
-    "duration": 4.992
+    "duration": 9.903
   },
   {
     "id": "02-marco-pick",
     "speaker": "marco",
     "voiceName": "Bill",
-    "text": "Make it magical. Kids first. Geysers, whales, glaciers.",
+    "text": "Make it magical. Geysers, whales, glaciers — but skip the tourist traps.",
     "scene": "open",
     "file": "/demo-audio-is/02-marco-pick.mp3",
-    "duration": 4.94
+    "duration": 6.246
   },
   {
     "id": "03-aria-ion",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Ion Adventure Hotel near Thingvellir. Two nights. Northern lights from the glass-roof bar after the kids are asleep.",
+    "text": "Ion Adventure Hotel — Sigga at the front desk has the kids covered. Two nights. Northern Lights wake-up call, glass-roof bar after they're asleep, and a private guide for the Silfra dive between the continents.",
     "scene": "ion",
     "file": "/demo-audio-is/03-aria-ion.mp3",
-    "duration": 6.899
+    "duration": 13.012
   },
   {
     "id": "04-aria-golden",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day two — the Golden Circle. Strokkur geyser. Gullfoss waterfall. Lunch at Friðheimar tomato farm.",
+    "text": "Day two — the Golden Circle, but the back-roads version. Strokkur erupts every six minutes. Skip Geysir's restaurant — lunch at Friðheimar, eating tomato soup inside the greenhouse where it grows.",
     "scene": "golden",
     "file": "/demo-audio-is/04-aria-golden.mp3",
-    "duration": 7.213
+    "duration": 12.881
   },
   {
     "id": "05-marco-whales",
     "speaker": "marco",
     "voiceName": "Bill",
-    "text": "Whales?",
+    "text": "And whales?",
     "scene": "whales",
     "file": "/demo-audio-is/05-marco-whales.mp3",
-    "duration": 0.995
+    "duration": 1.178
   },
   {
     "id": "06-aria-husavik",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day three — fly to Akureyri. Húsavík whale watching. Humpbacks ninety percent of the time in May.",
+    "text": "Day three — fly to Akureyri. Húsavík with Captain Stefán's RIB — ninety percent humpback rate in May. He'll cut the engine and let you hear them sing through a hydrophone.",
     "scene": "whales",
     "file": "/demo-audio-is/06-aria-husavik.mp3",
-    "duration": 6.847
+    "duration": 10.478
   },
   {
     "id": "07-aria-glacier",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day four — glacier walk on Sólheimajökull. Kids in mini crampons with a guide. Thermal pool after.",
+    "text": "Day four — Sólheimajökull glacier. Mini crampons, age-eight friendly. Guide Örvar sets up an ice-cave stop the day-trippers miss. Then Seljavallalaug — a 1923 thermal pool the kids will swim in alone.",
     "scene": "glacier",
     "file": "/demo-audio-is/07-aria-glacier.mp3",
-    "duration": 6.664
+    "duration": 13.952
   },
   {
     "id": "08-aria-reykjavik",
     "speaker": "aria",
     "voiceName": "Sarah",
-    "text": "Day five — Hallgrímskirkja in Reykjavík. Skyr and pastries at Brauð and Co before the flight.",
+    "text": "Day five — Hallgrímskirkja for the tower view. Skyr and cinnamon snúðar at Brauð and Co before the airport. Unna's bakery secret: ask for them straight from the oven.",
     "scene": "reykjavik",
     "file": "/demo-audio-is/08-aria-reykjavik.mp3",
-    "duration": 6.612
+    "duration": 11.444
   },
   {
     "id": "09-aria-close",
@@ -78,7 +78,7 @@
     "text": "Five days. Family of four. Sixty-two hundred. Booked?",
     "scene": "close",
     "file": "/demo-audio-is/09-aria-close.mp3",
-    "duration": 4.339
+    "duration": 4.287
   },
   {
     "id": "10-marco-yes",
@@ -87,6 +87,6 @@
     "text": "Booked.",
     "scene": "close",
     "file": "/demo-audio-is/10-marco-yes.mp3",
-    "duration": 0.76
+    "duration": 0.865
   }
 ]

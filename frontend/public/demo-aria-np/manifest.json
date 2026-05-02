@@ -2,64 +2,19 @@
   {
     "id": "01-aria-open",
     "speaker": "aria",
-    "text": "Marco. Group adventure — twelve Jetzy hikers, Annapurna Base Camp, ten days. In?",
+    "text": "Marco. I just opened twelve seats on a private Annapurna trek. Doctors, a chef, a filmmaker — your kind of people. Ten days. In?",
     "scene": "open",
-    "duration": 7.97,
+    "duration": 10.321,
     "audioFile": "/demo-audio-np/01-aria-open.mp3",
     "videoFile": "/demo-aria-np/01-aria-open.mp4"
   },
   {
     "id": "03-aria-pokhara",
     "speaker": "aria",
-    "text": "Moderate. Pokhara to ABC — classic. Tiger Mountain Lodge to start. Welcome dinner with your group.",
+    "text": "Moderate. We start at Tiger Mountain Pokhara — Adrian Boote built this place. He's saving you the corner room with the Annapurna view. Welcome dinner with the group on the lawn.",
     "scene": "pokhara",
-    "duration": 6.847,
+    "duration": 9.877,
     "audioFile": "/demo-audio-np/03-aria-pokhara.mp3",
     "videoFile": "/demo-aria-np/03-aria-pokhara.mp4"
-  },
-  {
-    "id": "04-aria-poonhill",
-    "speaker": "aria",
-    "text": "Day three — Ghorepani Poon Hill at sunrise. Dhaulagiri and Annapurna in one frame.",
-    "scene": "poonhill",
-    "duration": 5.776,
-    "audioFile": "/demo-audio-np/04-aria-poonhill.mp3",
-    "videoFile": "/demo-aria-np/04-aria-poonhill.mp4"
-  },
-  {
-    "id": "06-aria-group",
-    "speaker": "aria",
-    "text": "Two doctors, a chef, a documentary filmmaker. Average age thirty-six. You'll like them.",
-    "scene": "pokhara",
-    "duration": 5.828,
-    "audioFile": "/demo-audio-np/06-aria-group.mp3",
-    "videoFile": "/demo-aria-np/06-aria-group.mp4"
-  },
-  {
-    "id": "07-aria-abc",
-    "speaker": "aria",
-    "text": "Day seven — Annapurna Base Camp at dawn. Group photo at fourteen-thousand feet.",
-    "scene": "abc",
-    "duration": 5.123,
-    "audioFile": "/demo-audio-np/07-aria-abc.mp3",
-    "videoFile": "/demo-aria-np/07-aria-abc.mp4"
-  },
-  {
-    "id": "08-aria-spa",
-    "speaker": "aria",
-    "text": "Day nine — back to Tiger Mountain. Massage. Lake Phewa sunset paddle.",
-    "scene": "spa",
-    "duration": 5.462,
-    "audioFile": "/demo-audio-np/08-aria-spa.mp3",
-    "videoFile": "/demo-aria-np/08-aria-spa.mp4"
-  },
-  {
-    "id": "09-aria-close",
-    "speaker": "aria",
-    "text": "Ten days. Twelve new friends. Thirty-eight hundred all in. Booked?",
-    "scene": "close",
-    "duration": 5.358,
-    "audioFile": "/demo-audio-np/09-aria-close.mp3",
-    "videoFile": "/demo-aria-np/09-aria-close.mp4"
   }
 ]

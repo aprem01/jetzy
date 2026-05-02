@@ -137,55 +137,6 @@ export default function TravelEarth() {
     return () => cancelAnimationFrame(raf);
   }, [cartTotal]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // === DEBUG HUD ===
-  // On-screen log so we can debug rendering issues without DevTools.
-  // Captures console.log/warn/error and any uncaught errors, pushes to a
-  // visible panel toggleable in the corner of the screen.
-  const [debugLogs, setDebugLogs] = useState([]);
-  const [debugOpen, setDebugOpen] = useState(true);
-  const debugRef = useRef([]);
-  useEffect(() => {
-    const push = (level, args) => {
-      const text = args
-        .map((a) => {
-          try {
-            if (a instanceof Error) return `${a.name}: ${a.message}`;
-            if (typeof a === 'object') return JSON.stringify(a);
-            return String(a);
-          } catch {
-            return '[unserializable]';
-          }
-        })
-        .join(' ');
-      const entry = { level, text, t: Date.now() };
-      debugRef.current = [...debugRef.current.slice(-40), entry];
-      setDebugLogs(debugRef.current);
-    };
-    const origLog = console.log.bind(console);
-    const origWarn = console.warn.bind(console);
-    const origErr = console.error.bind(console);
-    const origInfo = console.info.bind(console);
-    console.log = (...a) => { push('log', a); origLog(...a); };
-    console.warn = (...a) => { push('warn', a); origWarn(...a); };
-    console.error = (...a) => { push('error', a); origErr(...a); };
-    console.info = (...a) => { push('info', a); origInfo(...a); };
-    const onErr = (e) => push('error', [`window.onerror: ${e.message} @ ${e.filename}:${e.lineno}`]);
-    const onRej = (e) => push('error', [`unhandledrejection: ${e.reason?.message || e.reason}`]);
-    window.addEventListener('error', onErr);
-    window.addEventListener('unhandledrejection', onRej);
-    push('info', [`Travel Earth boot · ua=${navigator.userAgent.slice(0, 60)}`]);
-    push('info', [`GOOGLE_MAPS_KEY=${GOOGLE_MAPS_KEY ? 'set' : 'MISSING'}`]);
-    push('info', [`Cesium=${typeof Cesium} · createGooglePhoto=${typeof Cesium?.createGooglePhotorealistic3DTileset}`]);
-    return () => {
-      console.log = origLog;
-      console.warn = origWarn;
-      console.error = origErr;
-      console.info = origInfo;
-      window.removeEventListener('error', onErr);
-      window.removeEventListener('unhandledrejection', onRej);
-    };
-  }, []);
-
   useEffect(() => { messagesRef.current = messages; }, [messages]);
   useEffect(() => { isSpeakingRef.current = isSpeaking; }, [isSpeaking]);
 
@@ -955,8 +906,9 @@ export default function TravelEarth() {
         </div>
       </div>
 
-      {/* === AVATAR (bottom-left) — Aria normally; faded when Marco speaks === */}
-      <div className="absolute bottom-8 left-6 z-30 flex items-end gap-4 max-w-[min(560px,55vw)]">
+      {/* === AVATAR (bottom-left) — Aria normally; faded when Marco speaks ===
+           z-40 keeps it above the inset Inside Modal (z-30) during tour mode. */}
+      <div className="absolute bottom-8 left-6 z-40 flex items-end gap-4 max-w-[min(560px,55vw)]">
         <div className="flex flex-col items-center">
           <div className="relative">
             {/* Pulse ring while speaking */}
@@ -971,7 +923,7 @@ export default function TravelEarth() {
                 isSpeaking && currentSpeaker === 'aria'
                   ? 'border-[#C9A84C] shadow-[0_0_30px_rgba(201,168,76,0.55)]'
                   : 'border-[#C9A84C]/70 shadow-[0_0_20px_rgba(201,168,76,0.25)]'
-              } ${currentSpeaker === 'marco' ? 'opacity-50' : 'opacity-100'} transition-all`}
+              } ${currentSpeaker !== 'aria' ? 'opacity-50' : 'opacity-100'} transition-all`}
             >
               {ariaVideo ? (
                 <video
@@ -992,7 +944,7 @@ export default function TravelEarth() {
           </div>
           <div className="mt-2 text-center">
             <div className="font-display text-sm text-white tracking-wide">
-              {currentSpeaker === 'marco' ? 'Marco' : 'Aria'}
+              {currentSpeaker === 'marco' ? 'Marco' : currentSpeaker === 'sofia' ? 'Sofia' : 'Aria'}
             </div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-[#C9A84C]/90">
               {status}
@@ -1010,7 +962,7 @@ export default function TravelEarth() {
         <div className="pointer-events-none absolute bottom-40 left-1/2 -translate-x-1/2 z-20 max-w-[min(720px,80vw)]">
           <div className="px-6 py-4 rounded-2xl backdrop-blur-xl bg-black/65 border border-white/10 shadow-2xl">
             <div className="text-[10px] font-bold tracking-[0.25em] text-[#C9A84C] mb-1.5">
-              {currentSpeaker === 'marco' ? 'MARCO' : 'ARIA'}
+              {currentSpeaker === 'marco' ? 'MARCO' : currentSpeaker === 'sofia' ? 'SOFIA' : 'ARIA'}
             </div>
             <p className="text-xl text-white text-center leading-snug font-light">
               {ariaLine}
@@ -1701,38 +1653,7 @@ export default function TravelEarth() {
         );
       })()}
 
-      {/* === DEBUG HUD (always-on screen log so we can debug without DevTools) === */}
-      <div className="absolute top-20 right-4 z-40 max-w-[min(440px,90vw)]">
-        <button
-          onClick={() => setDebugOpen((v) => !v)}
-          className="px-3 py-1.5 rounded-t-lg bg-black/85 border border-white/15 text-[10px] font-mono text-white/80 hover:text-white"
-        >
-          {debugOpen ? 'hide' : 'show'} debug ({debugLogs.length})
-        </button>
-        {debugOpen && (
-          <div className="rounded-l-lg rounded-br-lg bg-black/85 border border-white/15 p-2 max-h-[60vh] overflow-y-auto font-mono text-[10px] leading-tight">
-            {debugLogs.length === 0 && (
-              <div className="text-white/40">no logs yet…</div>
-            )}
-            {debugLogs.map((l, i) => (
-              <div
-                key={i}
-                className={
-                  l.level === 'error'
-                    ? 'text-red-300'
-                    : l.level === 'warn'
-                      ? 'text-yellow-300'
-                      : l.level === 'info'
-                        ? 'text-cyan-300'
-                        : 'text-white/70'
-                }
-              >
-                <span className="opacity-50">[{l.level}]</span> {l.text}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* (debug HUD removed for investor demo) */}
     </div>
   );
 }

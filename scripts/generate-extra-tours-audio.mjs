@@ -1,10 +1,10 @@
 /**
- * Pre-generates ElevenLabs audio for 3 new themed tours:
- *   - Nepal Annapurna · Group Hike (social, hiking, 12 Jetzy hikers)
- *   - Iceland Family Adventure (family with kids, 5 days)
- *   - Marrakech Girls' Weekend (girls trip, 4 days)
- *
- * Saves MP3s to /public/demo-audio-{np|is|ma}/ + manifest.json each.
+ * v2 SCRIPTS — rewritten for the "$100M demo" pitch:
+ *  - Aria sounds like a true insider — names hidden gems, drops local
+ *    knowledge, gives the kind of recommendation only a fixer-turned-
+ *    friend would have.
+ *  - Marrakech girls' weekend uses a FEMALE friend voice (Sofia · Charlotte)
+ *    not Bill, since it's a women-only trip planning conversation.
  */
 import { writeFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
@@ -15,52 +15,56 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(__dirname, '..', 'frontend', 'public');
 
-const VOICE_ARIA  = { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah', stability: 0.4,  similarity: 0.88, style: 0.45 };
-const VOICE_MARCO = { id: 'pqHfZKP75CvOlQylNhV4', name: 'Bill',  stability: 0.55, similarity: 0.85, style: 0.25 };
+const VOICES = {
+  aria:    { id: 'EXAVITQu4vr4xnSDxMaL', name: 'Sarah',     stability: 0.4,  similarity: 0.88, style: 0.45 },
+  marco:   { id: 'pqHfZKP75CvOlQylNhV4', name: 'Bill',      stability: 0.55, similarity: 0.85, style: 0.25 },
+  sofia:   { id: 'XB0fDUnXU5powFXDhCwa', name: 'Charlotte', stability: 0.45, similarity: 0.88, style: 0.40 }, // female friend
+};
 
 const TOURS = {
   nepal: {
     dir: 'demo-audio-np',
     lines: [
-      { id: '01-aria-open',     speaker: 'aria',  text: "Marco. Group adventure — twelve Jetzy hikers, Annapurna Base Camp, ten days. In?",       scene: 'open' },
-      { id: '02-marco-pick',    speaker: 'marco', text: "I'm in. How fit do I need to be?",                                                        scene: 'open' },
-      { id: '03-aria-pokhara',  speaker: 'aria',  text: "Moderate. Pokhara to ABC — classic. Tiger Mountain Lodge to start. Welcome dinner with your group.", scene: 'pokhara' },
-      { id: '04-aria-poonhill', speaker: 'aria',  text: "Day three — Ghorepani Poon Hill at sunrise. Dhaulagiri and Annapurna in one frame.",       scene: 'poonhill' },
-      { id: '05-marco-group',   speaker: 'marco', text: "Other hikers good?",                                                                       scene: 'pokhara' },
-      { id: '06-aria-group',    speaker: 'aria',  text: "Two doctors, a chef, a documentary filmmaker. Average age thirty-six. You'll like them.", scene: 'pokhara' },
-      { id: '07-aria-abc',      speaker: 'aria',  text: "Day seven — Annapurna Base Camp at dawn. Group photo at fourteen-thousand feet.",         scene: 'abc' },
-      { id: '08-aria-spa',      speaker: 'aria',  text: "Day nine — back to Tiger Mountain. Massage. Lake Phewa sunset paddle.",                   scene: 'spa' },
-      { id: '09-aria-close',    speaker: 'aria',  text: "Ten days. Twelve new friends. Thirty-eight hundred all in. Booked?",                       scene: 'close' },
-      { id: '10-marco-yes',     speaker: 'marco', text: "Booked.",                                                                                   scene: 'close' },
+      { id: '01-aria-open',     speaker: 'aria',  text: "Marco. I just opened twelve seats on a private Annapurna trek. Doctors, a chef, a filmmaker — your kind of people. Ten days. In?", scene: 'open' },
+      { id: '02-marco-pick',    speaker: 'marco', text: "How fit do I need to be — and what makes this trek different?",                                                                  scene: 'open' },
+      { id: '03-aria-pokhara',  speaker: 'aria',  text: "Moderate. We start at Tiger Mountain Pokhara — Adrian Boote built this place. He's saving you the corner room with the Annapurna view. Welcome dinner with the group on the lawn.", scene: 'pokhara' },
+      { id: '04-aria-poonhill', speaker: 'aria',  text: "Day three — Ghorepani Poon Hill. We leave at four AM with headlamps. Local guide Pemba has done this trail two hundred times. Tea at the top, before the day-trippers arrive.", scene: 'poonhill' },
+      { id: '05-marco-group',   speaker: 'marco', text: "Other hikers vetted?",                                                                                                            scene: 'pokhara' },
+      { id: '06-aria-group',    speaker: 'aria',  text: "All twelve. Average age thirty-six. WhatsApp group already humming. Three of them have done Kilimanjaro. You'll trade notes by night two.", scene: 'pokhara' },
+      { id: '07-aria-abc',      speaker: 'aria',  text: "Day seven — Annapurna Base Camp at dawn. Pemba knows a kopje just past the cairn for sunrise photos — no other hikers know it. Group portrait, no one else in frame.", scene: 'abc' },
+      { id: '08-aria-spa',      speaker: 'aria',  text: "Day nine — back to Tiger Mountain. Surya does the Nepali oil massage — ninety minutes, ask for the deep one. Sunset paddle on Phewa with Annapurna mirrored.", scene: 'spa' },
+      { id: '09-aria-close',    speaker: 'aria',  text: "Ten days. Twelve lifelong friends. Three thousand eight hundred all in. Booked?",                                                  scene: 'close' },
+      { id: '10-marco-yes',     speaker: 'marco', text: "Booked.",                                                                                                                          scene: 'close' },
     ],
   },
   iceland: {
     dir: 'demo-audio-is',
     lines: [
-      { id: '01-aria-open',     speaker: 'aria',  text: "School half-term. You, Sofia, the kids — never been to Iceland. Five days?",              scene: 'open' },
-      { id: '02-marco-pick',    speaker: 'marco', text: "Make it magical. Kids first. Geysers, whales, glaciers.",                                  scene: 'open' },
-      { id: '03-aria-ion',      speaker: 'aria',  text: "Ion Adventure Hotel near Thingvellir. Two nights. Northern lights from the glass-roof bar after the kids are asleep.", scene: 'ion' },
-      { id: '04-aria-golden',   speaker: 'aria',  text: "Day two — the Golden Circle. Strokkur geyser. Gullfoss waterfall. Lunch at Friðheimar tomato farm.", scene: 'golden' },
-      { id: '05-marco-whales',  speaker: 'marco', text: "Whales?",                                                                                   scene: 'whales' },
-      { id: '06-aria-husavik',  speaker: 'aria',  text: "Day three — fly to Akureyri. Húsavík whale watching. Humpbacks ninety percent of the time in May.", scene: 'whales' },
-      { id: '07-aria-glacier',  speaker: 'aria',  text: "Day four — glacier walk on Sólheimajökull. Kids in mini crampons with a guide. Thermal pool after.", scene: 'glacier' },
-      { id: '08-aria-reykjavik',speaker: 'aria',  text: "Day five — Hallgrímskirkja in Reykjavík. Skyr and pastries at Brauð and Co before the flight.",     scene: 'reykjavik' },
-      { id: '09-aria-close',    speaker: 'aria',  text: "Five days. Family of four. Sixty-two hundred. Booked?",                                    scene: 'close' },
-      { id: '10-marco-yes',     speaker: 'marco', text: "Booked.",                                                                                   scene: 'close' },
+      { id: '01-aria-open',     speaker: 'aria',  text: "School half-term. You, Sofia, the kids — Iceland in spring. Five days. I've put together the version locals would do with their own kids.", scene: 'open' },
+      { id: '02-marco-pick',    speaker: 'marco', text: "Make it magical. Geysers, whales, glaciers — but skip the tourist traps.",                                                       scene: 'open' },
+      { id: '03-aria-ion',      speaker: 'aria',  text: "Ion Adventure Hotel — Sigga at the front desk has the kids covered. Two nights. Northern Lights wake-up call, glass-roof bar after they're asleep, and a private guide for the Silfra dive between the continents.", scene: 'ion' },
+      { id: '04-aria-golden',   speaker: 'aria',  text: "Day two — the Golden Circle, but the back-roads version. Strokkur erupts every six minutes. Skip Geysir's restaurant — lunch at Friðheimar, eating tomato soup inside the greenhouse where it grows.", scene: 'golden' },
+      { id: '05-marco-whales',  speaker: 'marco', text: "And whales?",                                                                                                                     scene: 'whales' },
+      { id: '06-aria-husavik',  speaker: 'aria',  text: "Day three — fly to Akureyri. Húsavík with Captain Stefán's RIB — ninety percent humpback rate in May. He'll cut the engine and let you hear them sing through a hydrophone.", scene: 'whales' },
+      { id: '07-aria-glacier',  speaker: 'aria',  text: "Day four — Sólheimajökull glacier. Mini crampons, age-eight friendly. Guide Örvar sets up an ice-cave stop the day-trippers miss. Then Seljavallalaug — a 1923 thermal pool the kids will swim in alone.", scene: 'glacier' },
+      { id: '08-aria-reykjavik',speaker: 'aria',  text: "Day five — Hallgrímskirkja for the tower view. Skyr and cinnamon snúðar at Brauð and Co before the airport. Unna's bakery secret: ask for them straight from the oven.", scene: 'reykjavik' },
+      { id: '09-aria-close',    speaker: 'aria',  text: "Five days. Family of four. Sixty-two hundred. Booked?",                                                                           scene: 'close' },
+      { id: '10-marco-yes',     speaker: 'marco', text: "Booked.",                                                                                                                          scene: 'close' },
     ],
   },
   marrakech: {
     dir: 'demo-audio-ma',
     lines: [
-      { id: '01-aria-open',     speaker: 'aria',  text: "Sofia and the girls. Long weekend. Where to?",                                              scene: 'open' },
-      { id: '02-marco-pick',    speaker: 'marco', text: "Somewhere we can fully reset. Spa, food, photos.",                                          scene: 'open' },
-      { id: '03-aria-mamounia', speaker: 'aria',  text: "Marrakech. La Mamounia, three nights. Mamounia Suite with garden access.",                  scene: 'mamounia' },
-      { id: '04-aria-hammam',   speaker: 'aria',  text: "Day two — hammam at Royal Mansour. Lunch on the rooftop at Nomad. Le Jardin Secret in the afternoon.", scene: 'hammam' },
-      { id: '05-aria-balloon',  speaker: 'aria',  text: "Day three — sunrise hot-air balloon over the Atlas. Lunch at Fellah Hotel. Sky Bar Renaissance for cocktails.", scene: 'balloon' },
-      { id: '06-marco-souks',   speaker: 'marco', text: "Souks?",                                                                                    scene: 'souks' },
-      { id: '07-aria-souks',    speaker: 'aria',  text: "Last day. Mahmood Mahjoub guide. Argan oil, lanterns, leather. He keeps the touts off you.", scene: 'souks' },
-      { id: '08-aria-close',    speaker: 'aria',  text: "Four days. Six girls. Three thousand each. Booked?",                                        scene: 'close' },
-      { id: '09-marco-yes',     speaker: 'marco', text: "Booked.",                                                                                    scene: 'close' },
+      // Note: speaker 'sofia' = female friend voice (Charlotte). NOT Marco.
+      { id: '01-aria-open',     speaker: 'aria',  text: "Sofia. Six girls, four days. Marrakech in March is peak — bougainvillea, jasmine, golden hour. I have the city dialed in.", scene: 'open' },
+      { id: '02-sofia-pick',    speaker: 'sofia', text: "Spa, food, photos — and somewhere we can fully reset.",                                                                          scene: 'open' },
+      { id: '03-aria-mamounia', speaker: 'aria',  text: "La Mamounia, three nights. I held the Mamounia Suite — garden access, Atlas view from the terrace. Karim at the spa knows you're coming. Welcome rose-petal hammam at four.", scene: 'mamounia' },
+      { id: '04-aria-hammam',   speaker: 'aria',  text: "Day two — Royal Mansour for the real hammam. Lunch at Nomad rooftop, ask for the table on the medina-facing corner. Le Jardin Secret in the afternoon — Mostafa lets you up the tower before it opens.", scene: 'hammam' },
+      { id: '05-aria-balloon',  speaker: 'aria',  text: "Day three — sunrise balloon over the Atlas with Ciel d'Afrique. Berber breakfast in the dunes. Lunch at Fellah, then Sky Bar Renaissance for golden-hour cocktails.", scene: 'balloon' },
+      { id: '06-sofia-souks',   speaker: 'sofia', text: "Souks?",                                                                                                                          scene: 'souks' },
+      { id: '07-aria-souks',    speaker: 'aria',  text: "Last day — Mahmood Mahjoub. Twenty-two years in the medina. He keeps the touts off you, opens the doors of the workshops the tour groups never see. Argan oil cooperative, lantern atelier, Berber rug seller who'll pour you mint tea before showing the rare ones.", scene: 'souks' },
+      { id: '08-aria-close',    speaker: 'aria',  text: "Four days. Six girls. Three thousand each. Booked?",                                                                              scene: 'close' },
+      { id: '09-sofia-yes',     speaker: 'sofia', text: "Booked.",                                                                                                                         scene: 'close' },
     ],
   },
 };
@@ -95,7 +99,8 @@ async function runOne(tourKey) {
   console.log(`\n━━━ ${tourKey.toUpperCase()} ━━━`);
   const manifest = [];
   for (const line of tour.lines) {
-    const voice = line.speaker === 'aria' ? VOICE_ARIA : VOICE_MARCO;
+    const voice = VOICES[line.speaker];
+    if (!voice) throw new Error(`unknown speaker: ${line.speaker}`);
     const filename = `${line.id}.mp3`;
     const filepath = path.join(outDir, filename);
     console.log(`→ ${line.id} (${voice.name})  "${line.text.slice(0, 50)}..."`);
