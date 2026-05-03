@@ -40,7 +40,12 @@ function AppLayout() {
   const { isOnboarded } = useApp();
   const location = useLocation();
 
-  if (!isOnboarded) {
+  // Skip onboarding when going straight to the demo (Travel Earth) — lets
+  // us share a single direct demo URL with investors that loads instantly
+  // without forcing them through the sign-up flow first.
+  const isDirectDemo = location.pathname === '/travel-earth' || location.pathname === '/demo';
+
+  if (!isOnboarded && !isDirectDemo) {
     return <Onboarding />;
   }
 
@@ -79,6 +84,7 @@ function AppLayout() {
         <Route path="/avatar" element={<Avatar />} />
         <Route path="/virtual-travel" element={<VirtualTravel />} />
         <Route path="/travel-earth" element={<TravelEarth />} />
+        <Route path="/demo" element={<TravelEarth />} />
         <Route path="/itinerary" element={<Itinerary />} />
         <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>

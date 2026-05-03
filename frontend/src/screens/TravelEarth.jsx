@@ -845,6 +845,24 @@ export default function TravelEarth() {
     setTourStepIndex(-1);
   }, [playStep]);
 
+  // ?autoplay=1 in URL → show a fullscreen "Tap to play" intro overlay.
+  // The single tap satisfies iOS audio-autoplay rules and immediately
+  // launches the first featured tour. Direct investor demo URL:
+  //   https://jetzy-app.vercel.app/demo?autoplay=1
+  const [autoplayIntro, setAutoplayIntro] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('autoplay') === '1') setAutoplayIntro(true);
+  }, []);
+  const launchAutoplay = useCallback(() => {
+    setAutoplayIntro(false);
+    const featured = TOURS.find((t) => t.featured) || TOURS[0];
+    if (featured) {
+      try { startTour(featured.id); } catch (e) { console.warn('autoplay failed:', e); }
+    }
+  }, [startTour]);
+
   const skipStep = useCallback(() => {
     try {
       const a = tourAudioRef.current;
@@ -1889,6 +1907,31 @@ export default function TravelEarth() {
       })()}
 
       {/* (debug HUD removed for investor demo) */}
+
+      {/* === AUTOPLAY INTRO OVERLAY (?autoplay=1) ===
+           Single fullscreen tap-to-play screen so iOS audio is unlocked
+           by the very first interaction. Disappears the moment user taps. */}
+      {autoplayIntro && (
+        <button
+          onClick={launchAutoplay}
+          className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-6 bg-gradient-to-br from-[#0b0f1a] via-[#1B2B4B] to-black animate-fade-in cursor-pointer text-white text-center px-6"
+          style={{ height: '100dvh' }}
+        >
+          <div className="text-[10px] font-bold tracking-[0.32em] text-[#C9A84C] mb-2">
+            JETZY · TRAVEL EARTH
+          </div>
+          <h1 className="font-display text-4xl sm:text-6xl text-white mb-3 tracking-tight">
+            Argentina · 8 Days
+          </h1>
+          <p className="text-base sm:text-lg text-white/70 max-w-md mb-8">
+            A 60-second cinematic preview of your Patagonia trip — built by Aria.
+          </p>
+          <div className="flex items-center gap-3 px-7 py-3.5 rounded-full bg-[#C9A84C] text-black font-semibold text-base shadow-2xl">
+            <Play size={18} fill="currentColor" />
+            Tap to play demo
+          </div>
+        </button>
+      )}
     </div>
   );
 }
