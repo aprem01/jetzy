@@ -285,11 +285,13 @@ export const TOURS = [
         speaker: 'aria',
         text: "Mendoza to wind down. Cavas Wine Lodge. Dinner at Francis Mallmann's 1884. Catena Zapata in the morning.",
         duration: 8.153,
-        // Drone 700 m above the Uco vineyard rows, looking west toward the
-        // Andes ridgeline. Shows actual rows of vines + the cordillera —
-        // the "wine country meets mountains" Mendoza signature.
-        camera: { lng: -68.82, lat: -33.0048, height: 700, pitch: -0.06, heading: -1.5708, duration: 5.0 },
-        marker: { name: 'Cavas Wine Lodge · Mendoza', lat: -33.0048, lng: -68.8447 },
+        // Catena Zapata's iconic Mayan-temple winery — drone 250 m, frontal
+        // approach to the pyramid. Photoreal 3D Tiles have great coverage
+        // here because the building is a known Mendoza landmark. Way more
+        // visual impact than generic vineyard rows.
+        camera: { lng: -68.8870, lat: -33.0145, height: 250, pitch: -0.08, heading: 0.4, duration: 5.0 },
+        marker: { name: 'Bodega Catena Zapata · Mendoza', lat: -33.01573, lng: -68.88659 },
+        placeQuery: 'Bodega Catena Zapata Mendoza',
         placeQuery: 'Cavas Wine Lodge Mendoza',
         cart: [
           { name: 'Cavas Wine Lodge · 1 night', kind: 'hotel', price: 580, day: 8 },

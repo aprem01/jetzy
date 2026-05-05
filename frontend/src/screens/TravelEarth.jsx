@@ -201,7 +201,12 @@ export default function TravelEarth() {
 
   const openInside = useCallback((opts) => {
     setInsidePhotoIndex(0);
-    setInsideMode(Array.isArray(opts.photos) && opts.photos.length > 0 ? 'photos' : 'streetview');
+    // Default to STREET tab whenever Street View coverage exists — investor
+    // wants to see the ACTUAL venue building first, not the curated photo.
+    // Falls back to PHOTOS when no Street View available.
+    if (opts.streetView) setInsideMode('streetview');
+    else if (Array.isArray(opts.photos) && opts.photos.length > 0) setInsideMode('photos');
+    else setInsideMode('map');
     setInsideExperience(opts);
   }, []);
 
