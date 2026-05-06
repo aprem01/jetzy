@@ -95,7 +95,7 @@ export const TOURS = [
         spotlight: {
           name: 'Faena Hotel',
           subtitle: 'Philippe Starck · Puerto Madero · Buenos Aires',
-          image: '/venue-photos/luxury/faena-hero.jpg',
+          image: '/venue-photos/luxury/v2/faena-hero-v2.jpg',
           interior: ['/venue-photos/luxury/faena-inside.jpg', '/venue-photos/luxury/dining/faena-library-bar.jpg', '/venue-photos/luxury/dining/faena-dinner-table.jpg'],
           tag: 'STAY · DAY 1',
           details: [
@@ -134,7 +134,7 @@ export const TOURS = [
         spotlight: {
           name: 'Don Julio',
           subtitle: "World's 50 Best #14 · Argentine parrilla",
-          image: '/venue-photos/luxury/don-julio-hero.jpg',
+          image: '/venue-photos/luxury/v2/don-julio-hero-v2.jpg',
           interior: ['/venue-photos/luxury/don-julio-inside.jpg', '/venue-photos/luxury/dining/don-julio-malbec-pour.jpg', '/venue-photos/luxury/dining/don-julio-plated-steak.jpg', '/venue-photos/luxury/dining/floreria-atlantico.jpg'],
           tag: 'EAT · DAY 1 · DINNER',
           details: [
@@ -256,7 +256,7 @@ export const TOURS = [
         spotlight: {
           name: 'Perito Moreno · Big Ice',
           subtitle: 'Hielo y Aventura · IFMGA-certified glacier trek',
-          image: '/venue-photos/luxury/perito-hero.jpg',
+          image: '/venue-photos/luxury/v2/perito-hero-v2.jpg',
           interior: ['/venue-photos/luxury/perito-inside.jpg'],
           tag: 'DO · DAY 7',
           details: [

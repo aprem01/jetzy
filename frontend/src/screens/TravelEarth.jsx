@@ -1581,13 +1581,26 @@ export default function TravelEarth() {
         </div>
       )}
 
-      {/* === END CARD — "Booked." overlay shown when the tour completes === */}
+      {/* === END CARD — "Booked." overlay shown when the tour completes ===
+           Wind-down hero photo (sunset infinity pool) as full-bleed
+           backdrop with darkening overlay so the cinematic "perfect end of
+           trip" feeling lands before the receipt detail. */}
       {showBooked && (
-        <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#0b0f1a]/95 via-[#1B2B4B]/95 to-black/95 backdrop-blur-xl flex flex-col items-center justify-center px-6 animate-fade-up">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center px-6 animate-fade-up overflow-y-auto" style={{ minHeight: '100dvh' }}>
+          {/* Wind-down photo backdrop with dark overlay for legibility */}
+          <img
+            src="/venue-photos/luxury/v2/wind-down-closing.jpg"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover animate-ken-burns"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#0b0f1a]/85 via-[#1B2B4B]/80 to-black/90 backdrop-blur-sm" />
+
+          <div className="relative z-10 flex flex-col items-center w-full">
           {/* Close button */}
           <button
             onClick={() => setShowBooked(false)}
-            className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/60 border border-white/15 hover:bg-white/10 text-white flex items-center justify-center"
+            className="absolute top-0 right-0 w-10 h-10 rounded-full bg-black/60 border border-white/15 hover:bg-white/10 text-white flex items-center justify-center"
             aria-label="Close"
           >
             <X size={18} />
@@ -1667,6 +1680,7 @@ export default function TravelEarth() {
           >
             Plan another trip
           </button>
+          </div>
         </div>
       )}
 
