@@ -279,79 +279,9 @@ export const TOURS = [
           travelers: [TRAVELERS.zara, TRAVELERS.diego],
         },
       },
-      {
-        audio: '/demo-audio/09-aria-mendoza.mp3',
-        video: '/demo-aria/09-aria-mendoza.mp4',
-        speaker: 'aria',
-        text: "Mendoza to wind down. Cavas Wine Lodge. Dinner at Francis Mallmann's 1884. Catena Zapata in the morning.",
-        duration: 8.153,
-        // Catena Zapata's iconic Mayan-temple winery — drone 250 m, frontal
-        // approach to the pyramid. Photoreal 3D Tiles have great coverage
-        // here because the building is a known Mendoza landmark. Way more
-        // visual impact than generic vineyard rows.
-        camera: { lng: -68.8870, lat: -33.0145, height: 250, pitch: -0.08, heading: 0.4, duration: 5.0 },
-        marker: { name: 'Bodega Catena Zapata · Mendoza', lat: -33.01573, lng: -68.88659 },
-        placeQuery: 'Bodega Catena Zapata Mendoza',
-        placeQuery: 'Cavas Wine Lodge Mendoza',
-        cart: [
-          { name: 'Cavas Wine Lodge · 1 night', kind: 'hotel', price: 580, day: 8 },
-          { name: "Dinner · Francis Mallmann's 1884", kind: 'meal', price: 220, day: 8 },
-          { name: 'Catena Zapata · private tasting', kind: 'experience', price: 220, day: 9 },
-        ],
-        autoStreetView: { delayMs: 6000 },
-        spotlights: [
-          {
-            startMs: 0,
-            name: 'Cavas Wine Lodge',
-            subtitle: 'Standalone Cavas with plunge pool · Mendoza',
-            image: '/venue-photos/luxury/cavas-hero.jpg',
-            interior: ['/venue-photos/luxury/cavas-inside.jpg', '/venue-photos/luxury/dining/cavas-vineyard-dinner.jpg', '/venue-photos/luxury/dining/champagne-pour.jpg'],
-            tag: 'STAY · DAY 8',
-            details: [
-              { label: 'Address', value: 'Costaflores, Alto Agrelo' },
-              { label: 'Stay',    value: '1 night · Standalone Cava + plunge' },
-              { label: 'Includes',value: 'Sunset on the rooftop' },
-              { label: 'Rate',    value: 'USD 580' },
-            ],
-            travelers: [TRAVELERS.amelia, TRAVELERS.liam],
-          },
-          {
-            startMs: 2700,
-            name: "Francis Mallmann · 1884",
-            subtitle: '7-course menu cooked over open fire',
-            image: '/venue-photos/luxury/mallmann-hero.jpg',
-            interior: ['/venue-photos/luxury/mallmann-inside.jpg', '/venue-photos/luxury/dining/mallmann-fire-feast.jpg'],
-            tag: 'EAT · DAY 8 · DINNER',
-            details: [
-              { label: 'Chef',     value: 'Francis Mallmann · Chef\'s Table' },
-              { label: 'Address',  value: 'Bodega Escorihuela, Belgrano 1188' },
-              { label: 'Menu',     value: '7 courses · open-fire cooking' },
-              { label: 'Rate',     value: 'USD 220 pp' },
-            ],
-            travelers: [TRAVELERS.diego, TRAVELERS.noah, TRAVELERS.zara],
-          },
-          {
-            startMs: 5400,
-            name: 'Catena Zapata · Pyramid',
-            subtitle: 'Iconic Mayan-temple winery · Adrianna Vineyard',
-            image: '/venue-photos/luxury/catena-hero.jpg',
-            interior: ['/venue-photos/luxury/catena-inside.jpg', '/venue-photos/luxury/dining/catena-wine-tasting.jpg'],
-            tag: 'DO · DAY 9',
-            details: [
-              { label: 'Estate',   value: 'Bodega Catena Zapata · since 1902' },
-              { label: 'Tasting',  value: '6 vintages incl. Adrianna' },
-              { label: 'Tour',     value: 'Pyramid winery + cellar' },
-              { label: 'Rate',     value: 'USD 220 pp' },
-            ],
-            travelers: [TRAVELERS.amelia, TRAVELERS.liam],
-          },
-        ],
-        picks: [
-          { kind: 'EAT',  name: 'Casa El Enemigo',   note: 'Adrianna Catena & Aleardo Ferrer · 7-course tasting' },
-          { kind: 'DRINK',name: 'Bodega Salentein',  note: 'Greek-temple winery in the Uco Valley' },
-          { kind: 'DO',   name: 'Caballadas horseback', note: 'Sunset ride through the vineyards' },
-        ],
-      },
+      // (Mendoza step removed — Photoreal 3D Tiles coverage in the Uco
+      // Valley + Catena Zapata area was weak/distorted, dragging down the
+      // demo's visual quality. Tour now ends at Perito Moreno → close.)
       {
         audio: '/demo-audio/10-aria-close.mp3',
         video: '/demo-aria/10-aria-close.mp4',
